@@ -318,17 +318,82 @@ pub enum SessionEvent {
 
 ---
 
+## 11. IndexedDB vs LocalStorage ゲーム状態永続化
+
+### Decision
+IndexedDB as primary storage with LocalStorage for lightweight settings
+
+### Rationale
+- **容量**: IndexedDBは大容量（数GB）でLocalStorage（5-10MB）より大幅に多く、複雑なTRPGデータに必要
+- **構造化データ**: 複雑なJavaScriptオブジェクト、配列、バイナリデータをシリアライゼーションなしで扱える
+- **非同期操作**: 大データ操作でもUIブロッキングを防止
+- **高度クエリ**: インデックス機能で効率的なデータ検索（キャラクター履歴、イベントログフィルタリング）
+- **オフライン対応**: データ整合性とバージョニングサポートが優秀
+
+### Alternatives Considered
+- **LocalStorageのみ**: 容量制限（5-10MB）と同期ブロッキング操作により却下
+- **ハイブリッド**: IndexedDB（メインデータ） + LocalStorage（ユーザー設定のみ）
+
+### Event Sourcing with IndexedDB
+```javascript
+// Object Store Structure
+events: {
+  eventId: string,
+  sessionId: string,
+  timestamp: number,
+  type: string,
+  payload: object,
+  playerId?: string
+}
+
+gameState: {
+  sessionId: string,
+  currentState: object,
+  lastEventId: string,
+  version: number
+}
+```
+
+### Cross-Tab Synchronization
+```javascript
+// BroadcastChannel for real-time sync
+const gameChannel = new BroadcastChannel('trpg-game-sync');
+gameChannel.postMessage({
+  type: 'GAME_EVENT',
+  sessionId: 'session-123',
+  event: eventData
+});
+```
+
+### Backend Migration Strategy
+- **イベントベース同期**: バックエンドが同じイベントストリームを消費
+- **オフラインファースト維持**: ローカルイベントが同期まで権威
+- **競合解決**: イベントタイムスタンプとベクタークロックで競合処理
+- **増分同期**: 最後の成功同期以降の新しいイベントのみ
+
+---
+
 ## Status Summary
 
 ✅ **完了**: WebAssembly + React統合パターン調査
 ✅ **完了**: MonorepoでのTypeScript型共有戦略調査
 ✅ **完了**: DDD + オニオンアーキテクチャでのRust実装調査
+✅ **完了**: IndexedDB vs LocalStorage ゲーム状態永続化調査
 ⏳ **後回し**: Hono + Cloudflare Workers パターン調査（フロントエンド優先のため）
-⏳ **待機中**: IndexedDB vs LocalStorage ゲーム状態永続化調査
 
 ---
 
-## Next Steps
-1. ゲーム状態永続化戦略を調査
-2. 全調査結果をもとにPhase 1設計フェーズへ移行
-3. Hono + Cloudflare Workers調査は後のフェーズで実施
+## Phase 0 Research Complete
+
+**すべての技術調査が完了しました。Phase 1 設計フェーズへ移行準備完了。**
+
+### 確定した技術スタック
+1. **WebAssembly + React**: WebWorker統合パターンでメインスレッド応答性保持
+2. **Monorepo TypeScript**: Bun Workspaces + Project References + "Live Types" パターン
+3. **DDD + Onion Architecture**: Session中心の集約ルート + イベントソーシング
+4. **IndexedDB Storage**: イベントソーシング + BroadcastChannel クロスタブ同期
+
+### 次のフェーズ
+- **Phase 1**: data-model.md, contracts/, quickstart.md, CLAUDE.md の作成
+- **Constitution Check**: 再評価
+- **Phase 2**: タスク生成アプローチ計画
