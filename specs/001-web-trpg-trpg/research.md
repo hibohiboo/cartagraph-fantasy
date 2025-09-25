@@ -251,18 +251,84 @@ pub struct Character {
 
 ---
 
+## 10. DDD + オニオンアーキテクチャでのRust実装
+
+### Decision
+Multi-layered Rust WASM modules with Session-centric aggregate roots and Event Sourcing
+
+### Rationale
+- Rustの型システムがドメイン境界を自然に強制し、WebAssemblyコンパイルでアーキテクチャ整合性を保持
+- GameSessionを主要な集約ルートとして一貫性境界を管理
+- イベントソーシングによりTRPGの巻き戻しと再生機能を実現
+- オニオンアーキテクチャでドメインロジックをインフラから独立してテスト可能
+
+### Alternatives Considered
+- **フラットモジュール構造**: 複雑なTRPGルールの関心分離不足により却下
+- **JavaScript中心アプローチ**: ゲームルール一貫性のコンパイル時保証不足により却下
+- **文字列ベースID**: 型安全性不足により却下
+
+### Architecture Pattern
+```rust
+// Domain Layer (最内層)
+pub mod domain {
+    pub mod entities;     // Character, Scenario, Session
+    pub mod value_objects; // DiceResult, CardType, SceneName
+    pub mod aggregates;   // GameSession, CharacterSheet
+    pub mod services;     // RuleEngine, ProbabilityCalculator
+}
+
+// Application Layer
+pub mod application {
+    pub mod commands;     // CreateSession, UseCard, RollDice
+    pub mod queries;      // GetSessionState, GetCharacterStats
+    pub mod handlers;     // Command/Query handlers
+}
+
+// Infrastructure Layer (最外層)
+pub mod infrastructure {
+    pub mod persistence;  // Event store, state snapshots
+    pub mod wasm_bindings; // JavaScript interface
+}
+```
+
+### Aggregate Root Design
+```rust
+#[derive(Serialize, Deserialize)]
+pub struct GameSession {
+    session_id: SessionId,
+    scenario: ScenarioInstance,
+    players: HashMap<PlayerId, SessionCharacter>,
+    current_scene: SceneState,
+    shared_cards: Vec<Card>,
+    rule_engine: RuleEngine,
+    event_history: Vec<DomainEvent>,
+}
+```
+
+### Event Sourcing with Thalo
+```rust
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum SessionEvent {
+    SessionStarted { session_id: SessionId, scenario_id: ScenarioId },
+    CardUsed { player_id: PlayerId, card_id: CardId, timestamp: u64 },
+    DiceRolled { player_id: PlayerId, notation: DiceNotation, result: DiceResult },
+    SceneAdvanced { from_scene: SceneId, to_scene: SceneId },
+}
+```
+
+---
+
 ## Status Summary
 
 ✅ **完了**: WebAssembly + React統合パターン調査
 ✅ **完了**: MonorepoでのTypeScript型共有戦略調査
+✅ **完了**: DDD + オニオンアーキテクチャでのRust実装調査
 ⏳ **後回し**: Hono + Cloudflare Workers パターン調査（フロントエンド優先のため）
-⏳ **待機中**: DDD + オニオンアーキテクチャでのRust実装調査
 ⏳ **待機中**: IndexedDB vs LocalStorage ゲーム状態永続化調査
 
 ---
 
 ## Next Steps
-1. RustでのDDDパターン実装を調査
-2. ゲーム状態永続化戦略を調査
-3. 全調査結果をもとにPhase 1設計フェーズへ移行
-4. Hono + Cloudflare Workers調査は後のフェーズで実施
+1. ゲーム状態永続化戦略を調査
+2. 全調査結果をもとにPhase 1設計フェーズへ移行
+3. Hono + Cloudflare Workers調査は後のフェーズで実施
