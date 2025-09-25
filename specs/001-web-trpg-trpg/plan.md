@@ -62,11 +62,12 @@
 - Library docs: llms.txt format planned? 各パッケージにREADME.md配置予定
 
 **Testing (NON-NEGOTIABLE)**:
-- RED-GREEN-Refactor cycle enforced? 全パッケージでTDD適用
+- RED-GREEN-Refactor cycle enforced? **MVP段階**: coreドメインロジック最優先TDD、UI/Storybookはsnapshot中心
 - Git commits show tests before implementation? コミットメッセージで明示
 - Order: Contract→Integration→E2E→Unit strictly followed? API設計から順次実装
 - Real dependencies used? IndexedDB実装、後にPostgreSQL統合テスト
 - Integration tests for: WebAssembly↔React, React↔Backend API, モノレポ間連携
+- **MVP Testing Priority**: core (TDD必須) > shared (型テスト) > frontend (E2E) > ui (snapshot) > backend (後回し)
 - FORBIDDEN: Implementation before test, skipping RED phase
 
 **Observability**:
@@ -197,7 +198,8 @@ packages/
 
 **Ordering Strategy**:
 - TDD order: Tests before implementation
-- Dependency order: shared → core → backend → ui → frontend
+- **MVP実装順序**: shared → core (ドメインロジック最優先) → frontend (フロントエンドのみ) → ui → backend (後回し)
+- **初期MVPスコープ**: フロントエンドのみ（バックエンド連携は将来実装）
 - Mark [P] for parallel execution (independent packages)
 - WebAssembly compilation pipeline setup first
 
