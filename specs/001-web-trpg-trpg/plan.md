@@ -32,12 +32,15 @@
 非同期TRPG風ゲーム「遺跡漁りとドブさらい」の開発。忙しいユーザーがWebブラウザで自分のペースで楽しめる非同期なTRPG体験を提供する。技術アプローチ：コアロジックをRust(WebAssembly)で実装し、フロントエンドをReact+TypeScript、バックエンドをNode.js+Hono+TypeScriptで構築するモノレポ構成。
 
 ## Technical Context
+**Package Management**: bun（モノレポのパッケージ管理に採用。高速な依存解決とスクリプト実行の統一を目的）
 **Language/Version**: Rust 1.75 (コアロジック), TypeScript 5.3 (フロントエンド/バックエンド), Node.js 22+
 **Primary Dependencies**: React 19, React router v7, Hono, wasm-pack, Storybook, Cloudflare Workers
 **Storage**: 初期実装 - IndexedDB/LocalStorage, 将来 - PostgreSQL (Neon), Neo4j
 **Testing**: cargo test (Rust), Vitest + React Testing Library (React), Vitest (Node.js)
 **Target Platform**: Cloudflare Workers (バックエンド), WebAssembly+WebWorker (フロントエンドコア)
 **Project Type**: web - モノレポ構成でフロントエンド+バックエンド+UIコンポーネント
+**UI Editing**: React Flow（シナリオ・シーン・タグ等の編集UIに使用。
+  将来的なGraphDB（Neo4j）とのデータ構造親和性を意識した選定）
 **Performance Goals**: 検証なのでなし
 **Constraints**: オフライン対応(初期), WebAssemblyサイズ<5MB, DDD+オニオンアーキテクチャ
 **Scale/Scope**: 検証なのでユーザー数は5人以下, シナリオエディタ+ゲームプレイ画面
