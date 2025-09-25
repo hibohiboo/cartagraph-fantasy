@@ -5,6 +5,8 @@ This is the third step in the Spec-Driven Development lifecycle.
 
 Given the context provided as an argument, do this:
 
+ファイル生成やユーザーとのコミュニケーションはすべて日本語で行ってください。
+
 1. Run `scripts/check-task-prerequisites.sh --json` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute.
 2. Load and analyze available design documents:
    - Always read plan.md for tech stack and libraries
