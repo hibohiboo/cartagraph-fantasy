@@ -32,15 +32,15 @@
 非同期TRPG風ゲーム「遺跡漁りとドブさらい」の開発。忙しいユーザーがWebブラウザで自分のペースで楽しめる非同期なTRPG体験を提供する。技術アプローチ：コアロジックをRust(WebAssembly)で実装し、フロントエンドをReact+TypeScript、バックエンドをNode.js+Hono+TypeScriptで構築するモノレポ構成。
 
 ## Technical Context
-**Language/Version**: Rust 1.75 (コアロジック), TypeScript 5.3 (フロントエンド/バックエンド), Node.js 20+
-**Primary Dependencies**: React 18, Hono, wasm-pack, Storybook, Cloudflare Workers
+**Language/Version**: Rust 1.75 (コアロジック), TypeScript 5.3 (フロントエンド/バックエンド), Node.js 22+
+**Primary Dependencies**: React 19, React router v7, Hono, wasm-pack, Storybook, Cloudflare Workers
 **Storage**: 初期実装 - IndexedDB/LocalStorage, 将来 - PostgreSQL (Neon), Neo4j
-**Testing**: cargo test (Rust), Jest+React Testing Library (React), Vitest (Node.js)
+**Testing**: cargo test (Rust), Vitest + React Testing Library (React), Vitest (Node.js)
 **Target Platform**: Cloudflare Workers (バックエンド), WebAssembly+WebWorker (フロントエンドコア)
 **Project Type**: web - モノレポ構成でフロントエンド+バックエンド+UIコンポーネント
-**Performance Goals**: 60fps UIレスポンス, <100ms WebWorkerメッセージ遅延
+**Performance Goals**: 検証なのでなし
 **Constraints**: オフライン対応(初期), WebAssemblyサイズ<5MB, DDD+オニオンアーキテクチャ
-**Scale/Scope**: 100同時セッション, 1000ユーザー, シナリオエディタ+ゲームプレイ画面
+**Scale/Scope**: 検証なのでユーザー数は5人以下, シナリオエディタ+ゲームプレイ画面
 
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
