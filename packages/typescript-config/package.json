@@ -1,0 +1,10 @@
+{
+  "name": "@cartagraph-fantasy/typescript-config",
+  "private": true,
+  "scripts": {
+    "ncu": "ncu -u"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}
