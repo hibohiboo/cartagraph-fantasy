@@ -163,7 +163,6 @@ packages/
    - シナリオ作成: POST /scenarios, GET /scenarios/:id
    - セッション管理: POST /sessions, PUT /sessions/:id/players
    - ゲームプレイ: POST /sessions/:id/actions, GET /sessions/:id/log
-   - WebSocket: セッション進行リアルタイム同期
    - Output OpenAPI schema to `/contracts/`
 
 3. **Generate contract tests** from contracts:
