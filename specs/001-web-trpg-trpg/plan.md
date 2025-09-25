@@ -36,6 +36,7 @@
 **Language/Version**: Rust 1.75 (コアロジック), TypeScript 5.3 (フロントエンド/バックエンド), Node.js 22+
 **Primary Dependencies**: React 19, React router v7, Hono, wasm-pack, Storybook, Cloudflare Workers
 **Storage**: 初期実装 - IndexedDB/LocalStorage, 将来 - PostgreSQL (Neon), Neo4j
+※UIレイヤーではReact Flowを利用し、Neo4jとのグラフ構造移行を見据えた編集体験を提供予定
 **Testing**: cargo test (Rust), Vitest + React Testing Library (React), Vitest (Node.js)
 **Target Platform**: Cloudflare Workers (バックエンド), WebAssembly+WebWorker (フロントエンドコア)
 **Project Type**: web - モノレポ構成でフロントエンド+バックエンド+UIコンポーネント
