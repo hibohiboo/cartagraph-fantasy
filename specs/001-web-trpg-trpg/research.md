@@ -194,19 +194,75 @@ Hybrid approach - JavaScript for random seed generation, Rust for probability ca
 
 ---
 
+## 9. MonorepoでのTypeScript型共有戦略
+
+### Decision
+Bun Workspaces + TypeScript Project References with "Live Types" pattern
+
+### Rationale
+- Bunの純粋TypeScript サポートにより開発時のビルドステップを排除
+- プロジェクトレファレンスによるインクリメンタル コンパイルと適切なクロスパッケージ型チェック
+- "Live Types" パターンで開発時に直接 .ts ソースからインポート、古い宣言ファイル問題を防止
+- 頻繁な内部依存関係を持つモノレポでBunのワークスペース解決がnpm/yarnより高速
+
+### Alternatives Considered
+- **パスエイリアスのみ**: ランタイム解決複雑性とIDEでソースファイルではなくコンパイル済み出力にジャンプする問題により却下
+- **.d.ts ファイルによるビルドベースアプローチ**: 開発体験の悪化と古い型宣言問題により却下
+- **従来のバンドリングでのNx/Turborepo**: 5パッケージ構造には不必要な複雑性により却下
+
+### Configuration Pattern
+```typescript
+// Root tsconfig.json
+{
+  "compilerOptions": { "composite": true },
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/core" },
+    { "path": "./packages/ui" },
+    { "path": "./packages/frontend" }
+  ]
+}
+```
+
+### Shared Package Structure
+```
+packages/shared/
+├── package.json  // conditional exports設定
+├── tsconfig.json // composite: true, declaration: true
+└── src/
+    ├── types/
+    │   ├── entities.ts      // ゲームエンティティ型
+    │   ├── session.ts       // セッション管理型
+    │   └── wasm-interface.ts // FFI型定義
+    └── index.ts
+```
+
+### WebAssembly FFI Type Safety
+```rust
+// packages/core/src/entities.rs
+#[derive(Serialize, Deserialize, Tsify)]
+#[tsify(into_wasm_abi, from_wasm_abi)]
+pub struct Character {
+    pub name: String,
+    pub cards: Vec<Card>,
+    pub tags: Vec<Tag>,
+}
+```
+
+---
+
 ## Status Summary
 
 ✅ **完了**: WebAssembly + React統合パターン調査
-🔄 **進行中**: Hono + Cloudflare Workers パターン調査
-⏳ **待機中**: MonorepoでのTypeScript型共有戦略調査
+✅ **完了**: MonorepoでのTypeScript型共有戦略調査
+⏳ **後回し**: Hono + Cloudflare Workers パターン調査（フロントエンド優先のため）
 ⏳ **待機中**: DDD + オニオンアーキテクチャでのRust実装調査
 ⏳ **待機中**: IndexedDB vs LocalStorage ゲーム状態永続化調査
 
 ---
 
 ## Next Steps
-1. Hono + Cloudflare Workers の最適化戦略を調査
-2. モノレポでのTypeScript型共有設定を調査
-3. RustでのDDDパターン実装を調査
-4. ゲーム状態永続化戦略を調査
-5. 全調査結果をもとにPhase 1設計フェーズへ移行
+1. RustでのDDDパターン実装を調査
+2. ゲーム状態永続化戦略を調査
+3. 全調査結果をもとにPhase 1設計フェーズへ移行
+4. Hono + Cloudflare Workers調査は後のフェーズで実施
