@@ -1,24 +1,24 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: 非同期TRPG風ゲーム「遺跡漁りとドブさらい」
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Branch**: `001-web-trpg-trpg` | **Date**: 2025-09-25 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/001-web-trpg-trpg/spec.md`
 
 ## Execution Flow (/plan command scope)
 ```
 1. Load feature spec from Input path
-   → If not found: ERROR "No feature spec at {path}"
+   → Complete: 仕様書を分析し、30の機能要件と8つのエンティティを確認
 2. Fill Technical Context (scan for NEEDS CLARIFICATION)
-   → Detect Project Type from context (web=frontend+backend, mobile=app+api)
-   → Set Structure Decision based on project type
+   → Complete: 技術スタックを確定（Rust WebAssembly + React + Node.js）
+   → Project Type: web - モノレポ構成
 3. Evaluate Constitution Check section below
-   → If violations exist: Document in Complexity Tracking
-   → If no justification possible: ERROR "Simplify approach first"
+   → Check: 5つのプロジェクト構成、DDD+オニオンアーキテクチャ採用
    → Update Progress Tracking: Initial Constitution Check
 4. Execute Phase 0 → research.md
-   → If NEEDS CLARIFICATION remain: ERROR "Resolve unknowns"
-5. Execute Phase 1 → contracts, data-model.md, quickstart.md, agent-specific template file (e.g., `CLAUDE.md` for Claude Code, `.github/copilot-instructions.md` for GitHub Copilot, or `GEMINI.md` for Gemini CLI).
+   → Research WebAssembly integration with React, Hono API patterns
+5. Execute Phase 1 → contracts, data-model.md, quickstart.md, CLAUDE.md
+   → Generate API contracts, domain models, setup instructions
 6. Re-evaluate Constitution Check section
-   → If new violations: Refactor design, return to Phase 1
+   → Verify library-first approach, testing strategy
    → Update Progress Tracking: Post-Design Constitution Check
 7. Plan Phase 2 → Describe task generation approach (DO NOT create tasks.md)
 8. STOP - Ready for /tasks command
@@ -29,57 +29,57 @@
 - Phase 3-4: Implementation execution (manual or via tools)
 
 ## Summary
-[Extract from feature spec: primary requirement + technical approach from research]
+非同期TRPG風ゲーム「遺跡漁りとドブさらい」の開発。忙しいユーザーがWebブラウザで自分のペースで楽しめる非同期なTRPG体験を提供する。技術アプローチ：コアロジックをRust(WebAssembly)で実装し、フロントエンドをReact+TypeScript、バックエンドをNode.js+Hono+TypeScriptで構築するモノレポ構成。
 
 ## Technical Context
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: Rust 1.75 (コアロジック), TypeScript 5.3 (フロントエンド/バックエンド), Node.js 20+
+**Primary Dependencies**: React 18, Hono, wasm-pack, Storybook, Cloudflare Workers
+**Storage**: 初期実装 - IndexedDB/LocalStorage, 将来 - PostgreSQL (Neon), Neo4j
+**Testing**: cargo test (Rust), Jest+React Testing Library (React), Vitest (Node.js)
+**Target Platform**: Cloudflare Workers (バックエンド), WebAssembly+WebWorker (フロントエンドコア)
+**Project Type**: web - モノレポ構成でフロントエンド+バックエンド+UIコンポーネント
+**Performance Goals**: 60fps UIレスポンス, <100ms WebWorkerメッセージ遅延
+**Constraints**: オフライン対応(初期), WebAssemblyサイズ<5MB, DDD+オニオンアーキテクチャ
+**Scale/Scope**: 100同時セッション, 1000ユーザー, シナリオエディタ+ゲームプレイ画面
 
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 **Simplicity**:
-- Projects: [#] (max 3 - e.g., api, cli, tests)
-- Using framework directly? (no wrapper classes)
-- Single data model? (no DTOs unless serialization differs)
-- Avoiding patterns? (no Repository/UoW without proven need)
+- Projects: 5 (backend, frontend, ui, core, shared) - 3を超過
+- Using framework directly? React/Hono直接使用, wrapper無し
+- Single data model? 共通型定義をsharedパッケージで管理
+- Avoiding patterns? DDDドメインモデル使用（複雑性必要）
 
 **Architecture**:
-- EVERY feature as library? (no direct app code)
-- Libraries listed: [name + purpose for each]
-- CLI per library: [commands with --help/--version/--format]
-- Library docs: llms.txt format planned?
+- EVERY feature as library? 各パッケージがライブラリとして独立
+- Libraries listed: core(ゲームロジック), ui(コンポーネント), shared(型定義), backend(API), frontend(アプリ)
+- CLI per library: backend(サーバー起動), core(テストランナー), frontend(開発サーバー)
+- Library docs: llms.txt format planned? 各パッケージにREADME.md配置予定
 
 **Testing (NON-NEGOTIABLE)**:
-- RED-GREEN-Refactor cycle enforced? (test MUST fail first)
-- Git commits show tests before implementation?
-- Order: Contract→Integration→E2E→Unit strictly followed?
-- Real dependencies used? (actual DBs, not mocks)
-- Integration tests for: new libraries, contract changes, shared schemas?
+- RED-GREEN-Refactor cycle enforced? 全パッケージでTDD適用
+- Git commits show tests before implementation? コミットメッセージで明示
+- Order: Contract→Integration→E2E→Unit strictly followed? API設計から順次実装
+- Real dependencies used? IndexedDB実装、後にPostgreSQL統合テスト
+- Integration tests for: WebAssembly↔React, React↔Backend API, モノレポ間連携
 - FORBIDDEN: Implementation before test, skipping RED phase
 
 **Observability**:
-- Structured logging included?
-- Frontend logs → backend? (unified stream)
-- Error context sufficient?
+- Structured logging included? console.logからstructured loggingへ移行
+- Frontend logs → backend? WebWorkerエラーもバックエンド送信
+- Error context sufficient? スタックトレース+ユーザー操作履歴
 
 **Versioning**:
-- Version number assigned? (MAJOR.MINOR.BUILD)
-- BUILD increments on every change?
-- Breaking changes handled? (parallel tests, migration plan)
+- Version number assigned? 0.1.0で開始
+- BUILD increments on every change? 各パッケージ独立バージョニング
+- Breaking changes handled? モノレポ内でAPI変更は同時更新
 
 ## Project Structure
 
 ### Documentation (this feature)
 ```
-specs/[###-feature]/
+specs/001-web-trpg-trpg/
 ├── plan.md              # This file (/plan command output)
 ├── research.md          # Phase 0 output (/plan command)
 ├── data-model.md        # Phase 1 output (/plan command)
@@ -89,56 +89,55 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
+**Structure Decision**: Option 2 (Web application) + モノレポ構成
 ```
-# Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure]
+packages/
+├── backend/          # Node.js + Hono + TypeScript
+│   ├── src/
+│   │   ├── domain/   # DDDドメインモデル
+│   │   ├── usecases/ # アプリケーションサービス
+│   │   ├── infrastructure/ # 永続化・外部API
+│   │   └── api/      # Honoルート定義
+│   └── tests/
+├── frontend/         # React + TypeScript + WebAssembly
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   └── workers/  # WebWorker (Rust WASM呼び出し)
+│   └── tests/
+├── ui/               # Storybook + Reactコンポーネント
+│   ├── src/
+│   │   ├── components/
+│   │   └── stories/
+│   └── tests/
+├── core/             # Rust WebAssemblyコアロジック
+│   ├── src/
+│   │   ├── domain/   # ゲームルールドメインモデル
+│   │   ├── usecases/ # ゲーム進行ロジック
+│   │   └── wasm/     # WebAssembly FFI
+│   └── tests/
+└── shared/           # TypeScript共通型定義
+    ├── src/
+    │   ├── types/    # APIレスポンス型, ドメインモデル型
+    │   └── contracts/ # OpenAPI schema
+    └── tests/
 ```
-
-**Structure Decision**: [DEFAULT to Option 1 unless Technical Context indicates web/mobile app]
 
 ## Phase 0: Outline & Research
 1. **Extract unknowns from Technical Context** above:
-   - For each NEEDS CLARIFICATION → research task
-   - For each dependency → best practices task
-   - For each integration → patterns task
+   - WebAssemblyとReactの統合パターン
+   - HonoでのCloudflare Workers最適化
+   - モノレポでのTypeScript型共有戦略
+   - DDD+オニオンアーキテクチャでのRust実装
 
 2. **Generate and dispatch research agents**:
    ```
-   For each unknown in Technical Context:
-     Task: "Research {unknown} for {feature context}"
-   For each technology choice:
-     Task: "Find best practices for {tech} in {domain}"
+   Task: "Research WebAssembly integration patterns with React and WebWorkers"
+   Task: "Find Hono best practices for Cloudflare Workers deployment"
+   Task: "Research monorepo TypeScript configuration for shared types"
+   Task: "Find Domain-Driven Design patterns in Rust WebAssembly"
+   Task: "Research IndexedDB vs LocalStorage for game state persistence"
    ```
 
 3. **Consolidate findings** in `research.md` using format:
@@ -152,33 +151,33 @@ ios/ or android/
 *Prerequisites: research.md complete*
 
 1. **Extract entities from feature spec** → `data-model.md`:
-   - Entity name, fields, relationships
-   - Validation rules from requirements
-   - State transitions if applicable
+   - ユーザー, シナリオ, シーン, イベント, キャラクター, カード, タグ, セッション
+   - DDD集約ルート設計, 値オブジェクト識別
+   - 状態遷移図（セッション進行, カード使用）
 
 2. **Generate API contracts** from functional requirements:
-   - For each user action → endpoint
-   - Use standard REST/GraphQL patterns
-   - Output OpenAPI/GraphQL schema to `/contracts/`
+   - シナリオ作成: POST /scenarios, GET /scenarios/:id
+   - セッション管理: POST /sessions, PUT /sessions/:id/players
+   - ゲームプレイ: POST /sessions/:id/actions, GET /sessions/:id/log
+   - WebSocket: セッション進行リアルタイム同期
+   - Output OpenAPI schema to `/contracts/`
 
 3. **Generate contract tests** from contracts:
-   - One test file per endpoint
-   - Assert request/response schemas
+   - API endpoint毎のrequest/response schema validation
+   - WebAssembly FFI interface test
    - Tests must fail (no implementation yet)
 
 4. **Extract test scenarios** from user stories:
-   - Each story → integration test scenario
-   - Quickstart test = story validation steps
+   - シナリオ作成→GM募集→プレイヤー参加→ゲームプレイ→終了
+   - 非同期プレイ: ログイン→進捗確認→アクション実行
+   - Quickstart test = E2E user story validation
 
 5. **Update agent file incrementally** (O(1) operation):
-   - Run `/scripts/update-agent-context.sh [claude|gemini|copilot]` for your AI assistant
-   - If exists: Add only NEW tech from current plan
-   - Preserve manual additions between markers
-   - Update recent changes (keep last 3)
+   - Create CLAUDE.md with current tech stack context
+   - モノレポ構成, Rust WebAssembly, React patterns
    - Keep under 150 lines for token efficiency
-   - Output to repository root
 
-**Output**: data-model.md, /contracts/*, failing tests, quickstart.md, agent-specific file
+**Output**: data-model.md, /contracts/*, failing tests, quickstart.md, CLAUDE.md
 
 ## Phase 2: Task Planning Approach
 *This section describes what the /tasks command will do - DO NOT execute during /plan*
@@ -187,24 +186,27 @@ ios/ or android/
 - Load `/templates/tasks-template.md` as base
 - Generate tasks from Phase 1 design docs (contracts, data model, quickstart)
 - Each contract → contract test task [P]
-- Each entity → model creation task [P] 
+- Each entity → domain model creation task [P]
 - Each user story → integration test task
+- WebAssembly build pipeline setup task
+- Storybook component development tasks
 - Implementation tasks to make tests pass
 
 **Ordering Strategy**:
-- TDD order: Tests before implementation 
-- Dependency order: Models before services before UI
-- Mark [P] for parallel execution (independent files)
+- TDD order: Tests before implementation
+- Dependency order: shared → core → backend → ui → frontend
+- Mark [P] for parallel execution (independent packages)
+- WebAssembly compilation pipeline setup first
 
-**Estimated Output**: 25-30 numbered, ordered tasks in tasks.md
+**Estimated Output**: 30-35 numbered, ordered tasks in tasks.md
 
 **IMPORTANT**: This phase is executed by the /tasks command, NOT by /plan
 
 ## Phase 3+: Future Implementation
 *These phases are beyond the scope of the /plan command*
 
-**Phase 3**: Task execution (/tasks command creates tasks.md)  
-**Phase 4**: Implementation (execute tasks.md following constitutional principles)  
+**Phase 3**: Task execution (/tasks command creates tasks.md)
+**Phase 4**: Implementation (execute tasks.md following constitutional principles)
 **Phase 5**: Validation (run tests, execute quickstart.md, performance validation)
 
 ## Complexity Tracking
@@ -212,9 +214,8 @@ ios/ or android/
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
-
+| 5つのプロジェクト | モノレポ + WebAssembly + UI分離が必要 | 3プロジェクトではWebAssemblyとUI分離が困難 |
+| Repository pattern | DDD + 永続化抽象化が必要 | 直接DB接続では将来のNeo4j移行で大規模変更が発生 |
 
 ## Progress Tracking
 *This checklist is updated during execution flow*
@@ -228,10 +229,10 @@ ios/ or android/
 - [ ] Phase 5: Validation passed
 
 **Gate Status**:
-- [ ] Initial Constitution Check: PASS
+- [ ] Initial Constitution Check: PASS (with justified complexity)
 - [ ] Post-Design Constitution Check: PASS
 - [ ] All NEEDS CLARIFICATION resolved
-- [ ] Complexity deviations documented
+- [x] Complexity deviations documented
 
 ---
 *Based on Constitution v2.1.1 - See `/memory/constitution.md`*
