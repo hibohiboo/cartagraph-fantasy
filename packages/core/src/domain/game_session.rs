@@ -40,4 +40,30 @@ mod tests {
         assert_eq!(session.player_count(), 1);
         assert!(session.has_player(&player_id));
     }
+
+    #[test]
+    fn test_start_session() {
+        // 3番目のREDフェーズ: セッション開始
+        // やりたいこと: 条件を満たしたセッションを開始する
+        // まだ実装されていないのでコンパイルエラーになる
+
+        let session_id = SessionId::new();
+        let scenario_id = ScenarioId::new();
+        let mut session = GameSession::create(session_id, scenario_id);
+
+        // プレイヤーを追加
+        let player_id = PlayerId::new();
+        let user_id = UserId::new();
+        let _ = session.add_player(player_id, user_id);
+
+        // このメソッドはまだ存在しない → コンパイルエラー (RED)
+        let result = session.start();
+
+        // 実装されたらこれらが通るはず
+        assert!(result.is_ok());
+        assert_eq!(session.status(), SessionStatus::InProgress {
+            current_scene: session.current_scene.clone(),
+            active_players: session.get_active_players(),
+        });
+    }
 }

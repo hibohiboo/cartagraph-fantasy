@@ -72,6 +72,27 @@ impl GameSession {
     pub fn has_player(&self, player_id: &PlayerId) -> bool {
         self.players.contains_key(player_id)
     }
+
+    // TDD 3rd cycle: セッション開始の最小実装
+    pub fn start(&mut self) -> Result<(), String> {
+        // 最小実装: 単純にステータスを InProgress に変更
+        let active_players: HashSet<PlayerId> = self.players.keys().cloned().collect();
+
+        self.session_status = SessionStatus::InProgress {
+            current_scene: self.current_scene.clone(),
+            active_players,
+        };
+
+        Ok(())
+    }
+
+    pub fn get_active_players(&self) -> HashSet<PlayerId> {
+        // 現在のプレイヤーリストからアクティブなプレイヤーを返す
+        match &self.session_status {
+            SessionStatus::InProgress { active_players, .. } => active_players.clone(),
+            _ => self.players.keys().cloned().collect(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
