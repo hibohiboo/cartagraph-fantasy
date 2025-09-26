@@ -10,17 +10,34 @@ mod tests {
 
     #[test]
     fn test_create_simple_game_session() {
-        // RED フェーズ: 最小のケース
-        // やりたいこと: 単純にGameSessionを作る
+        // 最初のTDDサイクル - 完了
+        let session_id = SessionId::new();
+        let scenario_id = ScenarioId::new();
+
+        let session = GameSession::create(session_id, scenario_id);
+
+        assert_eq!(session.status(), SessionStatus::WaitingForPlayers);
+    }
+
+    #[test]
+    fn test_add_player_to_session() {
+        // 2番目のREDフェーズ: プレイヤーを追加する
+        // やりたいこと: セッションに1人のプレイヤーを追加
         // まだ実装されていないのでコンパイルエラーになる
 
         let session_id = SessionId::new();
         let scenario_id = ScenarioId::new();
+        let mut session = GameSession::create(session_id, scenario_id);
 
-        // この関数はまだ存在しない → コンパイルエラー (RED)
-        let session = GameSession::create(session_id, scenario_id);
+        let player_id = PlayerId::new();
+        let user_id = UserId::new();
 
-        // 作られたセッションの最低限の検証
-        assert_eq!(session.status(), SessionStatus::WaitingForPlayers);
+        // このメソッドはまだ存在しない → コンパイルエラー (RED)
+        let result = session.add_player(player_id.clone(), user_id);
+
+        // 実装されたらこれらが通るはず
+        assert!(result.is_ok());
+        assert_eq!(session.player_count(), 1);
+        assert!(session.has_player(&player_id));
     }
 }

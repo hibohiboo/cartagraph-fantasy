@@ -49,14 +49,37 @@ impl GameSession {
     pub fn status(&self) -> SessionStatus {
         self.session_status.clone()
     }
+
+    // TDD 2nd cycle: プレイヤー追加の最小実装
+    pub fn add_player(&mut self, player_id: PlayerId, user_id: UserId) -> Result<(), String> {
+        // 最小実装: 単純にプレイヤーを追加
+        let session_player = SessionPlayer {
+            id: player_id.clone(),
+            user_id,
+            character: None, // 初期状態ではキャラクター未選択
+            status: PlayerStatus::Waiting,
+            joined_at: chrono::Utc::now(),
+        };
+
+        self.players.insert(player_id, session_player);
+        Ok(())
+    }
+
+    pub fn player_count(&self) -> usize {
+        self.players.len()
+    }
+
+    pub fn has_player(&self, player_id: &PlayerId) -> bool {
+        self.players.contains_key(player_id)
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../shared/src/types/")]
 pub struct SessionPlayer {
-    pub player_id: PlayerId,
+    pub id: PlayerId,
     pub user_id: UserId,
-    pub character: SessionCharacter,
+    pub character: Option<SessionCharacter>, // キャラクター選択は任意
     pub status: PlayerStatus,
     #[ts(type = "string")]
     pub joined_at: DateTime<Utc>,
@@ -65,6 +88,8 @@ pub struct SessionPlayer {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../shared/src/types/")]
 pub enum PlayerStatus {
+    #[serde(rename = "waiting")]
+    Waiting, // TDD用: プレイヤー待機状態
     #[serde(rename = "active")]
     Active,
     #[serde(rename = "inactive")]
