@@ -3,13 +3,13 @@
   "compilerOptions": {
     "composite": true,
     "jsx": "react-jsx",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
   "include": ["src/**/*", "vite-env.d.ts"],
   "exclude": ["node_modules", "dist"],
   "references": [
     { "path": "../shared" },
-    { "path": "../core" },
     { "path": "../ui" }
   ]
 }
