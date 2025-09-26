@@ -2,6 +2,28 @@
   "name": "cartagraph-fantasy",
   "packageManager": "bun@1.2.22",
   "private": true,
+  "scripts": {
+    "build": "bun run build:shared && bun run build:core && bun run build:ui && bun run build:frontend",
+    "build:shared": "cd packages/shared && bun run build",
+    "build:core": "cd packages/core && bun run build",
+    "build:ui": "cd packages/ui && bun run build",
+    "build:frontend": "cd packages/frontend && bun run build",
+    "dev": "bun run dev:shared & bun run dev:ui & bun run dev:frontend",
+    "dev:shared": "cd packages/shared && bun run dev",
+    "dev:ui": "cd packages/ui && bun run dev",
+    "dev:frontend": "cd packages/frontend && bun run dev",
+    "test": "bun run test:shared && bun run test:core && bun run test:frontend && bun run test:ui",
+    "test:shared": "cd packages/shared && bun run test",
+    "test:core": "cd packages/core && bun run test",
+    "test:frontend": "cd packages/frontend && bun run test",
+    "test:ui": "cd packages/ui && bun run test",
+    "clean": "bun run clean:shared && bun run clean:core && bun run clean:ui && bun run clean:frontend",
+    "clean:shared": "cd packages/shared && bun run clean",
+    "clean:core": "cd packages/core && bun run clean",
+    "clean:ui": "cd packages/ui && bun run clean",
+    "clean:frontend": "cd packages/frontend && bun run clean",
+    "storybook": "cd packages/ui && bun run storybook"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "typescript": "^5.9.2"

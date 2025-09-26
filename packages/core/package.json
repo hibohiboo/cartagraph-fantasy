@@ -1,0 +1,21 @@
+{
+  "name": "@cartagraph/core",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "main": "./pkg/index.js",
+  "types": "./pkg/index.d.ts",
+  "files": ["pkg"],
+  "scripts": {
+    "build": "wasm-pack build --target web --out-dir pkg",
+    "dev": "wasm-pack build --target web --out-dir pkg --dev",
+    "test": "cargo test",
+    "clean": "cargo clean && rm -rf pkg"
+  },
+  "devDependencies": {
+    "wasm-pack": "^0.12.1"
+  },
+  "dependencies": {
+    "@cartagraph/shared": "workspace:*"
+  }
+}
