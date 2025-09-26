@@ -1,564 +1,564 @@
-# Implementation Tasks: 非同期TRPG風ゲーム「遺跡漁りとドブさらい」
+# 実装タスク: 非同期TRPG風ゲーム「遺跡漁りとドブさらい」
 
-**Branch**: `001-web-trpg-trpg` | **Date**: 2025-09-26 | **Status**: Phase 2 - Task Planning
-**Prerequisites**: Phase 1 design documents complete (data-model.md, contracts/, quickstart.md, CLAUDE.md)
+**ブランチ**: `001-web-trpg-trpg` | **日付**: 2025-09-26 | **ステータス**: Phase 2 - タスク計画
+**前提条件**: Phase 1 設計書完成 (data-model.md, contracts/, quickstart.md, CLAUDE.md)
 
-## Task Execution Strategy
+## タスク実行戦略
 
-### TDD Order Enforcement
-**CRITICAL**: All tasks follow RED-GREEN-Refactor cycle:
-1. Write failing test first (RED phase)
-2. Implement minimal code to pass (GREEN phase)
-3. Refactor for quality (Refactor phase)
+### TDD順序の強制実行
+**重要**: 全タスクはRED-GREEN-Refactorサイクルに従う:
+1. 失敗テストを最初に書く (RED フェーズ)
+2. テストを通すための最小コードを実装 (GREEN フェーズ)
+3. 品質向上のためのリファクタ (Refactor フェーズ)
 
-### MVP Implementation Priority
-**Frontend-Only MVP**: Backend integration deferred to future phases
-- **Priority 1**: shared → core (ドメインロジック最優先TDD)
-- **Priority 2**: frontend (E2Eテスト中心)
-- **Priority 3**: ui (Storybookスナップショット)
-- **Priority 4**: backend (後回し)
+### MVP実装優先順位
+**フロントエンド専用MVP**: バックエンド統合は将来フェーズに延期
+- **優先度1**: shared → core (ドメインロジック最優先TDD)
+- **優先度2**: frontend (E2Eテスト中心)
+- **優先度3**: ui (Storybookスナップショット)
+- **優先度4**: backend (後回し)
 
-### Parallel Execution Markers
-- **[P]**: Tasks can run in parallel (independent packages)
-- **[S]**: Sequential dependency (must complete before next)
-
----
-
-## Phase 1: Project Foundation (Tasks 1-8)
-
-### Task 1: Setup Monorepo Infrastructure [P]
-**Type**: Foundation | **Priority**: Critical | **Effort**: 2h
-```bash
-# Setup Bun workspace configuration
-```
-**Acceptance Criteria**:
-- [ ] Root package.json with Bun workspaces configuration
-- [ ] packages/ directory structure created
-- [ ] Cross-package TypeScript project references configured
-- [ ] Bun install works across all packages
-- [ ] Each package has independent build scripts
-
-**Dependencies**: None
-**Output**: Monorepo foundation ready for package development
-
-### Task 2: Create Shared Types Package [P]
-**Type**: Foundation | **Priority**: Critical | **Effort**: 3h
-```bash
-# Create packages/shared with TypeScript type definitions
-```
-**Acceptance Criteria**:
-- [ ] packages/shared/src/types/ with all domain types
-- [ ] Conditional exports in package.json for Node/Browser
-- [ ] TypeScript composite configuration
-- [ ] Type validation tests (basic)
-- [ ] Build pipeline generates .d.ts files
-
-**Dependencies**: Task 1
-**Tests Required**: Type validation, import/export verification
-**Output**: Shared type definitions for all packages
-
-### Task 3: Setup Core Rust WASM Package [P]
-**Type**: Foundation | **Priority**: Critical | **Effort**: 4h
-```bash
-# Create packages/core with Rust WebAssembly setup
-```
-**Acceptance Criteria**:
-- [ ] Cargo.toml configured for WebAssembly target
-- [ ] wasm-pack integration with Bun build system
-- [ ] Basic WebAssembly module exports to JavaScript
-- [ ] tsify + ts-rs configuration for type safety
-- [ ] WebWorker integration tests (basic)
-
-**Dependencies**: Task 1, Task 2
-**Tests Required**: WASM compilation, FFI interface
-**Output**: Rust WASM foundation with type-safe JavaScript bindings
-
-### Task 4: Create Frontend React Package [P]
-**Type**: Foundation | **Priority**: High | **Effort**: 2h
-```bash
-# Create packages/frontend with React + TypeScript
-```
-**Acceptance Criteria**:
-- [ ] React 19 + TypeScript 5.3 setup
-- [ ] Vite configuration with WASM + WebWorker support
-- [ ] Basic routing structure (React Router v7)
-- [ ] WebWorker integration for WASM communication
-- [ ] IndexedDB wrapper setup
-
-**Dependencies**: Task 1, Task 2, Task 3
-**Tests Required**: Component rendering, WebWorker communication
-**Output**: React frontend foundation ready for UI development
-
-### Task 5: Create UI Components Package [P]
-**Type**: Foundation | **Priority**: Medium | **Effort**: 2h
-```bash
-# Create packages/ui with Storybook setup
-```
-**Acceptance Criteria**:
-- [ ] Storybook 8.0 configuration
-- [ ] Basic component structure
-- [ ] React Flow integration for scenario editing
-- [ ] Component testing with snapshot tests
-- [ ] Export configuration for other packages
-
-**Dependencies**: Task 1, Task 2
-**Tests Required**: Storybook compilation, component snapshots
-**Output**: UI component library with development environment
-
-### Task 6: Write Core Domain Model Tests [S]
-**Type**: TDD-Core | **Priority**: Critical | **Effort**: 4h
-```bash
-# Write failing tests for GameSession, Character, ScenarioTemplate aggregates
-```
-**Acceptance Criteria**:
-- [ ] GameSession aggregate tests (session lifecycle, player management)
-- [ ] Character aggregate tests (creation, card management, restrictions)
-- [ ] ScenarioTemplate tests (scenario definition, scene transitions)
-- [ ] Event Sourcing tests (event application, state reconstruction)
-- [ ] All tests FAIL initially (RED phase)
-
-**Dependencies**: Task 3
-**Tests Required**: Domain logic validation, aggregate invariants, event sourcing
-**Output**: Comprehensive failing test suite for core domain logic
-
-### Task 7: Write WASM Interface Contract Tests [S]
-**Type**: TDD-Integration | **Priority**: Critical | **Effort**: 3h
-```bash
-# Write failing tests for WebAssembly FFI interface
-```
-**Acceptance Criteria**:
-- [ ] GameSession FFI method tests (createSession, addPlayer, useCard, rollDice)
-- [ ] Type safety tests (Rust ↔ TypeScript type consistency)
-- [ ] Serialization tests (complex objects across WASM boundary)
-- [ ] Error handling tests (domain errors propagation)
-- [ ] All tests FAIL initially (RED phase)
-
-**Dependencies**: Task 3, Task 6
-**Tests Required**: WebAssembly integration, FFI type safety
-**Output**: Contract tests defining WASM interface requirements
-
-### Task 8: Write Frontend E2E Test Scenarios [S]
-**Type**: TDD-E2E | **Priority**: High | **Effort**: 3h
-```bash
-# Write failing E2E tests based on quickstart.md scenarios
-```
-**Acceptance Criteria**:
-- [ ] Scenario 1: GM creates scenario, starts session (IndexedDB persistence)
-- [ ] Scenario 2: Player creates character, joins session
-- [ ] Scenario 3: Game play - card usage, dice rolling, scene progression
-- [ ] Scenario 4: Cross-tab synchronization test
-- [ ] All tests FAIL initially (RED phase)
-
-**Dependencies**: Task 4
-**Tests Required**: Full user workflow, persistence, real-time sync
-**Output**: E2E test suite defining complete user stories
+### 並列実行マーカー
+- **[P]**: 並列実行可能タスク (独立パッケージ)
+- **[S]**: 逐次依存 (次のタスクを開始する前に完了必須)
 
 ---
 
-## Phase 2: Core Domain Implementation (Tasks 9-18)
+## フェーズ1: プロジェクト基盤 (タスク 1-8)
 
-### Task 9: Implement GameSession Aggregate [S]
-**Type**: Implementation-Core | **Priority**: Critical | **Effort**: 5h
+### タスク1: モノレポインフラ構築 [P]
+**タイプ**: 基盤 | **優先度**: クリティカル | **工数**: 2時間
 ```bash
-# Implement GameSession with Event Sourcing
+# Bunワークスペース設定のセットアップ
 ```
-**Acceptance Criteria**:
-- [ ] GameSession aggregate with all required methods
-- [ ] Event Sourcing implementation (apply_event, get_uncommitted_events)
-- [ ] Player management (add, remove, status changes)
-- [ ] Session state machine (Created → Recruiting → InProgress → Completed)
-- [ ] Task 6 tests pass (GREEN phase)
+**受入条件**:
+- [ ] Bunワークスペース設定を含むルートpackage.json
+- [ ] packages/ディレクトリ構造の作成
+- [ ] パッケージ間TypeScriptプロジェクト参照の設定
+- [ ] 全パッケージでbun installが動作
+- [ ] 各パッケージが独立したビルドスクリプトを持つ
 
-**Dependencies**: Task 6 (Tests must exist and fail)
-**Tests Required**: Domain logic tests from Task 6 must pass
-**Output**: GameSession aggregate fully functional
+**依存関係**: なし
+**成果物**: パッケージ開発準備完了のモノレポ基盤
 
-### Task 10: Implement Character Aggregate [S]
-**Type**: Implementation-Core | **Priority**: Critical | **Effort**: 3h
+### タスク2: 共有型定義パッケージ作成 [P]
+**タイプ**: 基盤 | **優先度**: クリティカル | **工数**: 3時間
 ```bash
-# Implement Character with session participation logic
+# TypeScript型定義を含むpackages/sharedの作成
 ```
-**Acceptance Criteria**:
-- [ ] Character aggregate with personal cards, tags, history
-- [ ] Session participation validation
-- [ ] Character restrictions management
-- [ ] SessionCharacter value object for session-local state
-- [ ] Task 6 character tests pass (GREEN phase)
+**受入条件**:
+- [ ] 全ドメイン型を含むpackages/shared/src/types/
+- [ ] Node/Browser用の条件付きexportsをpackage.jsonに設定
+- [ ] TypeScriptコンポジット設定
+- [ ] 基本的な型検証テスト
+- [ ] .d.tsファイル生成ビルドパイプライン
 
-**Dependencies**: Task 6 (Tests must exist and fail)
-**Tests Required**: Character tests from Task 6 must pass
-**Output**: Character aggregate with session integration
+**依存関係**: タスク1
+**必要テスト**: 型検証、import/export確認
+**成果物**: 全パッケージ用の共有型定義
 
-### Task 11: Implement ScenarioTemplate Aggregate [S]
-**Type**: Implementation-Core | **Priority**: Critical | **Effort**: 4h
+### タスク3: コアRust WASMパッケージ構築 [P]
+**タイプ**: 基盤 | **優先度**: クリティカル | **工数**: 4時間
 ```bash
-# Implement ScenarioTemplate with scene/event structure
+# Rust WebAssemblyセットアップを含むpackages/coreの作成
 ```
-**Acceptance Criteria**:
-- [ ] ScenarioTemplate aggregate with nested scene definitions
-- [ ] Scene transition logic
-- [ ] Event trigger system
-- [ ] Scenario derivation support
-- [ ] Task 6 scenario tests pass (GREEN phase)
+**受入条件**:
+- [ ] WebAssemblyターゲット用Cargo.toml設定
+- [ ] Bunビルドシステムとwasm-packの統合
+- [ ] JavaScriptへの基本WebAssemblyモジュールエクスポート
+- [ ] 型安全性のためのtsify + ts-rs設定
+- [ ] 基本的なWebWorker統合テスト
 
-**Dependencies**: Task 6 (Tests must exist and fail)
-**Tests Required**: ScenarioTemplate tests from Task 6 must pass
-**Output**: ScenarioTemplate with complex scenario logic
+**依存関係**: タスク1, タスク2
+**必要テスト**: WASMコンパイル、FFIインターフェース
+**成果物**: 型安全JavaScriptバインディング付きRust WASM基盤
 
-### Task 12: Implement Card & Tag Systems [P]
-**Type**: Implementation-Core | **Priority**: High | **Effort**: 3h
+### タスク4: フロントエンドReactパッケージ作成 [P]
+**タイプ**: 基盤 | **優先度**: 高 | **工数**: 2時間
 ```bash
-# Implement Card and Tag value objects
+# React + TypeScriptを含むpackages/frontendの作成
 ```
-**Acceptance Criteria**:
-- [ ] Card value object with type system, rarity, embedded events
-- [ ] Tag value object with categories and typed values
-- [ ] Card usage validation logic
-- [ ] Tag acquisition/modification logic
-- [ ] Integration tests with GameSession
+**受入条件**:
+- [ ] React 19 + TypeScript 5.3セットアップ
+- [ ] WASM + WebWorkerサポート付きVite設定
+- [ ] 基本ルーティング構造 (React Router v7)
+- [ ] WASM通信用WebWorker統合
+- [ ] IndexedDBラッパーセットアップ
 
-**Dependencies**: Task 9
-**Tests Required**: Card/Tag manipulation, integration with aggregates
-**Output**: Complete card and tag system
+**依存関係**: タスク1, タスク2, タスク3
+**必要テスト**: コンポーネントレンダリング、WebWorker通信
+**成果物**: UI開発準備完了のReactフロントエンド基盤
 
-### Task 13: Implement Dice System [P]
-**Type**: Implementation-Core | **Priority**: High | **Effort**: 2h
+### タスク5: UIコンポーネントパッケージ作成 [P]
+**タイプ**: 基盤 | **優先度**: 中 | **工数**: 2時間
 ```bash
-# Implement dice rolling with advantage/disadvantage
+# Storybookセットアップを含むpackages/uiの作成
 ```
-**Acceptance Criteria**:
-- [ ] DiceNotation parsing (2d6+1, advantage/disadvantage)
-- [ ] DiceResult calculation with success determination (≥7)
-- [ ] Integration with JavaScript entropy source
-- [ ] Probability validation tests
-- [ ] Performance tests for batch rolling
+**受入条件**:
+- [ ] Storybook 8.0設定
+- [ ] 基本コンポーネント構造
+- [ ] シナリオ編集用React Flow統合
+- [ ] スナップショットテストによるコンポーネントテスト
+- [ ] 他パッケージ用エクスポート設定
 
-**Dependencies**: Task 9
-**Tests Required**: Dice mechanics, entropy integration, probability validation
-**Output**: Complete dice system with TRPG mechanics
+**依存関係**: タスク1, タスク2
+**必要テスト**: Storybookコンパイル、コンポーネントスナップショット
+**成果物**: 開発環境付きUIコンポーネントライブラリ
 
-### Task 14: Implement Rule Engine [S]
-**Type**: Implementation-Core | **Priority**: Medium | **Effort**: 4h
+### タスク6: コアドメインモデルテスト作成 [S]
+**タイプ**: TDD-コア | **優先度**: クリティカル | **工数**: 4時間
 ```bash
-# Implement rule validation and effect resolution
+# GameSession、Character、ScenarioTemplate集約の失敗テスト作成
 ```
-**Acceptance Criteria**:
-- [ ] Card usage validation (context-dependent rules)
-- [ ] Event effect resolution
-- [ ] Scene transition rule checking
-- [ ] Global vs scenario-specific rule handling
-- [ ] Rule violation error reporting
+**受入条件**:
+- [ ] GameSession集約テスト (セッションライフサイクル、プレイヤー管理)
+- [ ] Character集約テスト (作成、カード管理、制限)
+- [ ] ScenarioTemplateテスト (シナリオ定義、シーン遷移)
+- [ ] Event Sourcingテスト (イベント適用、状態再構築)
+- [ ] 初期状態で全テストが失敗 (REDフェーズ)
 
-**Dependencies**: Task 9, Task 10, Task 11, Task 12
-**Tests Required**: Rule validation, effect resolution, error conditions
-**Output**: Rule engine for game logic validation
+**依存関係**: タスク3
+**必要テスト**: ドメインロジック検証、集約不変条件、イベントソーシング
+**成果物**: コアドメインロジック用包括的失敗テストスイート
 
-### Task 15: Implement Event Log System [P]
-**Type**: Implementation-Core | **Priority**: Medium | **Effort**: 2h
+### タスク7: WASMインターフェースコントラクトテスト作成 [S]
+**タイプ**: TDD-統合 | **優先度**: クリティカル | **工数**: 3時間
 ```bash
-# Implement structured event logging
+# WebAssembly FFIインターフェースの失敗テスト作成
 ```
-**Acceptance Criteria**:
-- [ ] Event log with visibility controls
-- [ ] Log entry serialization for persistence
-- [ ] Log filtering by event type, player, visibility
-- [ ] Integration with domain events
-- [ ] Performance tests for large logs
+**受入条件**:
+- [ ] GameSession FFIメソッドテスト (createSession、addPlayer、useCard、rollDice)
+- [ ] 型安全テスト (Rust ↔ TypeScript型一貫性)
+- [ ] シリアライゼーションテスト (WASM境界越えの複雑オブジェクト)
+- [ ] エラーハンドリングテスト (ドメインエラー伝播)
+- [ ] 初期状態で全テストが失敗 (REDフェーズ)
 
-**Dependencies**: Task 9
-**Tests Required**: Log functionality, visibility rules, persistence
-**Output**: Event logging system for game history
+**依存関係**: タスク3, タスク6
+**必要テスト**: WebAssembly統合、FFI型安全性
+**成果物**: WASMインターフェース要件を定義するコントラクトテスト
 
-### Task 16: Implement WebAssembly FFI Interface [S]
-**Type**: Implementation-Integration | **Priority**: Critical | **Effort**: 4h
+### タスク8: フロントエンドE2Eテストシナリオ作成 [S]
+**タイプ**: TDD-E2E | **優先度**: 高 | **工数**: 3時間
 ```bash
-# Implement WASM bindings with type safety
+# quickstart.mdシナリオに基づく失敗E2Eテスト作成
 ```
-**Acceptance Criteria**:
-- [ ] All WASM interface methods from contracts/wasm-interface.yaml
-- [ ] Type-safe serialization/deserialization (tsify integration)
-- [ ] Error handling across WASM boundary
-- [ ] Performance optimization for large data structures
-- [ ] Task 7 contract tests pass (GREEN phase)
+**受入条件**:
+- [ ] シナリオ1: GMがシナリオ作成、セッション開始 (IndexedDB永続化)
+- [ ] シナリオ2: プレイヤーがキャラクター作成、セッション参加
+- [ ] シナリオ3: ゲームプレイ - カード使用、ダイス振り、シーン進行
+- [ ] シナリオ4: クロスタブ同期テスト
+- [ ] 初期状態で全テストが失敗 (REDフェーズ)
 
-**Dependencies**: Task 7 (Tests must exist and fail), Task 9-15
-**Tests Required**: Contract tests from Task 7 must pass
-**Output**: Type-safe WebAssembly interface
-
-### Task 17: Implement WebWorker Integration [S]
-**Type**: Implementation-Integration | **Priority**: Critical | **Effort**: 3h
-```bash
-# Implement WebWorker communication layer
-```
-**Acceptance Criteria**:
-- [ ] WebWorker message protocol design
-- [ ] WASM module loading and initialization in worker
-- [ ] Message batching for performance
-- [ ] Error propagation from worker to main thread
-- [ ] Worker lifecycle management
-
-**Dependencies**: Task 16, Task 4
-**Tests Required**: Worker communication, error handling, lifecycle
-**Output**: WebWorker integration for non-blocking WASM execution
-
-### Task 18: Refactor Core Domain for Production [S]
-**Type**: Refactor | **Priority**: Medium | **Effort**: 2h
-```bash
-# Code quality improvements and optimizations
-```
-**Acceptance Criteria**:
-- [ ] Code review and cleanup
-- [ ] Performance optimization identification
-- [ ] Memory usage optimization for WASM
-- [ ] Documentation improvements
-- [ ] Error message quality improvements
-
-**Dependencies**: Task 9-17 completed
-**Tests Required**: All existing tests continue to pass
-**Output**: Production-ready core domain implementation
+**依存関係**: タスク4
+**必要テスト**: 完全ユーザーワークフロー、永続化、リアルタイム同期
+**成果物**: 完全ユーザーストーリーを定義するE2Eテストスイート
 
 ---
 
-## Phase 3: Frontend Implementation (Tasks 19-26)
+## フェーズ2: コアドメイン実装 (タスク 9-18)
 
-### Task 19: Implement IndexedDB Event Store [S]
-**Type**: Implementation-Frontend | **Priority**: Critical | **Effort**: 4h
+### タスク9: GameSession集約実装 [S]
+**タイプ**: 実装-コア | **優先度**: クリティカル | **工数**: 5時間
 ```bash
-# Implement IndexedDB-based event store
+# Event Sourcing付きGameSession実装
 ```
-**Acceptance Criteria**:
-- [ ] Event storage with efficient querying
-- [ ] State snapshot management
-- [ ] Cross-tab synchronization with BroadcastChannel
-- [ ] Migration and versioning support
-- [ ] Performance tests for large event streams
+**受入条件**:
+- [ ] 必要な全メソッドを持つGameSession集約
+- [ ] Event Sourcing実装 (apply_event、get_uncommitted_events)
+- [ ] プレイヤー管理 (追加、削除、ステータス変更)
+- [ ] セッション状態マシン (作成済み→募集中→進行中→完了)
+- [ ] タスク6のテストが通る (GREENフェーズ)
 
-**Dependencies**: Task 16
-**Tests Required**: Persistence, synchronization, performance
-**Output**: Persistent event store for game state
+**依存関係**: タスク6 (テストが存在し失敗している必要あり)
+**必要テスト**: タスク6のドメインロジックテストが通る必要あり
+**成果物**: 完全に機能するGameSession集約
 
-### Task 20: Implement Session Management UI [S]
-**Type**: Implementation-Frontend | **Priority**: High | **Effort**: 4h
+### タスク10: Character集約実装 [S]
+**タイプ**: 実装-コア | **優先度**: クリティカル | **工数**: 3時間
 ```bash
-# Create UI for session creation and management
+# セッション参加ロジック付きCharacter実装
 ```
-**Acceptance Criteria**:
-- [ ] Session creation form with scenario selection
-- [ ] Session list view (active, completed)
-- [ ] Player management UI (invite, kick, status)
-- [ ] Session status display and controls
-- [ ] Integration with WebWorker game engine
+**受入条件**:
+- [ ] 個人カード、タグ、履歴を持つCharacter集約
+- [ ] セッション参加検証
+- [ ] キャラクター制限管理
+- [ ] セッションローカル状態用SessionCharacter値オブジェクト
+- [ ] タスク6のキャラクターテストが通る (GREENフェーズ)
 
-**Dependencies**: Task 4, Task 17, Task 19
-**Tests Required**: UI interaction, state synchronization
-**Output**: Session management interface
+**依存関係**: タスク6 (テストが存在し失敗している必要あり)
+**必要テスト**: タスク6のCharacterテストが通る必要あり
+**成果物**: セッション統合付きCharacter集約
 
-### Task 21: Implement Character Creation UI [P]
-**Type**: Implementation-Frontend | **Priority**: High | **Effort**: 3h
+### タスク11: ScenarioTemplate集約実装 [S]
+**タイプ**: 実装-コア | **優先度**: クリティカル | **工数**: 4時間
 ```bash
-# Create character creation and management UI
+# シーン/イベント構造付きScenarioTemplate実装
 ```
-**Acceptance Criteria**:
-- [ ] Character creation form
-- [ ] Card and tag management interface
-- [ ] Character history display
-- [ ] Session participation status
-- [ ] Character export/import functionality
+**受入条件**:
+- [ ] ネストしたシーン定義を持つScenarioTemplate集約
+- [ ] シーン遷移ロジック
+- [ ] イベントトリガーシステム
+- [ ] シナリオ派生サポート
+- [ ] タスク6のシナリオテストが通る (GREENフェーズ)
 
-**Dependencies**: Task 4, Task 17, Task 19
-**Tests Required**: Form validation, persistence, import/export
-**Output**: Character management interface
+**依存関係**: タスク6 (テストが存在し失敗している必要あり)
+**必要テスト**: タスク6のScenarioTemplateテストが通る必要あり
+**成果物**: 複雑なシナリオロジック付きScenarioTemplate
 
-### Task 22: Implement Game Play UI [S]
-**Type**: Implementation-Frontend | **Priority**: High | **Effort**: 5h
+### タスク12: カード&タグシステム実装 [P]
+**タイプ**: 実装-コア | **優先度**: 高 | **工数**: 3時間
 ```bash
-# Create main game play interface
+# CardとTag値オブジェクト実装
 ```
-**Acceptance Criteria**:
-- [ ] Scene display with current objectives
-- [ ] Card usage interface with drag-and-drop
-- [ ] Dice rolling interface with animation
-- [ ] Event log display with filtering
-- [ ] Real-time updates from other players
+**受入条件**:
+- [ ] 型システム、レアリティ、埋め込みイベント付きCard値オブジェクト
+- [ ] カテゴリと型付き値を持つTag値オブジェクト
+- [ ] カード使用検証ロジック
+- [ ] タグ獲得/変更ロジック
+- [ ] GameSessionとの統合テスト
 
-**Dependencies**: Task 4, Task 17, Task 19, Task 20
-**Tests Required**: Real-time interaction, animation, multi-player sync
-**Output**: Core game play interface
+**依存関係**: タスク9
+**必要テスト**: カード/タグ操作、集約との統合
+**成果物**: 完全なカード・タグシステム
 
-### Task 23: Implement Scenario Editor UI [P]
-**Type**: Implementation-Frontend | **Priority**: Medium | **Effort**: 4h
+### タスク13: ダイスシステム実装 [P]
+**タイプ**: 実装-コア | **優先度**: 高 | **工数**: 2時間
 ```bash
-# Create scenario creation and editing interface
+# 有利/不利付きダイス振り実装
 ```
-**Acceptance Criteria**:
-- [ ] React Flow integration for visual scenario editing
-- [ ] Scene and event creation forms
-- [ ] Scenario testing and validation tools
-- [ ] Export/import scenario functionality
-- [ ] Version management for scenarios
+**受入条件**:
+- [ ] DiceNotationパース (2d6+1、有利/不利)
+- [ ] 成功判定付きDiceResult計算 (≥7)
+- [ ] JavaScriptエントロピーソースとの統合
+- [ ] 確率検証テスト
+- [ ] バッチ振りのパフォーマンステスト
 
-**Dependencies**: Task 4, Task 5, Task 17
-**Tests Required**: Visual editing, validation, import/export
-**Output**: Visual scenario editor
+**依存関係**: タスク9
+**必要テスト**: ダイスメカニクス、エントロピー統合、確率検証
+**成果物**: TRPGメカニクス付き完全ダイスシステム
 
-### Task 24: Implement Cross-Tab Synchronization [S]
-**Type**: Implementation-Frontend | **Priority**: High | **Effort**: 3h
+### タスク14: ルールエンジン実装 [S]
+**タイプ**: 実装-コア | **優先度**: 中 | **工数**: 4時間
 ```bash
-# Implement real-time sync across browser tabs
+# ルール検証と効果解決の実装
 ```
-**Acceptance Criteria**:
-- [ ] BroadcastChannel event distribution
-- [ ] State reconciliation across tabs
-- [ ] Conflict resolution for simultaneous actions
-- [ ] Connection status indicators
-- [ ] Offline mode handling
+**受入条件**:
+- [ ] カード使用検証 (文脈依存ルール)
+- [ ] イベント効果解決
+- [ ] シーン遷移ルールチェック
+- [ ] グローバルvsシナリオ固有ルール処理
+- [ ] ルール違反エラー報告
 
-**Dependencies**: Task 19, Task 20-23
-**Tests Required**: Multi-tab scenarios, conflict resolution
-**Output**: Multi-tab game synchronization
+**依存関係**: タスク9, タスク10, タスク11, タスク12
+**必要テスト**: ルール検証、効果解決、エラー条件
+**成果物**: ゲームロジック検証用ルールエンジン
 
-### Task 25: Implement UI State Management [S]
-**Type**: Implementation-Frontend | **Priority**: Medium | **Effort**: 2h
+### タスク15: イベントログシステム実装 [P]
+**タイプ**: 実装-コア | **優先度**: 中 | **工数**: 2時間
 ```bash
-# Setup React state management with Zustand
+# 構造化イベントログの実装
 ```
-**Acceptance Criteria**:
-- [ ] Global state store with Zustand
-- [ ] React Query integration for async operations
-- [ ] State persistence to localStorage
-- [ ] Performance optimization with selective subscriptions
-- [ ] Development tools integration
+**受入条件**:
+- [ ] 可視性制御付きイベントログ
+- [ ] 永続化用ログエントリシリアライゼーション
+- [ ] イベント種別、プレイヤー、可視性によるログフィルタ
+- [ ] ドメインイベントとの統合
+- [ ] 大容量ログのパフォーマンステスト
 
-**Dependencies**: Task 20-24
-**Tests Required**: State synchronization, persistence, performance
-**Output**: Optimized frontend state management
+**依存関係**: タスク9
+**必要テスト**: ログ機能、可視性ルール、永続化
+**成果物**: ゲーム履歴用イベントログシステム
 
-### Task 26: Complete Frontend E2E Implementation [S]
-**Type**: Implementation-E2E | **Priority**: Critical | **Effort**: 3h
+### タスク16: WebAssembly FFIインターフェース実装 [S]
+**タイプ**: 実装-統合 | **優先度**: クリティカル | **工数**: 4時間
 ```bash
-# Ensure all E2E scenarios pass
+# 型安全性付きWASMバインディング実装
 ```
-**Acceptance Criteria**:
-- [ ] All Task 8 E2E tests pass (GREEN phase)
-- [ ] Performance meets targets (< 5MB WASM, responsive UI)
-- [ ] Error handling and user feedback complete
-- [ ] Browser compatibility verification
-- [ ] Accessibility baseline compliance
+**受入条件**:
+- [ ] contracts/wasm-interface.yamlの全WASMインターフェースメソッド
+- [ ] 型安全シリアライゼーション/デシリアライゼーション (tsify統合)
+- [ ] WASM境界越えのエラーハンドリング
+- [ ] 大容量データ構造のパフォーマンス最適化
+- [ ] タスク7のコントラクトテストが通る (GREENフェーズ)
 
-**Dependencies**: Task 8 (Tests must exist and fail), Task 19-25
-**Tests Required**: E2E tests from Task 8 must pass
-**Output**: Complete frontend implementation passing all scenarios
+**依存関係**: タスク7 (テストが存在し失敗している必要あり), タスク9-15
+**必要テスト**: タスク7のコントラクトテストが通る必要あり
+**成果物**: 型安全WebAssemblyインターフェース
+
+### タスク17: WebWorker統合実装 [S]
+**タイプ**: 実装-統合 | **優先度**: クリティカル | **工数**: 3時間
+```bash
+# WebWorker通信レイヤー実装
+```
+**受入条件**:
+- [ ] WebWorkerメッセージプロトコル設計
+- [ ] ワーカー内でのWASMモジュールロードと初期化
+- [ ] パフォーマンス向上のためのメッセージバッチング
+- [ ] ワーカーからメインスレッドへのエラー伝播
+- [ ] ワーカーライフサイクル管理
+
+**依存関係**: タスク16, タスク4
+**必要テスト**: ワーカー通信、エラーハンドリング、ライフサイクル
+**成果物**: ノンブロッキングWASM実行用WebWorker統合
+
+### タスク18: 本番用コアドメインリファクタ [S]
+**タイプ**: リファクタ | **優先度**: 中 | **工数**: 2時間
+```bash
+# コード品質改善と最適化
+```
+**受入条件**:
+- [ ] コードレビューとクリーンアップ
+- [ ] パフォーマンス最適化の特定
+- [ ] WASMのメモリ使用量最適化
+- [ ] ドキュメント改善
+- [ ] エラーメッセージ品質改善
+
+**依存関係**: タスク9-17完了
+**必要テスト**: 既存の全テストが通り続ける
+**成果物**: 本番準備完了のコアドメイン実装
 
 ---
 
-## Phase 4: UI Components & Storybook (Tasks 27-30)
+## フェーズ3: フロントエンド実装 (タスク 19-26)
 
-### Task 27: Create Core Game Components [P]
-**Type**: Implementation-UI | **Priority**: Medium | **Effort**: 3h
+### タスク19: IndexedDBイベントストア実装 [S]
+**タイプ**: 実装-フロントエンド | **優先度**: クリティカル | **工数**: 4時間
 ```bash
-# Implement reusable game UI components
+# IndexedDBベースイベントストア実装
 ```
-**Acceptance Criteria**:
-- [ ] Card component with type variants and states
-- [ ] Dice roller component with animation
-- [ ] Player status component
-- [ ] Event log component with filtering
-- [ ] Storybook stories for all components
+**受入条件**:
+- [ ] 効率的クエリ機能付きイベントストレージ
+- [ ] 状態スナップショット管理
+- [ ] BroadcastChannelによるクロスタブ同期
+- [ ] マイグレーションとバージョニングサポート
+- [ ] 大容量イベントストリームのパフォーマンステスト
 
-**Dependencies**: Task 5
-**Tests Required**: Component snapshot tests, interaction tests
-**Output**: Core game UI component library
+**依存関係**: タスク16
+**必要テスト**: 永続化、同期、パフォーマンス
+**成果物**: ゲーム状態の永続イベントストア
 
-### Task 28: Create Scenario Editor Components [P]
-**Type**: Implementation-UI | **Priority**: Medium | **Effort**: 3h
+### タスク20: セッション管理UI実装 [S]
+**タイプ**: 実装-フロントエンド | **優先度**: 高 | **工数**: 4時間
 ```bash
-# Implement scenario editing UI components
+# セッション作成・管理UI作成
 ```
-**Acceptance Criteria**:
-- [ ] React Flow node components (scene, event, transition)
-- [ ] Form components for scenario editing
-- [ ] Validation display components
-- [ ] Preview components for scenario testing
-- [ ] Storybook integration with complex scenarios
+**受入条件**:
+- [ ] シナリオ選択付きセッション作成フォーム
+- [ ] セッションリスト表示 (アクティブ、完了済み)
+- [ ] プレイヤー管理UI (招待、キック、ステータス)
+- [ ] セッションステータス表示とコントロール
+- [ ] WebWorkerゲームエンジンとの統合
 
-**Dependencies**: Task 5, Task 23
-**Tests Required**: Component functionality, React Flow integration
-**Output**: Scenario editor component library
+**依存関係**: タスク4, タスク17, タスク19
+**必要テスト**: UI操作、状態同期
+**成果物**: セッション管理インターフェース
 
-### Task 29: Create Layout & Navigation Components [P]
-**Type**: Implementation-UI | **Priority**: Low | **Effort**: 2h
+### タスク21: キャラクター作成UI実装 [P]
+**タイプ**: 実装-フロントエンド | **優先度**: 高 | **工数**: 3時間
 ```bash
-# Implement application layout components
+# キャラクター作成・管理UI作成
 ```
-**Acceptance Criteria**:
-- [ ] Application layout with responsive design
-- [ ] Navigation components with route handling
-- [ ] Modal and dialog components
-- [ ] Loading and error state components
-- [ ] Accessibility features (keyboard navigation, screen reader)
+**受入条件**:
+- [ ] キャラクター作成フォーム
+- [ ] カード・タグ管理インターフェース
+- [ ] キャラクター履歴表示
+- [ ] セッション参加ステータス
+- [ ] キャラクターエクスポート/インポート機能
 
-**Dependencies**: Task 5
-**Tests Required**: Layout responsiveness, accessibility, navigation
-**Output**: Application layout and navigation system
+**依存関係**: タスク4, タスク17, タスク19
+**必要テスト**: フォーム検証、永続化、インポート/エクスポート
+**成果物**: キャラクター管理インターフェース
 
-### Task 30: Complete UI Component Documentation [P]
-**Type**: Documentation | **Priority**: Low | **Effort**: 2h
+### タスク22: ゲームプレイUI実装 [S]
+**タイプ**: 実装-フロントエンド | **優先度**: 高 | **工数**: 5時間
 ```bash
-# Create comprehensive component documentation
+# メインゲームプレイインターフェース作成
 ```
-**Acceptance Criteria**:
-- [ ] Storybook documentation for all components
-- [ ] Usage examples and best practices
-- [ ] Component API documentation
-- [ ] Design system documentation
-- [ ] Performance guidelines
+**受入条件**:
+- [ ] 現在目標付きシーン表示
+- [ ] ドラッグ&ドロップ付きカード使用インターフェース
+- [ ] アニメーション付きダイス振りインターフェース
+- [ ] フィルタ機能付きイベントログ表示
+- [ ] 他プレイヤーからのリアルタイム更新
 
-**Dependencies**: Task 27-29
-**Tests Required**: Documentation accuracy, example functionality
-**Output**: Complete UI component documentation
+**依存関係**: タスク4, タスク17, タスク19, タスク20
+**必要テスト**: リアルタイム操作、アニメーション、マルチプレイヤー同期
+**成果物**: コアゲームプレイインターフェース
+
+### タスク23: シナリオエディターUI実装 [P]
+**タイプ**: 実装-フロントエンド | **優先度**: 中 | **工数**: 4時間
+```bash
+# シナリオ作成・編集インターフェース作成
+```
+**受入条件**:
+- [ ] ビジュアルシナリオ編集用React Flow統合
+- [ ] シーン・イベント作成フォーム
+- [ ] シナリオテスト・検証ツール
+- [ ] シナリオエクスポート/インポート機能
+- [ ] シナリオのバージョン管理
+
+**依存関係**: タスク4, タスク5, タスク17
+**必要テスト**: ビジュアル編集、検証、インポート/エクスポート
+**成果物**: ビジュアルシナリオエディター
+
+### タスク24: クロスタブ同期実装 [S]
+**タイプ**: 実装-フロントエンド | **優先度**: 高 | **工数**: 3時間
+```bash
+# ブラウザタブ間リアルタイム同期実装
+```
+**受入条件**:
+- [ ] BroadcastChannelイベント配信
+- [ ] タブ間状態調整
+- [ ] 同時アクション競合解決
+- [ ] 接続ステータスインジケーター
+- [ ] オフラインモード処理
+
+**依存関係**: タスク19, タスク20-23
+**必要テスト**: マルチタブシナリオ、競合解決
+**成果物**: マルチタブゲーム同期
+
+### タスク25: UIステート管理実装 [S]
+**タイプ**: 実装-フロントエンド | **優先度**: 中 | **工数**: 2時間
+```bash
+# Zustand付きReactステート管理セットアップ
+```
+**受入条件**:
+- [ ] Zustand付きグローバルステートストア
+- [ ] 非同期操作用React Query統合
+- [ ] localStorageへの状態永続化
+- [ ] 選択的サブスクリプションによるパフォーマンス最適化
+- [ ] 開発ツール統合
+
+**依存関係**: タスク20-24
+**必要テスト**: 状態同期、永続化、パフォーマンス
+**成果物**: 最適化されたフロントエンドステート管理
+
+### タスク26: フロントエンドE2E実装完成 [S]
+**タイプ**: 実装-E2E | **優先度**: クリティカル | **工数**: 3時間
+```bash
+# 全E2Eシナリオの成功を確保
+```
+**受入条件**:
+- [ ] タスク8の全E2Eテストが通る (GREENフェーズ)
+- [ ] パフォーマンス目標達成 (< 5MB WASM、レスポンシブUI)
+- [ ] エラーハンドリングとユーザーフィードバック完成
+- [ ] ブラウザ互換性検証
+- [ ] アクセシビリティベースライン準拠
+
+**依存関係**: タスク8 (テストが存在し失敗している必要あり), タスク19-25
+**必要テスト**: タスク8のE2Eテストが通る必要あり
+**成果物**: 全シナリオ成功の完全フロントエンド実装
 
 ---
 
-## Success Criteria
+## フェーズ4: UIコンポーネント & Storybook (タスク 27-30)
 
-### Technical Validation
-- [ ] All TDD tests pass (RED → GREEN → Refactor cycle completed)
-- [ ] WebAssembly bundle size < 5MB
-- [ ] Frontend UI responds within 100ms for user interactions
-- [ ] IndexedDB operations complete within 50ms
-- [ ] Cross-tab synchronization latency < 200ms
+### タスク27: コアゲームコンポーネント作成 [P]
+**タイプ**: 実装-UI | **優先度**: 中 | **工数**: 3時間
+```bash
+# 再利用可能ゲームUIコンポーネント実装
+```
+**受入条件**:
+- [ ] 型バリアント・状態付きCardコンポーネント
+- [ ] アニメーション付きダイス振りコンポーネント
+- [ ] プレイヤーステータスコンポーネント
+- [ ] フィルタ機能付きイベントログコンポーネント
+- [ ] 全コンポーネント用Storybookストーリー
 
-### Functional Validation
-- [ ] Complete user workflow from spec.md → working game
-- [ ] All acceptance scenarios from quickstart.md functional
-- [ ] Game state persistence across browser sessions
-- [ ] Multi-player asynchronous game play functional
-- [ ] Scenario creation and editing functional
+**依存関係**: タスク5
+**必要テスト**: コンポーネントスナップショットテスト、操作テスト
+**成果物**: コアゲームUIコンポーネントライブラリ
 
-### Quality Gates
-- [ ] TypeScript strict mode with zero errors
-- [ ] Rust clippy warnings resolved
-- [ ] Code coverage > 80% for core domain logic
-- [ ] Storybook components render without errors
-- [ ] Performance budgets maintained
+### タスク28: シナリオエディターコンポーネント作成 [P]
+**タイプ**: 実装-UI | **優先度**: 中 | **工数**: 3時間
+```bash
+# シナリオ編集UIコンポーネント実装
+```
+**受入条件**:
+- [ ] React Flowノードコンポーネント (シーン、イベント、遷移)
+- [ ] シナリオ編集用フォームコンポーネント
+- [ ] 検証表示コンポーネント
+- [ ] シナリオテスト用プレビューコンポーネント
+- [ ] 複雑シナリオでのStorybook統合
+
+**依存関係**: タスク5, タスク23
+**必要テスト**: コンポーネント機能、React Flow統合
+**成果物**: シナリオエディターコンポーネントライブラリ
+
+### タスク29: レイアウト&ナビゲーションコンポーネント作成 [P]
+**タイプ**: 実装-UI | **優先度**: 低 | **工数**: 2時間
+```bash
+# アプリケーションレイアウトコンポーネント実装
+```
+**受入条件**:
+- [ ] レスポンシブデザイン付きアプリケーションレイアウト
+- [ ] ルート処理付きナビゲーションコンポーネント
+- [ ] モーダル・ダイアログコンポーネント
+- [ ] ローディング・エラー状態コンポーネント
+- [ ] アクセシビリティ機能 (キーボードナビ、スクリーンリーダー)
+
+**依存関係**: タスク5
+**必要テスト**: レイアウトレスポンシブ性、アクセシビリティ、ナビゲーション
+**成果物**: アプリケーションレイアウト・ナビゲーションシステム
+
+### タスク30: UIコンポーネントドキュメント完成 [P]
+**タイプ**: ドキュメント | **優先度**: 低 | **工数**: 2時間
+```bash
+# 包括的コンポーネントドキュメント作成
+```
+**受入条件**:
+- [ ] 全コンポーネント用Storybookドキュメント
+- [ ] 使用例とベストプラクティス
+- [ ] コンポーネントAPIドキュメント
+- [ ] デザインシステムドキュメント
+- [ ] パフォーマンスガイドライン
+
+**依存関係**: タスク27-29
+**必要テスト**: ドキュメント正確性、サンプル機能
+**成果物**: 完全UIコンポーネントドキュメント
 
 ---
 
-## Task Dependencies Summary
+## 成功基準
 
-**Critical Path**: 1 → 2 → 3 → 6 → 9 → 16 → 17 → 19 → 26 (E2E completion)
+### 技術検証
+- [ ] 全TDDテスト成功 (RED → GREEN → Refactorサイクル完了)
+- [ ] WebAssemblyバンドルサイズ < 5MB
+- [ ] フロントエンドUIがユーザー操作に100ms以内で応答
+- [ ] IndexedDB操作が50ms以内で完了
+- [ ] クロスタブ同期遅延 < 200ms
 
-**Parallel Opportunities**:
-- Tasks 2, 3, 4, 5 can run in parallel after Task 1
-- Tasks 12, 13, 15 can run in parallel after Task 9
-- Tasks 21, 23 can run in parallel with Task 20
-- Tasks 27, 28, 29, 30 can run in parallel
+### 機能検証
+- [ ] spec.mdから動作ゲームまでの完全ユーザーワークフロー
+- [ ] quickstart.mdの全受入シナリオ機能
+- [ ] ブラウザセッション間でのゲーム状態永続化
+- [ ] マルチプレイヤー非同期ゲームプレイ機能
+- [ ] シナリオ作成・編集機能
 
-**Total Estimated Effort**: 89 hours
-**Critical Path Duration**: ~45 hours with parallelization
-**MVP Delivery Target**: Core domain + Frontend (Tasks 1-26)
+### 品質ゲート
+- [ ] TypeScript strictモードでエラーゼロ
+- [ ] Rust clippy警告解決
+- [ ] コアドメインロジックでコードカバレッジ > 80%
+- [ ] Storybookコンポーネントがエラーなしでレンダリング
+- [ ] パフォーマンス予算維持
 
 ---
 
-*Generated from Phase 1 design documents following Constitutional TDD principles*
-*Next Phase: Execute tasks 1-8 (Foundation) following strict RED-GREEN-Refactor cycle*
+## タスク依存関係まとめ
+
+**クリティカルパス**: 1 → 2 → 3 → 6 → 9 → 16 → 17 → 19 → 26 (E2E完成)
+
+**並列実行機会**:
+- タスク2、3、4、5はタスク1完了後に並列実行可能
+- タスク12、13、15はタスク9完了後に並列実行可能
+- タスク21、23はタスク20と並列実行可能
+- タスク27、28、29、30は並列実行可能
+
+**総見積工数**: 89時間
+**クリティカルパス期間**: 並列化で約45時間
+**MVP提供目標**: コアドメイン + フロントエンド (タスク1-26)
+
+---
+
+*Phase 1設計書から憲法TDD原則に従って生成*
+*次フェーズ: 厳密なRED-GREEN-Refactorサイクルに従ってタスク1-8 (基盤)を実行*
