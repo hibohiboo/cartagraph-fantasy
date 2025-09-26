@@ -1,11 +1,9 @@
 // WASM FFI インターフェース - Task 7: Contract Tests
 
 use wasm_bindgen::prelude::*;
-use crate::types::*;
 
 #[cfg(test)]
 mod contract_tests {
-    use super::*;
     #[test]
     fn test_create_session_wasm_contract() {
         // 最初のRED Phase: createSession WASM FFI メソッドのコントラクト
