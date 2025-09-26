@@ -249,6 +249,12 @@ pub struct Character {
 }
 ```
 
+**Alternative Approach: ts-rs for Type Generation**
+- **ts-rs**: Rust構造体から直接TypeScript型定義を生成
+- **Benefits**: コンパイル時型一致保証、ビルドパイプライン統合
+- **vs tsify**: WebAssembly専用 vs 汎用的型生成
+- **Decision**: tsify (WASM統合) + ts-rs (追加型安全性) の併用を検討
+
 ---
 
 ## 10. DDD + オニオンアーキテクチャでのRust実装

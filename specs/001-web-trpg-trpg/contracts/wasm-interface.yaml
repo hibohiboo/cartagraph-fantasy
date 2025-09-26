@@ -1,0 +1,1188 @@
+openapi: 3.0.3
+info:
+  title: WebAssembly Interface - 非同期TRPG風ゲーム
+  description: RustコアロジックとTypeScriptフロントエンド間のFFI契約定義
+  version: 0.1.0
+
+components:
+  schemas:
+    # WebAssembly Entry Points
+    GameEngineHandle:
+      type: object
+      description: WebAssemblyゲームエンジンのハンドル
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+          minimum: 0
+      required:
+        - session_id
+        - version
+
+    # Core Function Interfaces
+    InitializeSessionRequest:
+      type: object
+      description: セッション初期化リクエスト
+      properties:
+        scenario_id:
+          type: string
+          format: uuid
+        gm_user_id:
+          type: string
+          format: uuid
+        max_players:
+          type: integer
+          minimum: 1
+          maximum: 10
+        initial_shared_cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmCard'
+        entropy_seed:
+          type: string
+          description: 乱数シード（hex形式）
+          pattern: '^[0-9a-fA-F]{64}$'
+      required:
+        - scenario_id
+        - gm_user_id
+        - max_players
+        - entropy_seed
+
+    InitializeSessionResponse:
+      type: object
+      description: セッション初期化結果
+      properties:
+        success:
+          type: boolean
+        session_handle:
+          $ref: '#/components/schemas/GameEngineHandle'
+        initial_state:
+          $ref: '#/components/schemas/WasmGameState'
+        error:
+          type: string
+          nullable: true
+      required:
+        - success
+
+    AddPlayerRequest:
+      type: object
+      description: プレイヤー追加リクエスト
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        character:
+          $ref: '#/components/schemas/WasmCharacter'
+      required:
+        - user_id
+        - character
+
+    AddPlayerResponse:
+      type: object
+      description: プレイヤー追加結果
+      properties:
+        success:
+          type: boolean
+        player_id:
+          type: string
+          format: uuid
+          nullable: true
+        updated_state:
+          $ref: '#/components/schemas/WasmGameState'
+        error:
+          type: string
+          nullable: true
+      required:
+        - success
+
+    UseCardRequest:
+      type: object
+      description: カード使用リクエスト
+      properties:
+        player_id:
+          type: string
+          format: uuid
+        card_id:
+          type: string
+          format: uuid
+        target_parameters:
+          type: object
+          additionalProperties: true
+          description: カード使用対象パラメーター
+        entropy:
+          type: string
+          description: ランダム性が必要な場合のエントロピー（hex形式）
+          pattern: '^[0-9a-fA-F]*$'
+      required:
+        - player_id
+        - card_id
+
+    UseCardResponse:
+      type: object
+      description: カード使用結果
+      properties:
+        success:
+          type: boolean
+        events_triggered:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmEvent'
+        state_changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmStateChange'
+        updated_state:
+          $ref: '#/components/schemas/WasmGameState'
+        message:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+      required:
+        - success
+        - events_triggered
+        - state_changes
+
+    RollDiceRequest:
+      type: object
+      description: ダイス振りリクエスト
+      properties:
+        player_id:
+          type: string
+          format: uuid
+        dice_notation:
+          $ref: '#/components/schemas/WasmDiceNotation'
+        modifier_tags:
+          type: array
+          items:
+            type: string
+          description: 修正値に影響するタグ名
+        entropy:
+          type: string
+          description: 乱数生成用エントロピー（hex形式）
+          pattern: '^[0-9a-fA-F]{16}$'
+      required:
+        - player_id
+        - dice_notation
+        - entropy
+
+    RollDiceResponse:
+      type: object
+      description: ダイス振り結果
+      properties:
+        success:
+          type: boolean
+        result:
+          $ref: '#/components/schemas/WasmDiceResult'
+        triggered_effects:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmEvent'
+        updated_state:
+          $ref: '#/components/schemas/WasmGameState'
+        error:
+          type: string
+          nullable: true
+      required:
+        - success
+
+    ProcessEventsRequest:
+      type: object
+      description: イベント処理リクエスト
+      properties:
+        pending_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmEvent'
+        context:
+          type: object
+          additionalProperties: true
+          description: イベント処理コンテキスト
+      required:
+        - pending_events
+
+    ProcessEventsResponse:
+      type: object
+      description: イベント処理結果
+      properties:
+        success:
+          type: boolean
+        processed_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmEvent'
+        new_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmEvent'
+        updated_state:
+          $ref: '#/components/schemas/WasmGameState'
+        completion_status:
+          $ref: '#/components/schemas/WasmCompletionStatus'
+        error:
+          type: string
+          nullable: true
+      required:
+        - success
+        - processed_events
+        - new_events
+
+    GetGameStateRequest:
+      type: object
+      description: ゲーム状態取得リクエスト
+      properties:
+        include_history:
+          type: boolean
+          default: false
+        player_perspective:
+          type: string
+          format: uuid
+          nullable: true
+          description: 特定プレイヤー視点での状態取得
+
+    GetGameStateResponse:
+      type: object
+      description: ゲーム状態取得結果
+      properties:
+        success:
+          type: boolean
+        current_state:
+          $ref: '#/components/schemas/WasmGameState'
+        event_history:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmEvent'
+          nullable: true
+        error:
+          type: string
+          nullable: true
+      required:
+        - success
+
+    SaveSnapshotRequest:
+      type: object
+      description: 状態スナップショット保存リクエスト
+      properties:
+        checkpoint_name:
+          type: string
+          maxLength: 50
+          nullable: true
+        include_metadata:
+          type: boolean
+          default: true
+      required: []
+
+    SaveSnapshotResponse:
+      type: object
+      description: スナップショット保存結果
+      properties:
+        success:
+          type: boolean
+        snapshot_data:
+          type: string
+          description: Base64エンコードされたスナップショット
+        metadata:
+          $ref: '#/components/schemas/WasmSnapshotMetadata'
+        error:
+          type: string
+          nullable: true
+      required:
+        - success
+
+    LoadSnapshotRequest:
+      type: object
+      description: スナップショット読み込みリクエスト
+      properties:
+        snapshot_data:
+          type: string
+          description: Base64エンコードされたスナップショット
+        validate_integrity:
+          type: boolean
+          default: true
+      required:
+        - snapshot_data
+
+    LoadSnapshotResponse:
+      type: object
+      description: スナップショット読み込み結果
+      properties:
+        success:
+          type: boolean
+        loaded_state:
+          $ref: '#/components/schemas/WasmGameState'
+        metadata:
+          $ref: '#/components/schemas/WasmSnapshotMetadata'
+        validation_warnings:
+          type: array
+          items:
+            type: string
+        error:
+          type: string
+          nullable: true
+      required:
+        - success
+        - validation_warnings
+
+    # Data Structures
+    WasmGameState:
+      type: object
+      description: WebAssembly内部ゲーム状態
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        scenario_instance:
+          $ref: '#/components/schemas/WasmScenarioInstance'
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmPlayer'
+        current_scene:
+          $ref: '#/components/schemas/WasmSceneState'
+        shared_cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmCard'
+        game_phase:
+          $ref: '#/components/schemas/WasmGamePhase'
+        turn_order:
+          type: array
+          items:
+            type: string
+            format: uuid
+        active_player_id:
+          type: string
+          format: uuid
+          nullable: true
+        pending_actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmPendingAction'
+        rule_state:
+          $ref: '#/components/schemas/WasmRuleState'
+        version:
+          type: integer
+          minimum: 0
+        last_updated:
+          type: string
+          format: date-time
+      required:
+        - session_id
+        - scenario_instance
+        - players
+        - current_scene
+        - shared_cards
+        - game_phase
+        - turn_order
+        - pending_actions
+        - rule_state
+        - version
+        - last_updated
+
+    WasmPlayer:
+      type: object
+      description: WebAssembly内部プレイヤー表現
+      properties:
+        player_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        character:
+          $ref: '#/components/schemas/WasmCharacter'
+        status:
+          $ref: '#/components/schemas/WasmPlayerStatus'
+        session_cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmCard'
+        session_tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmTag'
+        action_points:
+          type: integer
+          minimum: 0
+        last_action_timestamp:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - player_id
+        - user_id
+        - character
+        - status
+        - session_cards
+        - session_tags
+        - action_points
+
+    WasmCharacter:
+      type: object
+      description: WebAssembly内部キャラクター表現
+      properties:
+        character_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        base_cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmCard'
+        base_tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmTag'
+        character_status:
+          $ref: '#/components/schemas/WasmCharacterStatus'
+      required:
+        - character_id
+        - name
+        - base_cards
+        - base_tags
+        - character_status
+
+    WasmCard:
+      type: object
+      description: WebAssembly内部カード表現
+      properties:
+        card_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        card_type:
+          $ref: '#/components/schemas/WasmCardType'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmTag'
+        rarity:
+          $ref: '#/components/schemas/WasmRarity'
+        embedded_events:
+          type: array
+          items:
+            type: string
+            format: uuid
+        usage_conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmCondition'
+        cooldown_turns:
+          type: integer
+          minimum: 0
+        current_cooldown:
+          type: integer
+          minimum: 0
+        usable:
+          type: boolean
+      required:
+        - card_id
+        - name
+        - card_type
+        - tags
+        - rarity
+        - embedded_events
+        - usage_conditions
+        - cooldown_turns
+        - current_cooldown
+        - usable
+
+    WasmTag:
+      type: object
+      description: WebAssembly内部タグ表現
+      properties:
+        tag_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          $ref: '#/components/schemas/WasmTagCategory'
+        value:
+          oneOf:
+            - type: integer
+            - type: boolean
+            - type: string
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        stack_count:
+          type: integer
+          minimum: 1
+          default: 1
+      required:
+        - tag_id
+        - name
+        - category
+        - stack_count
+
+    WasmSceneState:
+      type: object
+      description: WebAssembly内部シーン状態
+      properties:
+        scene_id:
+          type: string
+          format: uuid
+        scene_name:
+          type: string
+        status:
+          $ref: '#/components/schemas/WasmSceneStatus'
+        active_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmEventInstance'
+        completion_conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmCondition'
+        completion_progress:
+          type: number
+          minimum: 0
+          maximum: 1
+        participants:
+          type: array
+          items:
+            type: string
+            format: uuid
+        scene_data:
+          type: object
+          additionalProperties: true
+        entered_at:
+          type: string
+          format: date-time
+      required:
+        - scene_id
+        - scene_name
+        - status
+        - active_events
+        - completion_conditions
+        - completion_progress
+        - participants
+        - entered_at
+
+    WasmEvent:
+      type: object
+      description: WebAssembly内部イベント表現
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        event_type:
+          $ref: '#/components/schemas/WasmEventType'
+        triggers:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmTrigger'
+        effects:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmEffect'
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmCondition'
+        priority:
+          type: integer
+          minimum: 0
+          default: 0
+        data:
+          type: object
+          additionalProperties: true
+      required:
+        - event_id
+        - name
+        - event_type
+        - triggers
+        - effects
+        - conditions
+        - priority
+
+    WasmEventInstance:
+      type: object
+      description: 実行中のイベントインスタンス
+      properties:
+        instance_id:
+          type: string
+          format: uuid
+        event_id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/WasmEventStatus'
+        triggered_by:
+          type: string
+          format: uuid
+          nullable: true
+        triggered_at:
+          type: string
+          format: date-time
+        parameters:
+          type: object
+          additionalProperties: true
+        resolution_data:
+          type: object
+          additionalProperties: true
+          nullable: true
+      required:
+        - instance_id
+        - event_id
+        - status
+        - triggered_at
+        - parameters
+
+    WasmDiceNotation:
+      type: object
+      description: ダイス記法
+      properties:
+        dice_count:
+          type: integer
+          minimum: 1
+          maximum: 10
+        dice_sides:
+          type: integer
+          enum: [4, 6, 8, 10, 12, 20]
+        modifier:
+          type: integer
+          minimum: -10
+          maximum: 10
+        advantage_type:
+          $ref: '#/components/schemas/WasmAdvantageType'
+        reroll_conditions:
+          type: array
+          items:
+            type: integer
+      required:
+        - dice_count
+        - dice_sides
+        - modifier
+        - advantage_type
+
+    WasmDiceResult:
+      type: object
+      description: ダイス振り結果
+      properties:
+        notation:
+          $ref: '#/components/schemas/WasmDiceNotation'
+        raw_rolls:
+          type: array
+          items:
+            type: integer
+        rerolls:
+          type: array
+          items:
+            type: object
+            properties:
+              original:
+                type: integer
+              rerolled:
+                type: integer
+            required:
+              - original
+              - rerolled
+        final_result:
+          type: integer
+        success:
+          type: boolean
+        critical_success:
+          type: boolean
+        critical_failure:
+          type: boolean
+        roll_timestamp:
+          type: string
+          format: date-time
+      required:
+        - notation
+        - raw_rolls
+        - rerolls
+        - final_result
+        - success
+        - critical_success
+        - critical_failure
+        - roll_timestamp
+
+    WasmStateChange:
+      type: object
+      description: 状態変更の記録
+      properties:
+        change_id:
+          type: string
+          format: uuid
+        change_type:
+          $ref: '#/components/schemas/WasmStateChangeType'
+        target_id:
+          type: string
+          format: uuid
+        target_type:
+          $ref: '#/components/schemas/WasmTargetType'
+        before_value:
+          nullable: true
+        after_value:
+          nullable: true
+        metadata:
+          type: object
+          additionalProperties: true
+        applied_at:
+          type: string
+          format: date-time
+      required:
+        - change_id
+        - change_type
+        - target_id
+        - target_type
+        - applied_at
+
+    WasmCondition:
+      type: object
+      description: 汎用条件表現
+      properties:
+        condition_id:
+          type: string
+          format: uuid
+        condition_type:
+          $ref: '#/components/schemas/WasmConditionType'
+        parameters:
+          type: object
+          additionalProperties: true
+        negate:
+          type: boolean
+          default: false
+      required:
+        - condition_id
+        - condition_type
+        - parameters
+
+    WasmTrigger:
+      type: object
+      description: イベントトリガー
+      properties:
+        trigger_type:
+          $ref: '#/components/schemas/WasmTriggerType'
+        conditions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmCondition'
+        priority:
+          type: integer
+          minimum: 0
+          default: 0
+      required:
+        - trigger_type
+        - conditions
+
+    WasmEffect:
+      type: object
+      description: イベント効果
+      properties:
+        effect_type:
+          $ref: '#/components/schemas/WasmEffectType'
+        target_selector:
+          $ref: '#/components/schemas/WasmTargetSelector'
+        parameters:
+          type: object
+          additionalProperties: true
+        delay:
+          type: integer
+          minimum: 0
+          default: 0
+      required:
+        - effect_type
+        - target_selector
+        - parameters
+
+    WasmTargetSelector:
+      type: object
+      description: 効果対象選択器
+      properties:
+        selector_type:
+          $ref: '#/components/schemas/WasmSelectorType'
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmCondition'
+        max_targets:
+          type: integer
+          minimum: 1
+          nullable: true
+      required:
+        - selector_type
+        - filters
+
+    WasmPendingAction:
+      type: object
+      description: 保留中のアクション
+      properties:
+        action_id:
+          type: string
+          format: uuid
+        player_id:
+          type: string
+          format: uuid
+        action_type:
+          $ref: '#/components/schemas/WasmActionType'
+        required_by:
+          type: string
+          format: date-time
+        parameters:
+          type: object
+          additionalProperties: true
+        timeout_behavior:
+          $ref: '#/components/schemas/WasmTimeoutBehavior'
+      required:
+        - action_id
+        - player_id
+        - action_type
+        - required_by
+        - parameters
+        - timeout_behavior
+
+    WasmRuleState:
+      type: object
+      description: ルールエンジン状態
+      properties:
+        rule_set_version:
+          type: string
+        active_modifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmRuleModifier'
+        global_variables:
+          type: object
+          additionalProperties: true
+        scenario_specific_rules:
+          type: object
+          additionalProperties: true
+      required:
+        - rule_set_version
+        - active_modifiers
+        - global_variables
+        - scenario_specific_rules
+
+    WasmRuleModifier:
+      type: object
+      description: ルール修正子
+      properties:
+        modifier_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        modifier_type:
+          $ref: '#/components/schemas/WasmModifierType'
+        effect:
+          type: object
+          additionalProperties: true
+        duration:
+          type: integer
+          minimum: -1
+          description: "-1 for permanent, 0 for instant, >0 for turns"
+        source:
+          type: string
+          description: "修正子の発生源"
+      required:
+        - modifier_id
+        - name
+        - modifier_type
+        - effect
+        - duration
+        - source
+
+    WasmScenarioInstance:
+      type: object
+      description: シナリオインスタンス
+      properties:
+        scenario_id:
+          type: string
+          format: uuid
+        instance_data:
+          type: object
+          additionalProperties: true
+        customizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/WasmCustomization'
+      required:
+        - scenario_id
+        - instance_data
+        - customizations
+
+    WasmCustomization:
+      type: object
+      description: シナリオカスタマイゼーション
+      properties:
+        customization_id:
+          type: string
+          format: uuid
+        target_type:
+          type: string
+        target_id:
+          type: string
+          format: uuid
+        modification:
+          type: object
+          additionalProperties: true
+      required:
+        - customization_id
+        - target_type
+        - target_id
+        - modification
+
+    WasmCompletionStatus:
+      type: object
+      description: 完了状態
+      properties:
+        is_completed:
+          type: boolean
+        completion_type:
+          $ref: '#/components/schemas/WasmCompletionType'
+        completion_data:
+          type: object
+          additionalProperties: true
+        next_actions:
+          type: array
+          items:
+            type: string
+      required:
+        - is_completed
+        - completion_type
+        - completion_data
+        - next_actions
+
+    WasmSnapshotMetadata:
+      type: object
+      description: スナップショットメタデータ
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        version:
+          type: string
+        session_id:
+          type: string
+          format: uuid
+        player_count:
+          type: integer
+        current_scene:
+          type: string
+        checksum:
+          type: string
+        compression:
+          type: string
+          enum: [none, gzip, lz4]
+      required:
+        - created_at
+        - version
+        - session_id
+        - player_count
+        - current_scene
+        - checksum
+        - compression
+
+    # Enums
+    WasmGamePhase:
+      type: string
+      enum:
+        - setup
+        - playing
+        - resolution
+        - completed
+        - suspended
+
+    WasmPlayerStatus:
+      type: string
+      enum:
+        - active
+        - inactive
+        - waiting
+        - departed
+
+    WasmCharacterStatus:
+      type: string
+      enum:
+        - ready
+        - acting
+        - waiting
+        - incapacitated
+        - recovering
+
+    WasmCardType:
+      type: string
+      enum:
+        - action
+        - choice
+        - possession
+        - scene_transition
+        - instant
+
+    WasmTagCategory:
+      type: string
+      enum:
+        - skill
+        - status
+        - achievement
+        - condition
+        - temporary
+
+    WasmRarity:
+      type: string
+      enum:
+        - common
+        - uncommon
+        - rare
+        - legendary
+        - unique
+
+    WasmSceneStatus:
+      type: string
+      enum:
+        - entering
+        - active
+        - resolving
+        - completed
+        - skipped
+
+    WasmEventType:
+      type: string
+      enum:
+        - narrative
+        - action
+        - possession
+        - scene_transition
+        - card_distribution
+        - system
+
+    WasmEventStatus:
+      type: string
+      enum:
+        - pending
+        - active
+        - resolving
+        - completed
+        - cancelled
+
+    WasmAdvantageType:
+      type: string
+      enum:
+        - normal
+        - advantage
+        - disadvantage
+        - double_advantage
+        - double_disadvantage
+
+    WasmStateChangeType:
+      type: string
+      enum:
+        - card_added
+        - card_removed
+        - tag_added
+        - tag_removed
+        - tag_modified
+        - scene_changed
+        - player_status_changed
+        - character_status_changed
+        - variable_changed
+
+    WasmTargetType:
+      type: string
+      enum:
+        - player
+        - character
+        - card
+        - tag
+        - scene
+        - session
+        - event
+
+    WasmConditionType:
+      type: string
+      enum:
+        - tag_possession
+        - card_possession
+        - dice_result
+        - player_count
+        - scene_status
+        - custom_variable
+        - time_based
+
+    WasmTriggerType:
+      type: string
+      enum:
+        - session_start
+        - scene_enter
+        - card_use
+        - dice_roll
+        - player_action
+        - time_passed
+        - manual
+        - event_completion
+
+    WasmEffectType:
+      type: string
+      enum:
+        - add_card
+        - remove_card
+        - add_tag
+        - remove_tag
+        - modify_tag
+        - change_scene
+        - display_message
+        - require_dice_roll
+        - set_variable
+        - trigger_event
+
+    WasmSelectorType:
+      type: string
+      enum:
+        - all_players
+        - active_player
+        - specific_player
+        - players_with_tag
+        - players_with_card
+        - random_players
+
+    WasmActionType:
+      type: string
+      enum:
+        - use_card
+        - roll_dice
+        - choose_option
+        - input_text
+        - confirm_action
+        - wait_for_others
+
+    WasmTimeoutBehavior:
+      type: string
+      enum:
+        - skip_action
+        - default_choice
+        - random_choice
+        - gm_decision
+        - extend_time
+
+    WasmModifierType:
+      type: string
+      enum:
+        - dice_modifier
+        - card_cost_modifier
+        - action_point_modifier
+        - scene_modifier
+        - global_rule_modifier
+
+    WasmCompletionType:
+      type: string
+      enum:
+        - scene_completed
+        - session_completed
+        - session_terminated
+        - player_departed
+        - system_error
+
+paths: {}  # WebAssembly FFIなのでHTTPエンドポイントは存在しない

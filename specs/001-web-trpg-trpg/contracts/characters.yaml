@@ -1,0 +1,907 @@
+openapi: 3.0.3
+info:
+  title: Characters API - 非同期TRPG風ゲーム
+  description: キャラクター作成・管理API
+  version: 0.1.0
+
+paths:
+  /characters:
+    get:
+      summary: キャラクター一覧取得
+      description: ユーザーの所有キャラクター一覧を取得
+      parameters:
+        - name: user_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: include_restricted
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: 制限のあるキャラクターも含めるか
+      responses:
+        '200':
+          description: キャラクター一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  characters:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CharacterSummary'
+                  total:
+                    type: integer
+                required:
+                  - characters
+                  - total
+
+    post:
+      summary: 新規キャラクター作成
+      description: 新しいキャラクターを作成
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCharacterRequest'
+      responses:
+        '201':
+          description: キャラクター作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterDetail'
+        '400':
+          description: 入力エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /characters/{characterId}:
+    get:
+      summary: キャラクター詳細取得
+      description: 指定されたキャラクターの詳細情報を取得
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: キャラクター詳細
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterDetail'
+        '404':
+          description: キャラクターが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+
+    put:
+      summary: キャラクター更新
+      description: 既存キャラクターを更新
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCharacterRequest'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterDetail'
+        '404':
+          description: キャラクターが見つからない
+
+    delete:
+      summary: キャラクター削除
+      description: キャラクターを削除
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: 削除成功
+        '404':
+          description: キャラクターが見つからない
+        '409':
+          description: 削除不可（セッション参加中等）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictError'
+
+  /characters/{characterId}/cards:
+    get:
+      summary: 所持カード一覧取得
+      description: キャラクターの所持カード一覧を取得
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: card_type
+          in: query
+          schema:
+            $ref: '#/components/schemas/CardType'
+          description: カードタイプでフィルタリング
+      responses:
+        '200':
+          description: 所持カード一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cards:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Card'
+                  total:
+                    type: integer
+                required:
+                  - cards
+                  - total
+
+    post:
+      summary: カード追加
+      description: キャラクターにカードを追加
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCardRequest'
+      responses:
+        '200':
+          description: カード追加成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterDetail'
+
+  /characters/{characterId}/cards/{cardId}:
+    delete:
+      summary: カード削除
+      description: キャラクターからカードを削除
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: カード削除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterDetail'
+        '404':
+          description: カードが見つからない
+
+  /characters/{characterId}/tags:
+    get:
+      summary: 所持タグ一覧取得
+      description: キャラクターの所持タグ一覧を取得
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/TagCategory'
+          description: タグカテゴリでフィルタリング
+      responses:
+        '200':
+          description: 所持タグ一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tags:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tag'
+                  total:
+                    type: integer
+                required:
+                  - tags
+                  - total
+
+    post:
+      summary: タグ追加
+      description: キャラクターにタグを追加
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTagRequest'
+      responses:
+        '200':
+          description: タグ追加成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterDetail'
+
+  /characters/{characterId}/tags/{tagId}:
+    delete:
+      summary: タグ削除
+      description: キャラクターからタグを削除
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: tagId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: タグ削除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterDetail'
+        '404':
+          description: タグが見つからない
+
+  /characters/{characterId}/sessions:
+    get:
+      summary: セッション履歴取得
+      description: キャラクターの参加セッション履歴を取得
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - completed
+                - in_progress
+                - terminated
+          description: セッションステータスでフィルタリング
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: セッション履歴
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SessionRecord'
+                  total:
+                    type: integer
+                  has_more:
+                    type: boolean
+                required:
+                  - sessions
+                  - total
+                  - has_more
+
+  /characters/{characterId}/restrictions:
+    get:
+      summary: 参加制限取得
+      description: キャラクターのシナリオ参加制限を取得
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 参加制限一覧
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  restrictions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ScenarioRestriction'
+                  total:
+                    type: integer
+                required:
+                  - restrictions
+                  - total
+
+    post:
+      summary: 参加制限追加
+      description: キャラクターにシナリオ参加制限を追加
+      parameters:
+        - name: characterId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddRestrictionRequest'
+      responses:
+        '200':
+          description: 制限追加成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterDetail'
+
+components:
+  schemas:
+    CharacterSummary:
+      type: object
+      properties:
+        character_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        player_name:
+          type: string
+        total_cards:
+          type: integer
+          minimum: 0
+        total_tags:
+          type: integer
+          minimum: 0
+        session_count:
+          type: integer
+          minimum: 0
+        created_at:
+          type: string
+          format: date-time
+        last_played_at:
+          type: string
+          format: date-time
+          nullable: true
+        has_restrictions:
+          type: boolean
+      required:
+        - character_id
+        - name
+        - player_name
+        - total_cards
+        - total_tags
+        - session_count
+        - created_at
+        - has_restrictions
+
+    CharacterDetail:
+      allOf:
+        - $ref: '#/components/schemas/CharacterSummary'
+        - type: object
+          properties:
+            player_id:
+              type: string
+              format: uuid
+            personal_cards:
+              type: array
+              items:
+                $ref: '#/components/schemas/Card'
+            acquired_tags:
+              type: array
+              items:
+                $ref: '#/components/schemas/Tag'
+            session_history:
+              type: array
+              items:
+                $ref: '#/components/schemas/SessionRecord'
+              maxItems: 5
+            scenario_restrictions:
+              type: array
+              items:
+                $ref: '#/components/schemas/ScenarioRestriction'
+            statistics:
+              $ref: '#/components/schemas/CharacterStatistics'
+            updated_at:
+              type: string
+              format: date-time
+          required:
+            - player_id
+            - personal_cards
+            - acquired_tags
+            - session_history
+            - scenario_restrictions
+            - statistics
+            - updated_at
+
+    Card:
+      type: object
+      properties:
+        card_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 50
+        card_type:
+          $ref: '#/components/schemas/CardType'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        rarity:
+          $ref: '#/components/schemas/Rarity'
+        description:
+          type: string
+          maxLength: 200
+        acquired_at:
+          type: string
+          format: date-time
+        acquired_from:
+          type: string
+          description: 取得元（セッション名、報酬等）
+          nullable: true
+        usage_count:
+          type: integer
+          minimum: 0
+          default: 0
+      required:
+        - card_id
+        - name
+        - card_type
+        - rarity
+        - description
+        - acquired_at
+        - usage_count
+
+    Tag:
+      type: object
+      properties:
+        tag_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 30
+        category:
+          $ref: '#/components/schemas/TagCategory'
+        value:
+          oneOf:
+            - type: integer
+            - type: boolean
+            - type: string
+              maxLength: 100
+          nullable: true
+        acquired_at:
+          type: string
+          format: date-time
+        acquired_from:
+          type: string
+          description: 取得元（セッション名、イベント名等）
+          nullable: true
+        description:
+          type: string
+          maxLength: 200
+          nullable: true
+      required:
+        - tag_id
+        - name
+        - category
+        - acquired_at
+
+    SessionRecord:
+      type: object
+      properties:
+        session_id:
+          type: string
+          format: uuid
+        scenario_id:
+          type: string
+          format: uuid
+        scenario_name:
+          type: string
+        gm_name:
+          type: string
+        participated_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+          enum:
+            - completed
+            - in_progress
+            - terminated
+            - departed
+        final_tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        final_cards:
+          type: array
+          items:
+            $ref: '#/components/schemas/Card'
+        feedback:
+          type: string
+          maxLength: 500
+          nullable: true
+        achievements:
+          type: array
+          items:
+            type: string
+      required:
+        - session_id
+        - scenario_id
+        - scenario_name
+        - gm_name
+        - participated_at
+        - status
+        - final_tags
+        - final_cards
+        - achievements
+
+    ScenarioRestriction:
+      type: object
+      properties:
+        scenario_id:
+          type: string
+          format: uuid
+        scenario_name:
+          type: string
+        restriction_reason:
+          $ref: '#/components/schemas/RestrictionReason'
+        restricted_at:
+          type: string
+          format: date-time
+        restriction_details:
+          type: string
+          maxLength: 200
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - scenario_id
+        - scenario_name
+        - restriction_reason
+        - restricted_at
+
+    CharacterStatistics:
+      type: object
+      properties:
+        total_sessions:
+          type: integer
+          minimum: 0
+        completed_sessions:
+          type: integer
+          minimum: 0
+        success_rate:
+          type: number
+          minimum: 0
+          maximum: 100
+        favorite_scenario_types:
+          type: array
+          items:
+            type: object
+            properties:
+              tag:
+                type: string
+              count:
+                type: integer
+            required:
+              - tag
+              - count
+        achievement_count:
+          type: integer
+          minimum: 0
+        rarest_card:
+          $ref: '#/components/schemas/Rarity'
+          nullable: true
+        play_style_tags:
+          type: array
+          items:
+            type: string
+        last_activity:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - total_sessions
+        - completed_sessions
+        - success_rate
+        - favorite_scenario_types
+        - achievement_count
+        - play_style_tags
+
+    CreateCharacterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 30
+          pattern: '^[^\s].*[^\s]$'
+        player_id:
+          type: string
+          format: uuid
+        initial_tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateTagRequest'
+          maxItems: 5
+        background:
+          type: string
+          maxLength: 500
+          nullable: true
+      required:
+        - name
+        - player_id
+
+    UpdateCharacterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 30
+          pattern: '^[^\s].*[^\s]$'
+        background:
+          type: string
+          maxLength: 500
+          nullable: true
+
+    AddCardRequest:
+      type: object
+      properties:
+        card_id:
+          type: string
+          format: uuid
+        source:
+          type: string
+          maxLength: 100
+          description: 取得元の説明
+      required:
+        - card_id
+
+    AddTagRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 30
+        category:
+          $ref: '#/components/schemas/TagCategory'
+        value:
+          oneOf:
+            - type: integer
+            - type: boolean
+            - type: string
+              maxLength: 100
+          nullable: true
+        source:
+          type: string
+          maxLength: 100
+          description: 取得元の説明
+        description:
+          type: string
+          maxLength: 200
+          nullable: true
+      required:
+        - name
+        - category
+
+    CreateTagRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 30
+        category:
+          $ref: '#/components/schemas/TagCategory'
+        value:
+          oneOf:
+            - type: integer
+            - type: boolean
+            - type: string
+              maxLength: 100
+          nullable: true
+        description:
+          type: string
+          maxLength: 200
+          nullable: true
+      required:
+        - name
+        - category
+
+    AddRestrictionRequest:
+      type: object
+      properties:
+        scenario_id:
+          type: string
+          format: uuid
+        restriction_reason:
+          $ref: '#/components/schemas/RestrictionReason'
+        restriction_details:
+          type: string
+          maxLength: 200
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - scenario_id
+        - restriction_reason
+
+    # Enums
+    CardType:
+      type: string
+      enum:
+        - action
+        - choice
+        - possession
+        - scene_transition
+
+    TagCategory:
+      type: string
+      enum:
+        - skill
+        - status
+        - achievement
+        - condition
+
+    Rarity:
+      type: string
+      enum:
+        - common
+        - uncommon
+        - rare
+        - legendary
+
+    RestrictionReason:
+      type: string
+      enum:
+        - already_completed
+        - incompatible_tags
+        - scenario_limited
+        - temporary_ban
+        - character_specific
+
+    # Error Schemas
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - validation_failed
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              code:
+                type: string
+              message:
+                type: string
+            required:
+              - field
+              - code
+              - message
+      required:
+        - error
+        - message
+
+    ConflictError:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - conflict
+        message:
+          type: string
+        conflict_type:
+          type: string
+          enum:
+            - character_in_session
+            - name_already_exists
+            - restriction_exists
+            - invalid_state
+      required:
+        - error
+        - message
+        - conflict_type
+
+    NotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+          enum:
+            - not_found
+        message:
+          type: string
+      required:
+        - error
+        - message
