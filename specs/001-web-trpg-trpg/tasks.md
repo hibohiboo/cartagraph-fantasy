@@ -163,15 +163,24 @@
 # WebAssembly FFIインターフェースの失敗テスト作成
 ```
 **受入条件**:
-- [ ] GameSession FFIメソッドテスト (createSession、addPlayer、useCard、rollDice)
+- [x] GameSession FFIメソッドテスト (createSession、addPlayer) ← TDD 2サイクル完了
+- [ ] useCard、rollDice のFFIメソッドテスト
 - [ ] 型安全テスト (Rust ↔ TypeScript型一貫性)
 - [ ] シリアライゼーションテスト (WASM境界越えの複雑オブジェクト)
 - [ ] エラーハンドリングテスト (ドメインエラー伝播)
-- [ ] 初期状態で全テストが失敗 (REDフェーズ)
+- [x] 初期状態で全テストが失敗 (REDフェーズ) ← 実装済み
 
 **依存関係**: タスク3, タスク6
 **必要テスト**: WebAssembly統合、FFI型安全性
 **成果物**: WASMインターフェース要件を定義するコントラクトテスト
+
+**実装メモ (2025-09-27)**:
+- `packages/core/src/wasm_interface.rs`にコントラクトテスト作成
+- TDD方式で2つのWASM FFIメソッドの契約テスト完了
+  - `wasm_create_session`: 文字列パラメータからGameSession作成
+  - `wasm_add_player`: セッションにプレイヤー追加
+- 各ID型に`from_string`メソッド追加 (SessionId, ScenarioId, PlayerId, UserId)
+- 非WASM環境でのテスト実行のため、`Result<String, String>`形式で実装
 
 ### タスク8: フロントエンドE2Eテストシナリオ作成 [S]
 **タイプ**: TDD-E2E | **優先度**: 高 | **工数**: 3時間

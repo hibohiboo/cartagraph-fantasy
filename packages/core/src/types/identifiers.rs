@@ -90,11 +90,19 @@ impl PlayerId {
     pub fn new() -> Self {
         Self(Uuid::new_v4().to_string())
     }
+
+    pub fn from_string(s: String) -> Self {
+        Self(s)
+    }
 }
 
 impl UserId {
     pub fn new() -> Self {
         Self(Uuid::new_v4().to_string())
+    }
+
+    pub fn from_string(s: String) -> Self {
+        Self(s)
     }
 }
 
