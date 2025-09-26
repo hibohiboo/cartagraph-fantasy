@@ -10,6 +10,9 @@
     "build": "cargo test --quiet && wasm-pack build --target web --out-dir pkg",
     "dev": "wasm-pack build --target web --out-dir pkg --dev",
     "test": "cargo test",
+    "test:integration": "bun run test-wasm-integration.js",
+    "test:webworker": "bun run test-webworker.js",
+    "test:all": "cargo test && bun run test:integration && bun run test:webworker",
     "generate-types": "cargo test --quiet",
     "clean": "cargo clean && rm -rf pkg && rm -rf ../shared/src/types/*.ts"
   },
