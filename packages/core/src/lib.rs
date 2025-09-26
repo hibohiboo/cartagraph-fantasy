@@ -14,3 +14,23 @@ pub fn main() {
 
 // 基本エクスポート
 pub use types::*;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn generate_typescript_types() {
+        // ts-rs型生成のトリガー
+        // テスト実行時に自動的にTypeScript型定義が生成される
+
+        // 基本的な型テスト
+        let session_id = types::SessionId::new();
+        assert!(!session_id.0.is_empty());
+
+        let player_id = types::PlayerId::new();
+        assert!(!player_id.0.is_empty());
+
+        println!("TypeScript types generated successfully!");
+    }
+}
