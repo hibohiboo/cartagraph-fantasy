@@ -7,10 +7,11 @@
   "types": "./pkg/index.d.ts",
   "files": ["pkg"],
   "scripts": {
-    "build": "wasm-pack build --target web --out-dir pkg",
+    "build": "cargo test --quiet && wasm-pack build --target web --out-dir pkg",
     "dev": "wasm-pack build --target web --out-dir pkg --dev",
     "test": "cargo test",
-    "clean": "cargo clean && rm -rf pkg"
+    "generate-types": "cargo test --quiet",
+    "clean": "cargo clean && rm -rf pkg && rm -rf ../shared/src/types/*.ts"
   },
   "devDependencies": {
     "wasm-pack": "^0.12.1"
