@@ -29,6 +29,28 @@ pub struct GameSession {
     pub version: u64,
 }
 
+impl GameSession {
+    // TDD: 最小実装でテストを通す
+    pub fn create(session_id: SessionId, scenario_id: ScenarioId) -> Self {
+        Self {
+            session_id,
+            scenario_id,
+            gm_user_id: UserId::new(), // 仮値
+            created_at: chrono::Utc::now(),
+            players: HashMap::new(),
+            max_players: 4, // デフォルト値
+            current_scene: SceneId::new(), // 仮値
+            shared_cards: Vec::new(),
+            session_status: SessionStatus::WaitingForPlayers,
+            version: 0,
+        }
+    }
+
+    pub fn status(&self) -> SessionStatus {
+        self.session_status.clone()
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export, export_to = "../shared/src/types/")]
 pub struct SessionPlayer {
