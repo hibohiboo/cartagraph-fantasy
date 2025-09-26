@@ -2,6 +2,7 @@ use wasm_bindgen::prelude::*;
 
 // モジュール宣言
 pub mod types;
+pub mod domain;
 
 // 外部クレート
 extern crate console_error_panic_hook;

@@ -56,6 +56,8 @@ pub enum PlayerStatus {
 pub enum SessionStatus {
     #[serde(rename = "created")]
     Created,
+    #[serde(rename = "waiting_for_players")]
+    WaitingForPlayers,
     #[serde(rename = "recruiting")]
     Recruiting,
     #[serde(rename = "starting")]
