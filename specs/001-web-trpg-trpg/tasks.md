@@ -140,8 +140,8 @@
   - [x] セッション作成 (最小ケース)
   - [x] プレイヤー追加 (基本ケース)
   - [x] セッション開始 (制約付き)
-- [ ] Character集約: TDDサイクルで段階実装 *(Task 9で実装)*
-- [ ] ScenarioTemplate: 基本機能から段階実装 *(Task 9で実装)*
+- [ ] Character集約: TDDサイクルで段階実装 *(Task 10で実装)*
+- [ ] ScenarioTemplate: 基本機能から段階実装 *(Task 11で実装)*
 - [ ] Event Sourcing: シンプルなイベント適用から *(Task 9で実装)*
 - [x] 各ステップで RED → GREEN → Refactor サイクル完了
 
