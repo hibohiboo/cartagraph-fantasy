@@ -102,6 +102,27 @@ mod contract_tests {
         assert_eq!(dice_response, "dice_rolled:3,5");
     }
 
+    #[test]
+    fn test_complex_object_serialization() {
+        // シリアライゼーションテスト: 複雑なオブジェクトのWASM境界越えテスト
+        // やりたいこと: GameSessionのような複雑な構造体をJSON経由でWASM境界を越える
+
+        let session_id_str = "test-session";
+        let scenario_id_str = "test-scenario";
+
+        // このWASM関数はまだ存在しない → コンパイルエラー (RED)
+        let result = wasm_get_session_as_json(session_id_str, scenario_id_str);
+
+        // 実装されたらこれらが通るはず
+        assert!(result.is_ok());
+        let json_response = result.unwrap();
+
+        // JSONが有効であることを確認
+        assert!(json_response.contains("session_id"));
+        assert!(json_response.contains("scenario_id"));
+        assert!(json_response.contains("session_status"));
+    }
+
     // WASM FFI Implementation: GameSession作成
     fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, String> {
         use crate::types::{SessionId, ScenarioId, GameSession};
@@ -188,5 +209,20 @@ mod contract_tests {
         }
 
         Ok("typescript_types_verified".to_string())
+    }
+
+    fn wasm_get_session_as_json(session_id: &str, scenario_id: &str) -> Result<String, String> {
+        use crate::types::{SessionId, ScenarioId, GameSession};
+
+        // GameSessionを作成
+        let session_id = SessionId::from_string(session_id.to_string());
+        let scenario_id = ScenarioId::from_string(scenario_id.to_string());
+        let session = GameSession::create(session_id, scenario_id);
+
+        // GameSessionをJSONにシリアライズ
+        match serde_json::to_string(&session) {
+            Ok(json) => Ok(json),
+            Err(e) => Err(format!("Serialization failed: {}", e)),
+        }
     }
 }

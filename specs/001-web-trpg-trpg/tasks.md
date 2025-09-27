@@ -164,7 +164,7 @@
 ```
 **受入条件**:
 - [x] GameSession FFIメソッドテスト (createSession、addPlayer、useCard、rollDice) ← TDD 4サイクル完了
-- [ ] 型安全テスト (Rust ↔ TypeScript型一貫性)
+- [x] 型安全テスト (Rust ↔ TypeScript型一貫性) ← ts-rs型生成 + WASM境界テスト完了
 - [ ] シリアライゼーションテスト (WASM境界越えの複雑オブジェクト)
 - [ ] エラーハンドリングテスト (ドメインエラー伝播)
 - [x] 初期状態で全テストが失敗 (REDフェーズ) ← 実装済み
@@ -181,8 +181,11 @@
   - `wasm_use_card`: プレイヤーがカードを使用
   - `wasm_roll_dice`: ダイス振り機能（ダミー結果：dice_rolled:3,5）
 - 各ID型に`from_string`メソッド追加 (SessionId, ScenarioId, PlayerId, UserId, CardId)
+- 型安全テスト実装完了
+  - `verify_typescript_type_exports()`: ts-rs型宣言検証
+  - `test_wasm_boundary_type_roundtrip()`: WASM境界での型一貫性テスト
 - 非WASM環境でのテスト実行のため、`Result<String, String>`形式で実装
-- 全4テスト実行成功確認済み
+- 全6テスト実行成功確認済み、リファクタ完了（REDコメント削除、不要import削除）
 
 ### タスク8: フロントエンドE2Eテストシナリオ作成 [S]
 **タイプ**: TDD-E2E | **優先度**: 高 | **工数**: 3時間
