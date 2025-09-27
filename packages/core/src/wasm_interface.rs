@@ -54,6 +54,24 @@ mod contract_tests {
         assert!(result.is_ok());
     }
 
+    #[test]
+    fn test_roll_dice_wasm_contract() {
+        // 4番目のRED Phase: rollDice WASM FFI メソッドのコントラクト
+        // やりたいこと: JSからWASM経由でダイスを振る
+        // まだ実装されていないのでコンパイルエラーになる
+
+        let session_id_str = "session-123";
+        let player_id_str = "player-456";
+        let dice_count = 2;
+        let dice_sides = 6;
+
+        // このWASM関数はまだ存在しない → コンパイルエラー (RED)
+        let result = wasm_roll_dice(session_id_str, player_id_str, dice_count, dice_sides);
+
+        // 実装されたらこれらが通るはず
+        assert!(result.is_ok());
+    }
+
     // GREEN Phase: 最小限の実装でテストを通す
     fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, String> {
         use crate::types::{SessionId, ScenarioId, GameSession};
@@ -92,5 +110,17 @@ mod contract_tests {
         // 実際の実装では、セッションを取得してカードを使用する
         // 現在は最小限の成功レスポンスを返す
         Ok("card_used".to_string())
+    }
+
+    fn wasm_roll_dice(_session_id: &str, _player_id: &str, _dice_count: u32, _dice_sides: u32) -> Result<String, String> {
+        use crate::types::{SessionId, PlayerId};
+
+        // 最小実装: IDを構築してダイス振り操作をシミュレート
+        let _session_id = SessionId::from_string(_session_id.to_string());
+        let _player_id = PlayerId::from_string(_player_id.to_string());
+
+        // 実際の実装では、ダイスを振って結果をセッションに記録する
+        // 現在は最小限の成功レスポンスを返す（ダミーの結果）
+        Ok("dice_rolled:3,5".to_string())
     }
 }

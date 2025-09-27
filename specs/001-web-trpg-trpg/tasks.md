@@ -163,8 +163,7 @@
 # WebAssembly FFIインターフェースの失敗テスト作成
 ```
 **受入条件**:
-- [x] GameSession FFIメソッドテスト (createSession、addPlayer) ← TDD 2サイクル完了
-- [ ] useCard、rollDice のFFIメソッドテスト
+- [x] GameSession FFIメソッドテスト (createSession、addPlayer、useCard、rollDice) ← TDD 4サイクル完了
 - [ ] 型安全テスト (Rust ↔ TypeScript型一貫性)
 - [ ] シリアライゼーションテスト (WASM境界越えの複雑オブジェクト)
 - [ ] エラーハンドリングテスト (ドメインエラー伝播)
