@@ -3,7 +3,7 @@ use ts_rs::TS;
 use super::TagId;
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct Tag {
     pub tag_id: TagId,
     pub name: String,
@@ -12,7 +12,7 @@ pub struct Tag {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub enum TagCategory {
     #[serde(rename = "skill")]
     Skill,        // スキル系
@@ -25,7 +25,7 @@ pub enum TagCategory {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 #[serde(tag = "type", content = "value")]
 pub enum TagValue {
     #[serde(rename = "numeric")]
@@ -38,7 +38,7 @@ pub enum TagValue {
 
 // タグ操作関連
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct TagModification {
     pub tag_id: TagId,
     pub operation: TagOperation,
@@ -46,7 +46,7 @@ pub struct TagModification {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub enum TagOperation {
     #[serde(rename = "add")]
     Add,

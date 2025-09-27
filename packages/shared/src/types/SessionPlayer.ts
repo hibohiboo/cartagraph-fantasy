@@ -4,4 +4,4 @@ import type { PlayerStatus } from "./PlayerStatus";
 import type { SessionCharacter } from "./SessionCharacter";
 import type { UserId } from "./UserId";
 
-export interface SessionPlayer { player_id: PlayerId, user_id: UserId, character: SessionCharacter, status: PlayerStatus, joined_at: string, }
+export type SessionPlayer = { id: PlayerId, user_id: UserId, character: SessionCharacter | null, status: PlayerStatus, joined_at: string, };

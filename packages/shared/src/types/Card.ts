@@ -5,4 +5,4 @@ import type { EventId } from "./EventId";
 import type { Rarity } from "./Rarity";
 import type { TagId } from "./TagId";
 
-export interface Card { card_id: CardId, name: string, card_type: CardType, tags: Array<TagId>, embedded_events: Array<EventId>, rarity: Rarity, }
+export type Card = { card_id: CardId, name: string, card_type: CardType, tags: Array<TagId>, embedded_events: Array<EventId>, rarity: Rarity, };

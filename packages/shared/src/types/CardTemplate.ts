@@ -2,4 +2,4 @@
 import type { CardType } from "./CardType";
 import type { Rarity } from "./Rarity";
 
-export interface CardTemplate { name: string, card_type: CardType, tags: Array<string>, embedded_events: Array<string>, rarity: Rarity, description: string | null, }
+export type CardTemplate = { name: string, card_type: CardType, tags: Array<string>, embedded_events: Array<string>, rarity: Rarity, description: string | null, };

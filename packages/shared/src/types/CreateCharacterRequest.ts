@@ -3,4 +3,4 @@ import type { Card } from "./Card";
 import type { Tag } from "./Tag";
 import type { UserId } from "./UserId";
 
-export interface CreateCharacterRequest { name: string, player_id: UserId, initial_cards: Array<Card> | null, initial_tags: Array<Tag> | null, }
+export type CreateCharacterRequest = { name: string, player_id: UserId, initial_cards: Array<Card> | null, initial_tags: Array<Tag> | null, };

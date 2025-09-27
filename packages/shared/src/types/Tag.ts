@@ -3,4 +3,4 @@ import type { TagCategory } from "./TagCategory";
 import type { TagId } from "./TagId";
 import type { TagValue } from "./TagValue";
 
-export interface Tag { tag_id: TagId, name: string, category: TagCategory, value: TagValue | null, }
+export type Tag = { tag_id: TagId, name: string, category: TagCategory, value: TagValue | null, };

@@ -3,4 +3,4 @@ import type { TagId } from "./TagId";
 import type { TagOperation } from "./TagOperation";
 import type { TagValue } from "./TagValue";
 
-export interface TagModification { tag_id: TagId, operation: TagOperation, new_value: TagValue | null, }
+export type TagModification = { tag_id: TagId, operation: TagOperation, new_value: TagValue | null, };

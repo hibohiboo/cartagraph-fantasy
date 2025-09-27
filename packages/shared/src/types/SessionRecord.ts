@@ -4,4 +4,4 @@ import type { ScenarioId } from "./ScenarioId";
 import type { SessionId } from "./SessionId";
 import type { Tag } from "./Tag";
 
-export interface SessionRecord { session_id: SessionId, scenario_id: ScenarioId, participated_at: string, final_tags: Array<Tag>, final_cards: Array<Card>, feedback: string | null, }
+export type SessionRecord = { session_id: SessionId, scenario_id: ScenarioId, participated_at: string, final_tags: Array<Tag>, final_cards: Array<Card>, feedback: string | null, };

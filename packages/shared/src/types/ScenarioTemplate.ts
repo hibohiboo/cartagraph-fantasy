@@ -7,4 +7,4 @@ import type { SceneDefinition } from "./SceneDefinition";
 import type { SceneId } from "./SceneId";
 import type { UserId } from "./UserId";
 
-export interface ScenarioTemplate { scenario_id: ScenarioId, name: string, description: string, author_id: UserId, version: string, recommended_players: PlayerRange, estimated_duration_minutes: number, difficulty: Difficulty, tags: Array<string>, scenes: Record<SceneId, SceneDefinition>, initial_scene_id: SceneId, shared_cards: Array<CardTemplate>, derived_from: ScenarioId | null, version_number: bigint, }
+export type ScenarioTemplate = { scenario_id: ScenarioId, name: string, description: string, author_id: UserId, version: string, recommended_players: PlayerRange, estimated_duration_minutes: number, difficulty: Difficulty, tags: Array<string>, scenes: { [key in SceneId]?: SceneDefinition }, initial_scene_id: SceneId, shared_cards: Array<CardTemplate>, derived_from: ScenarioId | null, version_number: bigint, };

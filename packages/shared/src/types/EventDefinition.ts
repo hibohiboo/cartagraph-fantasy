@@ -4,4 +4,4 @@ import type { EventId } from "./EventId";
 import type { EventTrigger } from "./EventTrigger";
 import type { EventType } from "./EventType";
 
-export interface EventDefinition { event_id: EventId, name: string, event_type: EventType, triggers: Array<EventTrigger>, effects: Array<EventEffect>, message: string, }
+export type EventDefinition = { event_id: EventId, name: string, event_type: EventType, triggers: Array<EventTrigger>, effects: Array<EventEffect>, message: string, };

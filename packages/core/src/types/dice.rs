@@ -3,7 +3,7 @@ use ts_rs::TS;
 use chrono::{DateTime, Utc};
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct DiceNotation {
     pub dice_count: u8,
     pub dice_sides: u8,
@@ -12,7 +12,7 @@ pub struct DiceNotation {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub enum AdvantageType {
     #[serde(rename = "normal")]
     Normal,
@@ -23,7 +23,7 @@ pub enum AdvantageType {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct DiceResult {
     pub notation: DiceNotation,
     pub raw_rolls: Vec<u8>,
@@ -35,7 +35,7 @@ pub struct DiceResult {
 
 // ダイス記法パース結果
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct DiceNotationParseResult {
     pub success: bool,
     pub notation: Option<DiceNotation>,

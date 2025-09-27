@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use super::{CharacterId, UserId, SessionId, ScenarioId, Card, Tag};
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct Character {
     pub character_id: CharacterId,
     pub name: String,
@@ -20,7 +20,7 @@ pub struct Character {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct SessionRecord {
     pub session_id: SessionId,
     pub scenario_id: ScenarioId,
@@ -33,7 +33,7 @@ pub struct SessionRecord {
 
 // セッション専用キャラクターコピー
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct SessionCharacter {
     pub character_id: CharacterId,
     pub name: String,
@@ -43,7 +43,7 @@ pub struct SessionCharacter {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub enum CharacterStatus {
     #[serde(rename = "ready")]
     Ready,
@@ -56,7 +56,7 @@ pub enum CharacterStatus {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub enum RestrictionReason {
     #[serde(rename = "already_completed")]
     AlreadyCompleted,
@@ -68,7 +68,7 @@ pub enum RestrictionReason {
 
 // キャラクター作成リクエスト
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct CreateCharacterRequest {
     pub name: String,
     pub player_id: UserId,

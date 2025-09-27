@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 use super::{SessionId, UserId, PlayerId, ScenarioId, SceneId, SessionCharacter, Card};
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct GameSession {
     // Identity
     pub session_id: SessionId,
@@ -96,7 +96,7 @@ impl GameSession {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct SessionPlayer {
     pub id: PlayerId,
     pub user_id: UserId,
@@ -107,7 +107,7 @@ pub struct SessionPlayer {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub enum PlayerStatus {
     #[serde(rename = "waiting")]
     Waiting, // TDD用: プレイヤー待機状態
@@ -120,7 +120,7 @@ pub enum PlayerStatus {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub enum SessionStatus {
     #[serde(rename = "created")]
     Created,

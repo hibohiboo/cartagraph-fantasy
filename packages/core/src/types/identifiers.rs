@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 // 基本識別子型 - すべてString UUID v4として実装
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 #[serde(transparent)]
 pub struct SessionId(
     #[ts(type = "string")]
@@ -12,7 +12,7 @@ pub struct SessionId(
 );
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 #[serde(transparent)]
 pub struct PlayerId(
     #[ts(type = "string")]
@@ -20,7 +20,7 @@ pub struct PlayerId(
 );
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 #[serde(transparent)]
 pub struct UserId(
     #[ts(type = "string")]
@@ -28,7 +28,7 @@ pub struct UserId(
 );
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 #[serde(transparent)]
 pub struct CharacterId(
     #[ts(type = "string")]
@@ -36,7 +36,7 @@ pub struct CharacterId(
 );
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 #[serde(transparent)]
 pub struct ScenarioId(
     #[ts(type = "string")]
@@ -44,7 +44,7 @@ pub struct ScenarioId(
 );
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 #[serde(transparent)]
 pub struct SceneId(
     #[ts(type = "string")]
@@ -52,7 +52,7 @@ pub struct SceneId(
 );
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 #[serde(transparent)]
 pub struct EventId(
     #[ts(type = "string")]
@@ -60,7 +60,7 @@ pub struct EventId(
 );
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 #[serde(transparent)]
 pub struct CardId(
     #[ts(type = "string")]
@@ -68,7 +68,7 @@ pub struct CardId(
 );
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 #[serde(transparent)]
 pub struct TagId(
     #[ts(type = "string")]

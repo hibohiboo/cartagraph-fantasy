@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use super::{ScenarioId, UserId, SceneId, EventId, CardTemplate};
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct ScenarioTemplate {
     // Identity
     pub scenario_id: ScenarioId,
@@ -36,7 +36,7 @@ pub struct ScenarioTemplate {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct SceneDefinition {
     pub scene_id: SceneId,
     pub name: String,
@@ -48,7 +48,7 @@ pub struct SceneDefinition {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct EventDefinition {
     pub event_id: EventId,
     pub name: String,
@@ -59,14 +59,14 @@ pub struct EventDefinition {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct PlayerRange {
     pub min: usize,
     pub max: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub enum Difficulty {
     #[serde(rename = "beginner")]
     Beginner,
@@ -79,7 +79,7 @@ pub enum Difficulty {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub enum EventType {
     #[serde(rename = "narrative")]
     Narrative,        // 物語進行イベント
@@ -95,14 +95,14 @@ pub enum EventType {
 
 // プレースホルダー型（詳細は後で実装）
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct CompletionCondition {
     pub condition_type: String,
     pub parameters: HashMap<String, String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct SceneTransition {
     pub from_scene: SceneId,
     pub to_scene: SceneId,
@@ -110,14 +110,14 @@ pub struct SceneTransition {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct EventTrigger {
     pub trigger_type: String,
     pub parameters: HashMap<String, String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct EventEffect {
     pub effect_type: String,
     pub parameters: HashMap<String, String>,

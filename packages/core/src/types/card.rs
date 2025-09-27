@@ -3,7 +3,7 @@ use ts_rs::TS;
 use super::{CardId, EventId, TagId};
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct Card {
     pub card_id: CardId,
     pub name: String,
@@ -14,7 +14,7 @@ pub struct Card {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub enum CardType {
     #[serde(rename = "action")]
     Action,           // アクション用カード
@@ -27,7 +27,7 @@ pub enum CardType {
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub enum Rarity {
     #[serde(rename = "common")]
     Common,
@@ -41,7 +41,7 @@ pub enum Rarity {
 
 // カードテンプレート（シナリオ定義用）
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export, export_to = "../shared/src/types/")]
+#[ts(export)]
 pub struct CardTemplate {
     pub name: String,
     pub card_type: CardType,

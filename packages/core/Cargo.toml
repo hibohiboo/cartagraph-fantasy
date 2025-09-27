@@ -26,5 +26,6 @@ features = ["wasm_js"]
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
 
+
 [features]
 default = []

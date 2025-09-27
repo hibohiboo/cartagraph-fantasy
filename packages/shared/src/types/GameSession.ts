@@ -8,4 +8,4 @@ import type { SessionPlayer } from "./SessionPlayer";
 import type { SessionStatus } from "./SessionStatus";
 import type { UserId } from "./UserId";
 
-export interface GameSession { session_id: SessionId, scenario_id: ScenarioId, gm_user_id: UserId, created_at: string, players: Record<PlayerId, SessionPlayer>, max_players: number, current_scene: SceneId, shared_cards: Array<Card>, session_status: SessionStatus, version: bigint, }
+export type GameSession = { session_id: SessionId, scenario_id: ScenarioId, gm_user_id: UserId, created_at: string, players: { [key in PlayerId]?: SessionPlayer }, max_players: number, current_scene: SceneId, shared_cards: Array<Card>, session_status: SessionStatus, version: bigint, };

@@ -7,4 +7,4 @@ import type { SessionRecord } from "./SessionRecord";
 import type { Tag } from "./Tag";
 import type { UserId } from "./UserId";
 
-export interface Character { character_id: CharacterId, name: string, player_id: UserId, personal_cards: Array<Card>, acquired_tags: Array<Tag>, session_history: Array<SessionRecord>, scenario_restrictions: Record<ScenarioId, RestrictionReason>, created_at: string, last_updated: string, }
+export type Character = { character_id: CharacterId, name: string, player_id: UserId, personal_cards: Array<Card>, acquired_tags: Array<Tag>, session_history: Array<SessionRecord>, scenario_restrictions: { [key in ScenarioId]?: RestrictionReason }, created_at: string, last_updated: string, };

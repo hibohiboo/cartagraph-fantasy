@@ -4,4 +4,4 @@ import type { CharacterId } from "./CharacterId";
 import type { CharacterStatus } from "./CharacterStatus";
 import type { Tag } from "./Tag";
 
-export interface SessionCharacter { character_id: CharacterId, name: string, session_cards: Array<Card>, session_tags: Array<Tag>, status: CharacterStatus, }
+export type SessionCharacter = { character_id: CharacterId, name: string, session_cards: Array<Card>, session_tags: Array<Tag>, status: CharacterStatus, };

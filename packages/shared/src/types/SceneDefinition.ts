@@ -5,4 +5,4 @@ import type { EventId } from "./EventId";
 import type { SceneId } from "./SceneId";
 import type { SceneTransition } from "./SceneTransition";
 
-export interface SceneDefinition { scene_id: SceneId, name: string, description: string, objective: string, completion_condition: CompletionCondition, events: Record<EventId, EventDefinition>, transitions: Array<SceneTransition>, }
+export type SceneDefinition = { scene_id: SceneId, name: string, description: string, objective: string, completion_condition: CompletionCondition, events: { [key in EventId]?: EventDefinition }, transitions: Array<SceneTransition>, };

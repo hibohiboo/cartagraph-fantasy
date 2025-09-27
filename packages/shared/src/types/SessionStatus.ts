@@ -2,4 +2,4 @@
 import type { PlayerId } from "./PlayerId";
 import type { SceneId } from "./SceneId";
 
-export type SessionStatus = "created" | "recruiting" | "starting" | { "in_progress": { current_scene: SceneId, active_players: Array<PlayerId>, } } | "paused" | "completed" | "terminated";
+export type SessionStatus = "created" | "waiting_for_players" | "recruiting" | "starting" | { "in_progress": { current_scene: SceneId, active_players: Array<PlayerId>, } } | "paused" | "completed" | "terminated";
