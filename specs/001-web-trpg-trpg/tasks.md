@@ -184,8 +184,14 @@
 - 型安全テスト実装完了
   - `verify_typescript_type_exports()`: ts-rs型宣言検証
   - `test_wasm_boundary_type_roundtrip()`: WASM境界での型一貫性テスト
+- シリアライゼーションテスト実装完了
+  - `wasm_get_session_as_json()`: GameSession → JSON変換
+  - `wasm_parse_session_from_json()`: JSON → GameSession復元
+  - `test_complex_object_serialization()`: 複雑オブジェクトシリアライゼーション
+  - `test_bidirectional_serialization()`: 双方向変換テスト
+  - `test_json_compatibility_and_structure()`: JSON構造・互換性検証
 - 非WASM環境でのテスト実行のため、`Result<String, String>`形式で実装
-- 全6テスト実行成功確認済み、リファクタ完了（REDコメント削除、不要import削除）
+- serde_json依存関係追加、全9テスト実行成功確認済み
 
 ### タスク8: フロントエンドE2Eテストシナリオ作成 [S]
 **タイプ**: TDD-E2E | **優先度**: 高 | **工数**: 3時間
