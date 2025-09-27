@@ -77,7 +77,9 @@ impl Character {
 
     // TDDサイクル5: セッション記録追加 (制約付き)
     pub fn add_session_record(&mut self, record: SessionRecord) -> Result<(), String> {
-        todo!("Session record logic - TDD implementation")
+        self.session_history.push(record);
+        self.last_updated = chrono::Utc::now();
+        Ok(())
     }
 }
 
@@ -160,6 +162,21 @@ mod tests {
         assert!(!can_join);
     }
 
+    // TDD サイクル 5: セッション記録追加 (制約付き) - RED フェーズ
+    #[test]
+    fn test_add_session_record() {
+        // RED: 失敗するテスト (1つだけ)
+        let mut character = create_test_character();
+        let record = create_test_session_record();
+
+        let result = character.add_session_record(record.clone());
+
+        // 期待値：セッション記録が追加される
+        assert!(result.is_ok());
+        assert_eq!(character.session_history.len(), 1);
+        assert_eq!(character.session_history[0].session_id, record.session_id);
+    }
+
     // ヘルパー関数
     fn create_test_character() -> Character {
         Character::create(
@@ -186,6 +203,17 @@ mod tests {
             name: "テストタグ".to_string(),
             category: crate::types::TagCategory::Skill,
             value: Some(crate::types::TagValue::Boolean(true)),
+        }
+    }
+
+    fn create_test_session_record() -> SessionRecord {
+        SessionRecord {
+            session_id: crate::types::SessionId::new(),
+            scenario_id: crate::types::ScenarioId::new(),
+            participated_at: chrono::Utc::now(),
+            final_tags: vec![],
+            final_cards: vec![],
+            feedback: None,
         }
     }
 }
