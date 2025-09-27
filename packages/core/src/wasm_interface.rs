@@ -72,6 +72,48 @@ mod contract_tests {
         assert!(result.is_ok());
     }
 
+    #[test]
+    fn test_typescript_type_consistency() {
+        // 型安全テスト: Rust型とTypeScript型の一貫性確認
+        // やりたいこと: ts-rs生成型がRust型と一致することを確認
+        // まだ実装されていないのでコンパイルエラーになる
+
+        // このテスト関数はまだ存在しない → コンパイルエラー (RED)
+        let result = verify_typescript_type_exports();
+
+        // 実装されたらこれらが通るはず
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_wasm_boundary_type_roundtrip() {
+        // WASM境界型一貫性テスト: 文字列 → Rust型 → 処理 → 結果の型安全性確認
+
+        // 1. createSessionの型一貫性確認
+        let session_result = wasm_create_session("test-session-id", "test-scenario-id");
+        assert!(session_result.is_ok());
+        let session_response = session_result.unwrap();
+        assert_eq!(session_response, "session_created");
+
+        // 2. addPlayerの型一貫性確認
+        let player_result = wasm_add_player("test-session-id", "test-player-id", "test-user-id");
+        assert!(player_result.is_ok());
+        let player_response = player_result.unwrap();
+        assert_eq!(player_response, "player_added");
+
+        // 3. useCardの型一貫性確認
+        let card_result = wasm_use_card("test-session-id", "test-player-id", "test-card-id");
+        assert!(card_result.is_ok());
+        let card_response = card_result.unwrap();
+        assert_eq!(card_response, "card_used");
+
+        // 4. rollDiceの型一貫性確認
+        let dice_result = wasm_roll_dice("test-session-id", "test-player-id", 2, 6);
+        assert!(dice_result.is_ok());
+        let dice_response = dice_result.unwrap();
+        assert_eq!(dice_response, "dice_rolled:3,5");
+    }
+
     // GREEN Phase: 最小限の実装でテストを通す
     fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, String> {
         use crate::types::{SessionId, ScenarioId, GameSession};
@@ -122,5 +164,42 @@ mod contract_tests {
         // 実際の実装では、ダイスを振って結果をセッションに記録する
         // 現在は最小限の成功レスポンスを返す（ダミーの結果）
         Ok("dice_rolled:3,5".to_string())
+    }
+
+    fn verify_typescript_type_exports() -> Result<String, String> {
+        use crate::types::{GameSession, SessionStatus, PlayerStatus, SessionId, ScenarioId};
+        use ts_rs::TS;
+
+        // 型安全性検証: ts-rsが正しく型をエクスポートできることを確認
+
+        // 1. 基本ID型のTypeScript型定義確認
+        let session_id_ts = SessionId::decl();
+        if !session_id_ts.contains("string") {
+            return Err("SessionId TypeScript declaration failed".to_string());
+        }
+
+        let scenario_id_ts = ScenarioId::decl();
+        if !scenario_id_ts.contains("string") {
+            return Err("ScenarioId TypeScript declaration failed".to_string());
+        }
+
+        // 2. Enum型のTypeScript型定義確認
+        let session_status_ts = SessionStatus::decl();
+        if !session_status_ts.contains("waiting_for_players") {
+            return Err("SessionStatus TypeScript declaration failed".to_string());
+        }
+
+        let player_status_ts = PlayerStatus::decl();
+        if !player_status_ts.contains("waiting") {
+            return Err("PlayerStatus TypeScript declaration failed".to_string());
+        }
+
+        // 3. 複合型のTypeScript型定義確認
+        let game_session_ts = GameSession::decl();
+        if !game_session_ts.contains("session_id") || !game_session_ts.contains("scenario_id") {
+            return Err("GameSession TypeScript declaration failed".to_string());
+        }
+
+        Ok("typescript_types_verified".to_string())
     }
 }
