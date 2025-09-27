@@ -1,8 +1,9 @@
 use wasm_bindgen::prelude::*;
 
-// モジュール宣言
-pub mod types;
-pub mod domain;
+// オニオンアーキテクチャ層構造
+pub mod domain;           // 最内層：純粋ドメインロジック
+pub mod infrastructure;   // 最外層：インフラ実装
+pub mod types;           // 互換性のため残存（段階的移行）
 pub mod wasm_interface;
 
 // 外部クレート
