@@ -232,19 +232,20 @@
 ```bash
 # Event Sourcing付きGameSession実装
 ```
-**進行中 (95% - オニオンアーキテクチャ移行中)**:
-- [x] **アーキテクチャ修正**: レイヤード → オニオンアーキテクチャ移行ほぼ完了
+**完了 (100% - オニオンアーキテクチャ移行完了)**:
+- [x] **アーキテクチャ修正**: レイヤード → オニオンアーキテクチャ移行完了
   - [x] Domain層: 純粋なビジネスロジック実装 (`domain/entities/`, `domain/value_objects/`)
   - [x] Infrastructure層: SerDe/DTO分離 (`infrastructure/serialization/`)
   - [x] 依存方向: Infrastructure → Domain (正しいオニオンアーキテクチャ)
-  - [ ] **残課題**: WASM interface完全修正 (ドメイン層型にSerDe traits不足)
-- [ ] **WASM interface修正**: ドメイン層型 → インフラDTO変換への完全移行
-  - 問題: ドメイン層の型にSerDeとTS traits が不足
-  - 原因: WASM interfaceテストが直接ドメイン型を参照している
-  - 解決策: WASM interface テストをインフラ層DTOを使用するように修正
-- [ ] **packages\core\src\wasm_interface.rs修正**: DTOベースへの完全書き換え
-  - 現在: 一時的に該当テスト関数を無効化してメインテスト通過に集中
-  - 要対応: DTOベースのWASMインターフェース実装完了
+  - [x] **完了**: WASM interface完全修正 (DTOベース実装)
+- [x] **WASM interface修正**: ドメイン層型 → インフラDTO変換への完全移行
+  - [x] 問題解決: ドメイン層の型純粋性を保持、インフラ層でSerDe実装
+  - [x] 原因解決: WASM interfaceテストをDTOベースに完全書き換え
+  - [x] 解決完了: WASM interface テストでインフラ層DTOを使用、型安全性確保
+- [x] **packages\core\src\wasm_interface.rs修正**: DTOベースへの完全書き換え完了
+  - [x] 実装: DTOベースのWASMインターフェース実装完了 (全61テスト通過)
+  - [x] 双方向変換: Domain ↔ DTO変換実装、型安全性確保
+  - [x] エラーハンドリング: バリデーション・ビジネスロジックエラーの適切な伝播
 - [x] 基本GameSession集約 (create, add_player, start, player管理)
 - [x] プレイヤー削除・ステータス変更メソッド実装 (`remove_player`, `change_player_status`)
 - [x] Event Sourcing基本実装 (DomainEvent, GameSessionEvent)
