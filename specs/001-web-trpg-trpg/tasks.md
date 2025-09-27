@@ -269,21 +269,36 @@
 **必要テスト**: 全テスト通過 ✅ (61/61)
 **成果物**: オニオンアーキテクチャ準拠のGameSession集約 ✅
 
-### タスク10: Character集約実装 [S]
+### タスク10: Character集約実装 [S] 🔄 **進行中**
 **タイプ**: 実装-コア | **優先度**: クリティカル | **工数**: 3時間
 ```bash
-# セッション参加ロジック付きCharacter実装
+# セッション参加ロジック付きCharacter実装 (純粋TDDサイクル)
 ```
-**受入条件**:
-- [ ] 個人カード、タグ、履歴を持つCharacter集約
-- [ ] セッション参加検証
-- [ ] キャラクター制限管理
-- [ ] セッションローカル状態用SessionCharacter値オブジェクト
-- [ ] タスク6のキャラクターテストが通る (GREENフェーズ)
 
-**依存関係**: タスク6 (テストが存在し失敗している必要あり)
-**必要テスト**: タスク6のCharacterテストが通る必要あり
-**成果物**: セッション統合付きCharacter集約
+**TDD実装計画 (小さなサイクルの徹底)**:
+1. **TDDサイクル1**: Character作成テスト (最小ケース) → RED → GREEN → Refactor
+2. **TDDサイクル2**: カード追加テスト (基本ケース) → RED → GREEN → Refactor
+3. **TDDサイクル3**: タグ追加テスト (基本ケース) → RED → GREEN → Refactor
+4. **TDDサイクル4**: シナリオ参加可能性テスト (制約付き) → RED → GREEN → Refactor
+5. **TDDサイクル5**: セッション記録追加テスト (制約付き) → RED → GREEN → Refactor
+
+**純粋TDD原則遵守**:
+- ✅ 1テスト → 実装 → 次へ (真のTDD)
+- ❌ 大量の失敗テストを先に並べる (ATDD的アプローチ)
+- ✅ unimplemented!()、todo!()の活用
+
+**受入条件**:
+- [ ] **TDDサイクル1完了**: Character::create() メソッド実装
+- [ ] **TDDサイクル2完了**: Character::add_card() メソッド実装
+- [ ] **TDDサイクル3完了**: Character::add_tag() メソッド実装
+- [ ] **TDDサイクル4完了**: Character::can_join_scenario() メソッド実装
+- [ ] **TDDサイクル5完了**: Character::add_session_record() メソッド実装
+- [ ] オニオンアーキテクチャ準拠 (domain/entities/character.rs)
+- [ ] 全テストGREEN、リファクタ完了
+
+**依存関係**: タスク9 (GameSession集約完了)
+**必要テスト**: 各TDDサイクルでRED→GREEN→Refactor完全実行
+**成果物**: TDDで構築されたCharacter集約
 
 ### タスク11: ScenarioTemplate集約実装 [S]
 **タイプ**: 実装-コア | **優先度**: クリティカル | **工数**: 4時間
