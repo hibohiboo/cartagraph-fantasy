@@ -166,7 +166,7 @@
 - [x] GameSession FFIメソッドテスト (createSession、addPlayer、useCard、rollDice) ← TDD 4サイクル完了
 - [x] 型安全テスト (Rust ↔ TypeScript型一貫性) ← ts-rs型生成 + WASM境界テスト完了
 - [x] シリアライゼーションテスト (WASM境界越えの複雑オブジェクト) ← JSON双方向 + 互換性テスト完了
-- [ ] エラーハンドリングテスト (ドメインエラー伝播)
+- [x] エラーハンドリングテスト (ドメインエラー伝播) ← ValidationError + BusinessLogicError伝播完了
 - [x] 初期状態で全テストが失敗 (REDフェーズ) ← 実装済み
 
 **依存関係**: タスク3, タスク6
@@ -190,8 +190,15 @@
   - `test_complex_object_serialization()`: 複雑オブジェクトシリアライゼーション
   - `test_bidirectional_serialization()`: 双方向変換テスト
   - `test_json_compatibility_and_structure()`: JSON構造・互換性検証
+- エラーハンドリングテスト実装完了
+  - `wasm_create_session_with_validation()`: バリデーション付きセッション作成
+  - `wasm_validate_player_operation()`: プレイヤー操作バリデーション
+  - `test_domain_error_propagation()`: ドメインエラー伝播テスト
+  - `test_multiple_error_types()`: 複数エラータイプ区別テスト
+  - `test_error_message_consistency()`: エラーメッセージ一貫性テスト
+  - ValidationError/BusinessLogicError/DeserializationErrorの適切な伝播確認
 - 非WASM環境でのテスト実行のため、`Result<String, String>`形式で実装
-- serde_json依存関係追加、全9テスト実行成功確認済み
+- serde_json依存関係追加、全12テスト実行成功確認済み
 
 ### タスク8: フロントエンドE2Eテストシナリオ作成 [S]
 **タイプ**: TDD-E2E | **優先度**: 高 | **工数**: 3時間

@@ -213,6 +213,37 @@ mod contract_tests {
         assert!(business_logic_error.unwrap_err().contains("BusinessLogicError"));
     }
 
+    #[test]
+    fn test_error_message_consistency() {
+        // エラーメッセージ一貫性テスト: エラーが適切な形式で伝播されることを確認
+
+        // 1. ValidationError形式のテスト
+        let validation_result = wasm_create_session_with_validation("", "valid-scenario");
+        assert!(validation_result.is_err());
+        let validation_error = validation_result.unwrap_err();
+        assert!(validation_error.starts_with("ValidationError:"));
+        assert!(validation_error.contains("Invalid session ID"));
+
+        // 2. BusinessLogicError形式のテスト
+        let business_logic_result = wasm_create_session_with_validation("ab", "valid-scenario");
+        assert!(business_logic_result.is_err());
+        let business_logic_error = business_logic_result.unwrap_err();
+        assert!(business_logic_error.starts_with("BusinessLogicError:"));
+        assert!(business_logic_error.contains("at least 3 characters"));
+
+        // 3. 成功ケースの確認
+        let success_result = wasm_create_session_with_validation("valid-session-id", "valid-scenario");
+        assert!(success_result.is_ok());
+        assert_eq!(success_result.unwrap(), "session_created_with_validation");
+
+        // 4. シリアライゼーションエラーのテスト
+        let invalid_json = "{ invalid json }";
+        let json_error_result = wasm_parse_session_from_json(invalid_json);
+        assert!(json_error_result.is_err());
+        let json_error = json_error_result.unwrap_err();
+        assert!(json_error.starts_with("Deserialization failed:"));
+    }
+
     // WASM FFI Implementation: GameSession作成
     fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, String> {
         use crate::types::{SessionId, ScenarioId, GameSession};
