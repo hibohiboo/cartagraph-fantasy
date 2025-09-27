@@ -61,6 +61,17 @@ impl Character {
         self.last_updated = chrono::Utc::now();
         Ok(())
     }
+
+    // TDDサイクル4: シナリオ参加可能性チェック (制約付き)
+    pub fn can_join_scenario(&self, scenario_id: &ScenarioId) -> bool {
+        // 制限がない場合は参加可能
+        !self.scenario_restrictions.contains_key(scenario_id)
+    }
+
+    // TDDサイクル4: シナリオ制限設定 (制約付き)
+    pub fn add_scenario_restriction(&mut self, scenario_id: ScenarioId, reason: RestrictionReason) -> Result<(), String> {
+        todo!("Scenario restriction logic - TDD implementation")
+    }
 }
 
 #[cfg(test)]
@@ -101,10 +112,9 @@ mod tests {
         assert_eq!(character.personal_cards[0].card_id, card.card_id);
     }
 
-    // TDD サイクル 3: タグ追加 (基本ケース) - RED フェーズ
+    // TDD サイクル 3: タグ追加 (基本ケース) - 完了
     #[test]
     fn test_add_tag() {
-        // RED: 失敗するテスト (1つだけ)
         let mut character = create_test_character();
         let tag = create_test_tag();
 
@@ -114,6 +124,19 @@ mod tests {
         assert!(result.is_ok());
         assert_eq!(character.acquired_tags.len(), 1);
         assert_eq!(character.acquired_tags[0].tag_id, tag.tag_id);
+    }
+
+    // TDD サイクル 4: シナリオ参加可能性チェック (制約付き) - RED フェーズ
+    #[test]
+    fn test_can_join_scenario_unrestricted() {
+        // RED: 失敗するテスト (1つだけ)
+        let character = create_test_character();
+        let scenario_id = ScenarioId::new();
+
+        let can_join = character.can_join_scenario(&scenario_id);
+
+        // 期待値：制限がない場合は参加可能
+        assert!(can_join);
     }
 
     // ヘルパー関数
