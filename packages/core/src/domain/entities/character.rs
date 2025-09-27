@@ -47,16 +47,22 @@ impl Character {
             version: 1,
         }
     }
+
+    // TDDサイクル2: カード追加 (基本ケース)
+    pub fn add_card(&mut self, card: Card) -> Result<(), String> {
+        self.personal_cards.push(card);
+        self.last_updated = chrono::Utc::now();
+        Ok(())
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    // TDD サイクル 1: キャラクター作成 (最小ケース) - RED フェーズ
+    // TDD サイクル 1: キャラクター作成 (最小ケース) - 完了
     #[test]
     fn test_character_creation() {
-        // RED: 失敗するテスト (1つだけ)
         let character_id = CharacterId::new();
         let name = "テストキャラクター".to_string();
         let player_id = UserId::new();
@@ -72,5 +78,40 @@ mod tests {
         assert!(character.session_history.is_empty());
         assert!(character.scenario_restrictions.is_empty());
         assert_eq!(character.version, 1);
+    }
+
+    // TDD サイクル 2: カード追加 (基本ケース) - RED フェーズ
+    #[test]
+    fn test_add_card() {
+        // RED: 失敗するテスト (1つだけ)
+        let mut character = create_test_character();
+        let card = create_test_card();
+
+        let result = character.add_card(card.clone());
+
+        // 期待値：カードが追加される
+        assert!(result.is_ok());
+        assert_eq!(character.personal_cards.len(), 1);
+        assert_eq!(character.personal_cards[0].card_id, card.card_id);
+    }
+
+    // ヘルパー関数
+    fn create_test_character() -> Character {
+        Character::create(
+            CharacterId::new(),
+            "テストキャラクター".to_string(),
+            UserId::new(),
+        )
+    }
+
+    fn create_test_card() -> Card {
+        Card {
+            card_id: crate::types::CardId::new(),
+            name: "テストカード".to_string(),
+            card_type: crate::types::CardType::Action,
+            tags: vec![],
+            embedded_events: vec![],
+            rarity: crate::types::Rarity::Common,
+        }
     }
 }
