@@ -110,6 +110,10 @@ impl CharacterId {
     pub fn new() -> Self {
         Self(Uuid::new_v4().to_string())
     }
+
+    pub fn from_string(s: String) -> Self {
+        Self(s)
+    }
 }
 
 impl ScenarioId {
@@ -137,6 +141,10 @@ impl EventId {
 impl CardId {
     pub fn new() -> Self {
         Self(Uuid::new_v4().to_string())
+    }
+
+    pub fn from_string(s: String) -> Self {
+        Self(s)
     }
 }
 
