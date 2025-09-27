@@ -123,6 +123,63 @@ mod contract_tests {
         assert!(json_response.contains("session_status"));
     }
 
+    #[test]
+    fn test_bidirectional_serialization() {
+        // 双方向シリアライゼーションテスト: JSON ↔ GameSession
+        // WASM境界で複雑オブジェクトが往復できることを確認
+
+        let session_id_str = "test-session-roundtrip";
+        let scenario_id_str = "test-scenario-roundtrip";
+
+        // 1. GameSession → JSON
+        let json_result = wasm_get_session_as_json(session_id_str, scenario_id_str);
+        assert!(json_result.is_ok());
+        let json_string = json_result.unwrap();
+
+        // 2. JSON → GameSession (デシリアライゼーション)
+        let parse_result = wasm_parse_session_from_json(&json_string);
+        assert!(parse_result.is_ok());
+        let parsed_response = parse_result.unwrap();
+
+        // 3. 結果検証
+        assert_eq!(parsed_response, "session_parsed_successfully");
+    }
+
+    #[test]
+    fn test_json_compatibility_and_structure() {
+        // JSON互換性テスト: 生成されるJSONが標準的な構造であることを確認
+        // TypeScript側で解析可能な形式であることを検証
+
+        let session_id_str = "test-json-compat";
+        let scenario_id_str = "test-scenario-compat";
+
+        // JSONを生成
+        let json_result = wasm_get_session_as_json(session_id_str, scenario_id_str);
+        assert!(json_result.is_ok());
+        let json_string = json_result.unwrap();
+
+        // 1. JSONが有効なJSONであることを確認（再パース可能）
+        let parse_result: Result<serde_json::Value, _> = serde_json::from_str(&json_string);
+        assert!(parse_result.is_ok());
+        let json_value = parse_result.unwrap();
+
+        // 2. 必要なフィールドが存在することを確認
+        assert!(json_value.get("session_id").is_some());
+        assert!(json_value.get("scenario_id").is_some());
+        assert!(json_value.get("session_status").is_some());
+        assert!(json_value.get("players").is_some());
+        assert!(json_value.get("created_at").is_some());
+
+        // 3. フィールドが期待される型であることを確認
+        assert!(json_value["session_id"].is_string());
+        assert!(json_value["scenario_id"].is_string());
+        assert!(json_value["session_status"].is_string());
+        assert!(json_value["players"].is_object());
+
+        // 4. session_statusが期待される値であることを確認
+        assert_eq!(json_value["session_status"], "waiting_for_players");
+    }
+
     // WASM FFI Implementation: GameSession作成
     fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, String> {
         use crate::types::{SessionId, ScenarioId, GameSession};
@@ -223,6 +280,19 @@ mod contract_tests {
         match serde_json::to_string(&session) {
             Ok(json) => Ok(json),
             Err(e) => Err(format!("Serialization failed: {}", e)),
+        }
+    }
+
+    fn wasm_parse_session_from_json(json_str: &str) -> Result<String, String> {
+        use crate::types::GameSession;
+
+        // JSONからGameSessionをデシリアライズ
+        match serde_json::from_str::<GameSession>(json_str) {
+            Ok(_session) => {
+                // デシリアライゼーション成功
+                Ok("session_parsed_successfully".to_string())
+            }
+            Err(e) => Err(format!("Deserialization failed: {}", e)),
         }
     }
 }

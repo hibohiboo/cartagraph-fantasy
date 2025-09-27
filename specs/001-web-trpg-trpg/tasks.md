@@ -165,7 +165,7 @@
 **受入条件**:
 - [x] GameSession FFIメソッドテスト (createSession、addPlayer、useCard、rollDice) ← TDD 4サイクル完了
 - [x] 型安全テスト (Rust ↔ TypeScript型一貫性) ← ts-rs型生成 + WASM境界テスト完了
-- [ ] シリアライゼーションテスト (WASM境界越えの複雑オブジェクト)
+- [x] シリアライゼーションテスト (WASM境界越えの複雑オブジェクト) ← JSON双方向 + 互換性テスト完了
 - [ ] エラーハンドリングテスト (ドメインエラー伝播)
 - [x] 初期状態で全テストが失敗 (REDフェーズ) ← 実装済み
 
