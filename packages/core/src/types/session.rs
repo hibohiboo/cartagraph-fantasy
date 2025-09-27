@@ -3,6 +3,7 @@ use ts_rs::TS;
 use chrono::{DateTime, Utc};
 use std::collections::{HashMap, HashSet};
 use super::{SessionId, UserId, PlayerId, ScenarioId, SceneId, SessionCharacter, Card};
+use crate::domain::DomainEvent;
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
 #[ts(export)]
@@ -27,14 +28,20 @@ pub struct GameSession {
 
     // Event History (Event Sourcing)
     pub version: u64,
+
+    // Event Sourcing: 未コミットイベント
+    #[serde(skip)]
+    pub uncommitted_events: Vec<DomainEvent>,
 }
 
 impl GameSession {
     // TDD: 最小実装でテストを通す
     pub fn create(session_id: SessionId, scenario_id: ScenarioId) -> Self {
-        Self {
-            session_id,
-            scenario_id,
+        use crate::domain::GameSessionEvent;
+
+        let mut session = Self {
+            session_id: session_id.clone(),
+            scenario_id: scenario_id.clone(),
             gm_user_id: UserId::new(), // 仮値
             created_at: chrono::Utc::now(),
             players: HashMap::new(),
@@ -43,7 +50,22 @@ impl GameSession {
             shared_cards: Vec::new(),
             session_status: SessionStatus::WaitingForPlayers,
             version: 0,
-        }
+            uncommitted_events: Vec::new(),
+        };
+
+        // SessionCreatedイベントを記録
+        let event = DomainEvent::new(
+            session_id,
+            GameSessionEvent::SessionCreated {
+                scenario_id,
+                gm_user_id: session.gm_user_id.clone(),
+            },
+            1,
+        );
+        session.uncommitted_events.push(event);
+        session.version = 1;
+
+        session
     }
 
     pub fn status(&self) -> SessionStatus {
@@ -92,6 +114,11 @@ impl GameSession {
             SessionStatus::InProgress { active_players, .. } => active_players.clone(),
             _ => self.players.keys().cloned().collect(),
         }
+    }
+
+    // Event Sourcing: 未コミットイベントを取得
+    pub fn get_uncommitted_events(&self) -> &[DomainEvent] {
+        &self.uncommitted_events
     }
 }
 

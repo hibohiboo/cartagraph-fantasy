@@ -66,4 +66,18 @@ mod tests {
             active_players: session.get_active_players(),
         });
     }
+
+    #[test]
+    fn test_event_sourcing_basic() {
+        // 4番目のREDフェーズ: Event Sourcing基本機能
+        // やりたいこと: セッション作成時にイベントが記録される
+
+        let session_id = SessionId::new();
+        let scenario_id = ScenarioId::new();
+        let session = GameSession::create(session_id, scenario_id);
+
+        // イベントが記録されているか確認
+        let uncommitted_events = session.get_uncommitted_events();
+        assert_eq!(uncommitted_events.len(), 1); // SessionCreated
+    }
 }
