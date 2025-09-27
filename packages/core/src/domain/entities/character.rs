@@ -54,6 +54,13 @@ impl Character {
         self.last_updated = chrono::Utc::now();
         Ok(())
     }
+
+    // TDDサイクル3: タグ追加 (基本ケース)
+    pub fn add_tag(&mut self, tag: Tag) -> Result<(), String> {
+        self.acquired_tags.push(tag);
+        self.last_updated = chrono::Utc::now();
+        Ok(())
+    }
 }
 
 #[cfg(test)]
@@ -80,10 +87,9 @@ mod tests {
         assert_eq!(character.version, 1);
     }
 
-    // TDD サイクル 2: カード追加 (基本ケース) - RED フェーズ
+    // TDD サイクル 2: カード追加 (基本ケース) - 完了
     #[test]
     fn test_add_card() {
-        // RED: 失敗するテスト (1つだけ)
         let mut character = create_test_character();
         let card = create_test_card();
 
@@ -93,6 +99,21 @@ mod tests {
         assert!(result.is_ok());
         assert_eq!(character.personal_cards.len(), 1);
         assert_eq!(character.personal_cards[0].card_id, card.card_id);
+    }
+
+    // TDD サイクル 3: タグ追加 (基本ケース) - RED フェーズ
+    #[test]
+    fn test_add_tag() {
+        // RED: 失敗するテスト (1つだけ)
+        let mut character = create_test_character();
+        let tag = create_test_tag();
+
+        let result = character.add_tag(tag.clone());
+
+        // 期待値：タグが追加される
+        assert!(result.is_ok());
+        assert_eq!(character.acquired_tags.len(), 1);
+        assert_eq!(character.acquired_tags[0].tag_id, tag.tag_id);
     }
 
     // ヘルパー関数
@@ -112,6 +133,15 @@ mod tests {
             tags: vec![],
             embedded_events: vec![],
             rarity: crate::types::Rarity::Common,
+        }
+    }
+
+    fn create_test_tag() -> Tag {
+        Tag {
+            tag_id: crate::types::TagId::new(),
+            name: "テストタグ".to_string(),
+            category: crate::types::TagCategory::Skill,
+            value: Some(crate::types::TagValue::Boolean(true)),
         }
     }
 }
