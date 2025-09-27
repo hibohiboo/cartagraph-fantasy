@@ -175,11 +175,14 @@
 
 **実装メモ (2025-09-27)**:
 - `packages/core/src/wasm_interface.rs`にコントラクトテスト作成
-- TDD方式で2つのWASM FFIメソッドの契約テスト完了
+- TDD方式で4つのWASM FFIメソッドの契約テスト完了（小さなサイクルで実装）
   - `wasm_create_session`: 文字列パラメータからGameSession作成
   - `wasm_add_player`: セッションにプレイヤー追加
-- 各ID型に`from_string`メソッド追加 (SessionId, ScenarioId, PlayerId, UserId)
+  - `wasm_use_card`: プレイヤーがカードを使用
+  - `wasm_roll_dice`: ダイス振り機能（ダミー結果：dice_rolled:3,5）
+- 各ID型に`from_string`メソッド追加 (SessionId, ScenarioId, PlayerId, UserId, CardId)
 - 非WASM環境でのテスト実行のため、`Result<String, String>`形式で実装
+- 全4テスト実行成功確認済み
 
 ### タスク8: フロントエンドE2Eテストシナリオ作成 [S]
 **タイプ**: TDD-E2E | **優先度**: 高 | **工数**: 3時間
