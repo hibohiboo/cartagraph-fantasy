@@ -130,3 +130,65 @@ impl From<&PlayerStatus> for PlayerStatusDto {
         }
     }
 }
+
+// DTO → ドメイン変換（逆方向）
+impl From<GameSessionDto> for GameSession {
+    fn from(dto: GameSessionDto) -> Self {
+        Self {
+            session_id: SessionId::from_string(dto.session_id),
+            scenario_id: ScenarioId::from_string(dto.scenario_id),
+            gm_user_id: UserId::from_string(dto.gm_user_id),
+            created_at: dto.created_at,
+            players: dto.players.into_iter()
+                .map(|(k, v)| (PlayerId::from_string(k), v.into()))
+                .collect(),
+            max_players: dto.max_players,
+            current_scene: SceneId::from_string(dto.current_scene),
+            session_status: dto.session_status.into(),
+            version: dto.version,
+        }
+    }
+}
+
+impl From<SessionPlayerDto> for SessionPlayer {
+    fn from(dto: SessionPlayerDto) -> Self {
+        Self {
+            id: PlayerId::from_string(dto.id),
+            user_id: UserId::from_string(dto.user_id),
+            character: dto.character.map(|c| CharacterId::from_string(c)),
+            status: dto.status.into(),
+            joined_at: dto.joined_at,
+        }
+    }
+}
+
+impl From<SessionStatusDto> for SessionStatus {
+    fn from(dto: SessionStatusDto) -> Self {
+        match dto {
+            SessionStatusDto::Created => SessionStatus::Created,
+            SessionStatusDto::WaitingForPlayers => SessionStatus::WaitingForPlayers,
+            SessionStatusDto::Recruiting => SessionStatus::Recruiting,
+            SessionStatusDto::Starting => SessionStatus::Starting,
+            SessionStatusDto::InProgress { current_scene, active_players } => {
+                SessionStatus::InProgress {
+                    current_scene: SceneId::from_string(current_scene),
+                    active_players: active_players.into_iter().map(|p| PlayerId::from_string(p)).collect(),
+                }
+            }
+            SessionStatusDto::Paused => SessionStatus::Paused,
+            SessionStatusDto::Completed => SessionStatus::Completed,
+            SessionStatusDto::Terminated => SessionStatus::Terminated,
+        }
+    }
+}
+
+impl From<PlayerStatusDto> for PlayerStatus {
+    fn from(dto: PlayerStatusDto) -> Self {
+        match dto {
+            PlayerStatusDto::Waiting => PlayerStatus::Waiting,
+            PlayerStatusDto::Active => PlayerStatus::Active,
+            PlayerStatusDto::Inactive { duration_minutes } => PlayerStatus::Inactive { duration_minutes },
+            PlayerStatusDto::Departed => PlayerStatus::Departed,
+        }
+    }
+}

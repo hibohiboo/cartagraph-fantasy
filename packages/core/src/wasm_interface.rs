@@ -1,9 +1,10 @@
 // WASM FFI インターフェース - Task 7: Contract Tests
-// オニオンアーキテクチャ対応
+// オニオンアーキテクチャ対応（DTOベース実装）
 
 #[cfg(test)]
 mod contract_tests {
     use crate::domain::*;
+    use crate::infrastructure::*;
     #[test]
     fn test_create_session_wasm_contract() {
         // createSession WASM FFI メソッドのコントラクトテスト
@@ -246,52 +247,57 @@ mod contract_tests {
         assert!(json_error.starts_with("Deserialization failed:"));
     }
 
-    // WASM FFI Implementation: GameSession作成
+    // WASM FFI Implementation: GameSession作成（DTOベース）
     fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, String> {
-        // オニオンアーキテクチャ：ドメインエンティティを使用
-        let session_id = crate::domain::SessionId::from_string(session_id.to_string());
-        let scenario_id = crate::domain::ScenarioId::from_string(scenario_id.to_string());
-        let gm_user_id = crate::domain::UserId::new(); // 仮のGMユーザーID
+        // オニオンアーキテクチャ：ドメインエンティティを使用し、DTOで外部と連携
+        let session_id = SessionId::from_string(session_id.to_string());
+        let scenario_id = ScenarioId::from_string(scenario_id.to_string());
+        let gm_user_id = UserId::new(); // 仮のGMユーザーID
 
-        let _session = crate::domain::GameSession::create(session_id, scenario_id, gm_user_id);
+        let session = GameSession::create(session_id, scenario_id, gm_user_id);
+
+        // ドメインエンティティをDTOに変換（必要に応じて）
+        let _session_dto = GameSessionDto::from(&session);
 
         // 成功レスポンスを返す（将来的にJsValueに変換予定）
         Ok("session_created".to_string())
     }
 
     fn wasm_add_player(_session_id: &str, _player_id: &str, _user_id: &str) -> Result<String, String> {
-        // オニオンアーキテクチャ：ドメイン型を使用
+        // オニオンアーキテクチャ：ドメイン型を使用、DTOで変換
 
         // IDを構築してプレイヤー追加操作
-        let _session_id = crate::domain::SessionId::from_string(_session_id.to_string());
-        let _player_id = crate::domain::PlayerId::from_string(_player_id.to_string());
-        let _user_id = crate::domain::UserId::from_string(_user_id.to_string());
+        let _session_id = SessionId::from_string(_session_id.to_string());
+        let _player_id = PlayerId::from_string(_player_id.to_string());
+        let _user_id = UserId::from_string(_user_id.to_string());
 
         // TODO: 実際の実装では、セッションを取得してプレイヤーを追加する
+        // 結果はDTOでシリアライズして返す
         Ok("player_added".to_string())
     }
 
     fn wasm_use_card(_session_id: &str, _player_id: &str, _card_id: &str) -> Result<String, String> {
-        // オニオンアーキテクチャ：ドメイン型を使用
+        // オニオンアーキテクチャ：ドメイン型を使用、DTOで変換
 
         // IDを構築してカード使用操作
-        let _session_id = crate::domain::SessionId::from_string(_session_id.to_string());
-        let _player_id = crate::domain::PlayerId::from_string(_player_id.to_string());
-        let _card_id = crate::domain::CardId::from_string(_card_id.to_string());
+        let _session_id = SessionId::from_string(_session_id.to_string());
+        let _player_id = PlayerId::from_string(_player_id.to_string());
+        let _card_id = CardId::from_string(_card_id.to_string());
 
         // TODO: 実際の実装では、セッションを取得してカードを使用する
+        // 結果はDTOでシリアライズして返す
         Ok("card_used".to_string())
     }
 
     fn wasm_roll_dice(_session_id: &str, _player_id: &str, _dice_count: u32, _dice_sides: u32) -> Result<String, String> {
-        // オニオンアーキテクチャ：ドメイン型を使用
+        // オニオンアーキテクチャ：ドメイン型を使用、DTOで変換
 
         // IDを構築してダイス振り操作
-        let _session_id = crate::domain::SessionId::from_string(_session_id.to_string());
-        let _player_id = crate::domain::PlayerId::from_string(_player_id.to_string());
+        let _session_id = SessionId::from_string(_session_id.to_string());
+        let _player_id = PlayerId::from_string(_player_id.to_string());
 
         // TODO: 実際の実装では、ダイスを振って結果をセッションに記録する
-        // 現在はダミーの結果を返す
+        // 現在はダミーの結果を返す、結果はDTOでシリアライズして返す
         let _ = (_dice_count, _dice_sides); // パラメータ使用を明示
         Ok("dice_rolled:3,5".to_string())
     }
@@ -309,7 +315,7 @@ mod contract_tests {
         let session = GameSession::create(session_id, scenario_id, gm_user_id);
 
         // ドメインエンティティをDTOに変換してシリアライズ
-        let session_dto = crate::infrastructure::GameSessionDto::from(&session);
+        let session_dto = GameSessionDto::from(&session);
 
         // DTOをJSONにシリアライズ
         match serde_json::to_string(&session_dto) {
@@ -322,8 +328,10 @@ mod contract_tests {
         // オニオンアーキテクチャ：インフラ層DTOを使用
 
         // JSONからGameSessionDTOをデシリアライズ
-        match serde_json::from_str::<crate::infrastructure::GameSessionDto>(json_str) {
-            Ok(_session) => {
+        match serde_json::from_str::<GameSessionDto>(json_str) {
+            Ok(session_dto) => {
+                // DTOからドメインエンティティへ変換してバリデーション
+                let _session: GameSession = session_dto.into();
                 // デシリアライゼーション成功
                 Ok("session_parsed_successfully".to_string())
             }
@@ -332,7 +340,7 @@ mod contract_tests {
     }
 
     fn wasm_create_session_with_validation(session_id: &str, scenario_id: &str) -> Result<String, String> {
-        // オニオンアーキテクチャ：ドメイン型を使用
+        // オニオンアーキテクチャ：ドメイン型を使用、DTOで変換
 
         // バリデーション: セッションIDが空でないことを確認
         if session_id.is_empty() {
@@ -350,10 +358,13 @@ mod contract_tests {
         }
 
         // ドメインエンティティとしてGameSessionを作成
-        let session_id = crate::domain::SessionId::from_string(session_id.to_string());
-        let scenario_id = crate::domain::ScenarioId::from_string(scenario_id.to_string());
-        let gm_user_id = crate::domain::UserId::new();
-        let _session = crate::domain::GameSession::create(session_id, scenario_id, gm_user_id);
+        let session_id = SessionId::from_string(session_id.to_string());
+        let scenario_id = ScenarioId::from_string(scenario_id.to_string());
+        let gm_user_id = UserId::new();
+        let session = GameSession::create(session_id, scenario_id, gm_user_id);
+
+        // ドメインエンティティをDTOに変換（必要に応じて）
+        let _session_dto = GameSessionDto::from(&session);
 
         Ok("session_created_with_validation".to_string())
     }
