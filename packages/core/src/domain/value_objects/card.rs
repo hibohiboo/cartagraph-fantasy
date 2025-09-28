@@ -5,14 +5,14 @@ use crate::domain::value_objects::identifiers::{CardId, EventId, TagId};
 pub struct Card {
     card_id: CardId,
     name: String,
-    card_type: CardType,
+    card_type: RuntimeCardType,
     tags: Vec<TagId>,
     embedded_events: Vec<EventId>,
-    rarity: Rarity,
+    rarity: RuntimeCardRarity,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum CardType {
+pub enum RuntimeCardType {
     Action,           // アクション用カード
     Choice,          // 選択肢カード
     Possession,      // 所持カード
@@ -20,7 +20,7 @@ pub enum CardType {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum Rarity {
+pub enum RuntimeCardRarity {
     Common,
     Uncommon,
     Rare,
@@ -31,10 +31,10 @@ impl Card {
     pub fn new(
         card_id: CardId,
         name: String,
-        card_type: CardType,
+        card_type: RuntimeCardType,
         tags: Vec<TagId>,
         embedded_events: Vec<EventId>,
-        rarity: Rarity,
+        rarity: RuntimeCardRarity,
     ) -> Self {
         Self {
             card_id,
@@ -54,7 +54,7 @@ impl Card {
         &self.name
     }
 
-    pub fn card_type(&self) -> &CardType {
+    pub fn card_type(&self) -> &RuntimeCardType {
         &self.card_type
     }
 
@@ -66,7 +66,7 @@ impl Card {
         &self.embedded_events
     }
 
-    pub fn rarity(&self) -> &Rarity {
+    pub fn rarity(&self) -> &RuntimeCardRarity {
         &self.rarity
     }
 
@@ -79,8 +79,8 @@ impl Card {
     pub fn can_be_used_in_context(&self, context: &CardUsageContext) -> Result<(), CardUsageError> {
         // カードタイプとシーンコンテキストの整合性チェック
         match (&self.card_type, &context.scene_context) {
-            (CardType::Action, SceneContext::Action) => Ok(()),
-            (CardType::Choice, SceneContext::Choice) => {
+            (RuntimeCardType::Action, SceneContext::Action) => Ok(()),
+            (RuntimeCardType::Choice, SceneContext::Choice) => {
                 // 選択肢カードが利用可能かチェック
                 if context.available_choices.contains(&self.card_id) {
                     Ok(())
@@ -88,8 +88,8 @@ impl Card {
                     Err(CardUsageError::InvalidContext)
                 }
             },
-            (CardType::SceneTransition, SceneContext::SceneEnd) => Ok(()),
-            (CardType::Possession, _) => Ok(()), // 所持カードは常に使用可能
+            (RuntimeCardType::SceneTransition, SceneContext::SceneEnd) => Ok(()),
+            (RuntimeCardType::Possession, _) => Ok(()), // 所持カードは常に使用可能
             _ => Err(CardUsageError::WrongCardType),
         }
     }
@@ -128,10 +128,10 @@ mod tests {
         // TDDサイクル1: 最小ケース - 基本的なカード作成
         let card_id = CardId::from_string("card_001".to_string());
         let name = "基本攻撃".to_string();
-        let card_type = CardType::Action;
+        let card_type = RuntimeCardType::Action;
         let tags = vec![];
         let embedded_events = vec![];
-        let rarity = Rarity::Common;
+        let rarity = RuntimeCardRarity::Common;
 
         let card = Card::new(card_id.clone(), name.clone(), card_type.clone(), tags, embedded_events, rarity.clone());
 
@@ -152,10 +152,10 @@ mod tests {
         let card = Card::new(
             CardId::from_string("card_002".to_string()),
             "スキルカード".to_string(),
-            CardType::Action,
+            RuntimeCardType::Action,
             vec![tag_id_1.clone()],
             vec![],
-            Rarity::Uncommon,
+            RuntimeCardRarity::Uncommon,
         );
 
         // 所持しているタグ
@@ -170,19 +170,19 @@ mod tests {
         let action_card = Card::new(
             CardId::from_string("action_card".to_string()),
             "攻撃".to_string(),
-            CardType::Action,
+            RuntimeCardType::Action,
             vec![],
             vec![],
-            Rarity::Common,
+            RuntimeCardRarity::Common,
         );
 
         let choice_card = Card::new(
             CardId::from_string("choice_card".to_string()),
             "選択A".to_string(),
-            CardType::Choice,
+            RuntimeCardType::Choice,
             vec![],
             vec![],
-            Rarity::Common,
+            RuntimeCardRarity::Common,
         );
 
         // アクションコンテキストでのアクションカード使用 - 成功

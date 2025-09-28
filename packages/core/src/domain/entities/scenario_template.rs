@@ -58,12 +58,12 @@ pub struct CardTemplate {
     pub card_id: CardId,
     pub name: String,
     pub description: String,
-    pub card_type: CardType,
-    pub rarity: CardRarity,
+    pub card_type: TemplateCardType,
+    pub rarity: TemplateCardRarity,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum CardType {
+pub enum TemplateCardType {
     Action,
     Resource,
     Event,
@@ -71,7 +71,7 @@ pub enum CardType {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum CardRarity {
+pub enum TemplateCardRarity {
     Common,
     Uncommon,
     Rare,
@@ -230,8 +230,8 @@ mod tests {
             card_id: card_id.clone(),
             name: "Magic Sword".to_string(),
             description: "A powerful weapon".to_string(),
-            card_type: CardType::Resource,
-            rarity: CardRarity::Rare,
+            card_type: TemplateCardType::Resource,
+            rarity: TemplateCardRarity::Rare,
         };
 
         // カード追加のテスト
@@ -241,8 +241,8 @@ mod tests {
         // カードが正しく追加されたかテスト
         assert_eq!(scenario.shared_cards.len(), 1);
         assert_eq!(scenario.shared_cards[0].name, "Magic Sword");
-        assert_eq!(scenario.shared_cards[0].card_type, CardType::Resource);
-        assert_eq!(scenario.shared_cards[0].rarity, CardRarity::Rare);
+        assert_eq!(scenario.shared_cards[0].card_type, TemplateCardType::Resource);
+        assert_eq!(scenario.shared_cards[0].rarity, TemplateCardRarity::Rare);
     }
 
     // TDD Cycle 4: validate_scene_flow() - RED phase

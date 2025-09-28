@@ -689,8 +689,8 @@ pub fn wasm_add_shared_card_to_scenario(scenario_json: &str, card_id: &str, name
         card_id: card_id.clone(),
         name: name.to_string(),
         description: description.to_string(),
-        card_type: crate::domain::entities::CardType::Resource,
-        rarity: crate::domain::entities::CardRarity::Common,
+        card_type: crate::domain::entities::TemplateCardType::Resource,
+        rarity: crate::domain::entities::TemplateCardRarity::Common,
     };
 
     scenario.add_shared_card(card)

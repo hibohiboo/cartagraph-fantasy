@@ -191,19 +191,19 @@ mod tests {
         let action_card = Card::new(
             CardId::from_string("action_001".to_string()),
             "攻撃".to_string(),
-            CardType::Action,
+            RuntimeCardType::Action,
             vec![],
             vec![],
-            Rarity::Common,
+            RuntimeCardRarity::Common,
         );
 
         let choice_card = Card::new(
             CardId::from_string("choice_001".to_string()),
             "選択A".to_string(),
-            CardType::Choice,
+            RuntimeCardType::Choice,
             vec![],
             vec![],
-            Rarity::Common,
+            RuntimeCardRarity::Common,
         );
 
         session.add_shared_card(action_card.clone());
