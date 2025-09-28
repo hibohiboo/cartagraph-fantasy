@@ -27,6 +27,28 @@ pub struct DiceResult {
 }
 
 impl DiceNotation {
+    /// JavaScriptから提供されるランダム値を使用してダイス振り
+    ///
+    /// JavaScript側でMath.random()やcrypto.getRandomValues()で
+    /// 生成された0.0-1.0の浮動小数点数を受け取り、
+    /// 適切なエントロピーに変換してダイス振りを実行
+    pub fn roll_with_js_random(&self, js_random_values: &[f64]) -> Result<DiceResult, DiceRollError> {
+        if js_random_values.len() < self.dice_count as usize {
+            return Err(DiceRollError::InsufficientEntropy);
+        }
+
+        // 0.0-1.0の浮動小数点数を0-255の整数エントロピーに変換
+        let entropy: Vec<u8> = js_random_values
+            .iter()
+            .take(self.dice_count as usize)
+            .map(|&val| {
+                // 0.0-1.0を0-255にマッピング
+                (val.clamp(0.0, 0.999999) * 256.0) as u8
+            })
+            .collect();
+
+        self.roll(&entropy)
+    }
     /// 基本的な2d6記法作成
     pub fn new_2d6() -> Self {
         Self {
@@ -302,5 +324,179 @@ mod tests {
         let disadvantage_low = DiceNotation::new_2d6().with_advantage(AdvantageType::Disadvantage);
         let result = disadvantage_low.roll(&low_entropy).unwrap();
         assert_eq!(result.final_result, 1); // max(2-1, 0) = 1
+    }
+
+    // TDDサイクル8: 確率検証テスト
+    #[test]
+    fn test_probability_validation() {
+        // 2d6の理論的確率分布検証
+        let notation = DiceNotation::new_2d6();
+        let mut outcomes = std::collections::HashMap::new();
+
+        // 全組み合わせテスト（6×6=36通り）
+        for die1 in 1..=6 {
+            for die2 in 1..=6 {
+                let entropy = [die1 - 1, die2 - 1]; // 0-5の範囲でエントロピー
+                let result = notation.roll(&entropy).unwrap();
+                *outcomes.entry(result.final_result).or_insert(0) += 1;
+            }
+        }
+
+        // 理論的期待値の検証
+        assert_eq!(outcomes.get(&2), Some(&1)); // 最小値(1,1)
+        assert_eq!(outcomes.get(&7), Some(&6)); // 最頻値
+        assert_eq!(outcomes.get(&12), Some(&1)); // 最大値(6,6)
+
+        // 成功率の検証 (≥7): 21/36 ≈ 58.3%
+        let total_success = outcomes.iter()
+            .filter(|(&result, _)| result >= 7)
+            .map(|(_, &count)| count)
+            .sum::<u32>();
+        assert_eq!(total_success, 21);
+
+        let total_failure = outcomes.iter()
+            .filter(|(&result, _)| result < 7)
+            .map(|(_, &count)| count)
+            .sum::<u32>();
+        assert_eq!(total_failure, 15);
+    }
+
+    // TDDサイクル9: バッチ振りパフォーマンステスト
+    #[test]
+    fn test_batch_rolling_performance() {
+        let notation = DiceNotation::new_2d6();
+
+        // 大量のダイス振りでパフォーマンス測定
+        let start = std::time::Instant::now();
+        let batch_size = 1000;
+        let mut results = Vec::with_capacity(batch_size);
+
+        for i in 0..batch_size {
+            let entropy = [(i % 256) as u8, ((i * 7) % 256) as u8]; // 疑似ランダム
+            let result = notation.roll(&entropy).unwrap();
+            results.push(result);
+        }
+
+        let duration = start.elapsed();
+
+        // パフォーマンス要件: 1000回の振りが50ms未満で完了
+        assert!(duration.as_millis() < 50, "Batch rolling took {}ms, expected <50ms", duration.as_millis());
+
+        // 結果の妥当性確認
+        assert_eq!(results.len(), batch_size);
+        for result in &results {
+            assert!(result.final_result >= 2 && result.final_result <= 12);
+            assert_eq!(result.raw_rolls.len(), 2);
+        }
+
+        // 統計的妥当性の簡易チェック（理論値58.3%に近い範囲40-80%）
+        let success_count = results.iter().filter(|r| r.is_success()).count();
+        let success_rate = success_count as f64 / batch_size as f64;
+        assert!(success_rate >= 0.40 && success_rate <= 0.80,
+               "Success rate {} is outside expected range [0.40, 0.80]", success_rate);
+    }
+
+    // TDDサイクル10: 複合機能統合テスト
+    #[test]
+    fn test_comprehensive_dice_integration() {
+        // パース→振り→結果検証の統合フロー
+        let notation = DiceNotation::parse("2d6+2").unwrap();
+        let entropy = [3, 4]; // (3%6)+1=4, (4%6)+1=5 -> 合計9+2修正=11
+
+        let result = notation.roll(&entropy).unwrap();
+        assert_eq!(result.final_result, 11);
+        assert!(result.is_success());
+        assert_eq!(result.raw_rolls, [4, 5]);
+        assert_eq!(result.notation().modifier, 2);
+
+        // 有利+修正値の組み合わせ
+        let complex_notation = DiceNotation::parse("2d6-1")
+            .unwrap()
+            .with_advantage(AdvantageType::Advantage);
+
+        let low_entropy = [0, 1]; // 合計3-1修正+1有利=3
+        let result = complex_notation.roll(&low_entropy).unwrap();
+        assert_eq!(result.final_result, 3);
+        assert!(!result.is_success());
+    }
+
+    // TDDサイクル11: JavaScriptエントロピー統合テスト
+    #[test]
+    fn test_javascript_entropy_integration() {
+        let notation = DiceNotation::new_2d6();
+
+        // JavaScript Math.random()風の値でテスト
+        let js_random_values = [0.25, 0.75]; // 0.25 * 256 = 64, 0.75 * 256 = 192
+        let result = notation.roll_with_js_random(&js_random_values).unwrap();
+
+        // エントロピー変換の検証: [64, 192] -> [(64%6)+1=5, (192%6)+1=1] -> 合計6
+        assert_eq!(result.raw_rolls, [5, 1]);
+        assert_eq!(result.final_result, 6);
+        assert!(!result.is_success());
+
+        // 境界値テスト
+        let boundary_values = [0.0, 0.999999]; // [0, 255] -> [1, 4] -> 合計5
+        let result = notation.roll_with_js_random(&boundary_values).unwrap();
+        assert_eq!(result.raw_rolls, [1, 4]);
+        assert_eq!(result.final_result, 5);
+
+        // エントロピー不足エラー
+        let insufficient_values = [0.5]; // 2d6なので2つ必要
+        let result = notation.roll_with_js_random(&insufficient_values);
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), DiceRollError::InsufficientEntropy);
+
+        // 範囲外値の自動クランプ
+        let out_of_range_values = [-0.1, 1.5]; // クランプされて[0.0, 0.999999]
+        let result = notation.roll_with_js_random(&out_of_range_values).unwrap();
+        assert_eq!(result.raw_rolls, [1, 4]); // 0と255相当のエントロピー
+    }
+
+    // TDDサイクル12: 実用的なWASM統合シナリオテスト
+    #[test]
+    fn test_realistic_wasm_scenarios() {
+        // GM側: 複数プレイヤーの同時ダイス振り
+        let players_dice = vec![
+            ("player1", DiceNotation::parse("2d6+1").unwrap()),
+            ("player2", DiceNotation::new_2d6().with_advantage(AdvantageType::Advantage)),
+            ("player3", DiceNotation::parse("2d6-1").unwrap().with_advantage(AdvantageType::Disadvantage)),
+        ];
+
+        // JavaScriptから供給される疑似乱数
+        let js_entropy_pool = [
+            [0.1, 0.6], // player1用
+            [0.8, 0.3], // player2用
+            [0.4, 0.9], // player3用
+        ];
+
+        let mut results = Vec::new();
+        for (i, (player_name, notation)) in players_dice.iter().enumerate() {
+            let result = notation.roll_with_js_random(&js_entropy_pool[i]).unwrap();
+            results.push((player_name, result));
+        }
+
+        // 結果検証
+        assert_eq!(results.len(), 3);
+
+        // Player1: [0.1*256=25, 0.6*256=153] -> [(25%6)+1=2, (153%6)+1=4] = 6+1修正 = 7 (成功)
+        let (name1, result1) = &results[0];
+        assert_eq!(*name1, "player1");
+        assert_eq!(result1.raw_rolls, [2, 4]);
+        assert_eq!(result1.final_result, 7);
+        assert!(result1.is_success());
+
+        // Player2: [0.8*256=204, 0.3*256=76] -> [(204%6)+1=1, (76%6)+1=5] = 6+1有利 = 7 (成功)
+        let (name2, result2) = &results[1];
+        assert_eq!(*name2, "player2");
+        assert_eq!(result2.raw_rolls, [1, 5]);
+        assert_eq!(result2.final_result, 7);
+        assert!(result2.is_success());
+
+        // Player3: [0.4*256=102, 0.9*256=230] -> [(102%6)+1=1, (230%6)+1=5] = 6-1修正-1不利 = 4 (失敗)
+        let (name3, result3) = &results[2];
+        assert_eq!(*name3, "player3");
+        assert_eq!(result3.raw_rolls, [1, 5]);
+        assert_eq!(result3.final_result, 4);
+        assert!(!result3.is_success());
     }
 }
