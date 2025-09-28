@@ -77,15 +77,37 @@ impl Card {
 
     /// カードが使用可能な状況かを検証
     pub fn can_be_used_in_context(&self, context: &CardUsageContext) -> Result<(), CardUsageError> {
-        // TODO: implement usage validation
-        unimplemented!("Card usage validation not yet implemented")
+        // カードタイプとシーンコンテキストの整合性チェック
+        match (&self.card_type, &context.scene_context) {
+            (CardType::Action, SceneContext::Action) => Ok(()),
+            (CardType::Choice, SceneContext::Choice) => {
+                // 選択肢カードが利用可能かチェック
+                if context.available_choices.contains(&self.card_id) {
+                    Ok(())
+                } else {
+                    Err(CardUsageError::InvalidContext)
+                }
+            },
+            (CardType::SceneTransition, SceneContext::SceneEnd) => Ok(()),
+            (CardType::Possession, _) => Ok(()), // 所持カードは常に使用可能
+            _ => Err(CardUsageError::WrongCardType),
+        }
     }
 }
 
 /// カード使用コンテキスト
 #[derive(Debug)]
 pub struct CardUsageContext {
-    // TODO: define context fields
+    pub player_tags: Vec<TagId>,
+    pub available_choices: Vec<CardId>,
+    pub scene_context: SceneContext,
+}
+
+#[derive(Debug)]
+pub enum SceneContext {
+    Action,      // アクション可能なシーン
+    Choice,      // 選択肢選択中
+    SceneEnd,    // シーン終了時
 }
 
 /// カード使用エラー
@@ -94,7 +116,7 @@ pub enum CardUsageError {
     InvalidContext,
     MissingRequiredTags,
     AlreadyUsed,
-    // TODO: add more specific error types
+    WrongCardType, // カードタイプがコンテキストに適さない
 }
 
 #[cfg(test)]
@@ -140,5 +162,48 @@ mod tests {
         assert!(card.has_tag(&tag_id_1));
         // 所持していないタグ
         assert!(!card.has_tag(&tag_id_2));
+    }
+
+    #[test]
+    fn test_card_usage_validation() {
+        // TDDサイクル5: カード使用検証ロジック
+        let action_card = Card::new(
+            CardId::from_string("action_card".to_string()),
+            "攻撃".to_string(),
+            CardType::Action,
+            vec![],
+            vec![],
+            Rarity::Common,
+        );
+
+        let choice_card = Card::new(
+            CardId::from_string("choice_card".to_string()),
+            "選択A".to_string(),
+            CardType::Choice,
+            vec![],
+            vec![],
+            Rarity::Common,
+        );
+
+        // アクションコンテキストでのアクションカード使用 - 成功
+        let action_context = CardUsageContext {
+            player_tags: vec![],
+            available_choices: vec![],
+            scene_context: SceneContext::Action,
+        };
+        assert!(action_card.can_be_used_in_context(&action_context).is_ok());
+
+        // アクションコンテキストでの選択肢カード使用 - 失敗
+        let result = choice_card.can_be_used_in_context(&action_context);
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), CardUsageError::WrongCardType);
+
+        // 選択肢コンテキストでの選択肢カード使用 - 成功
+        let choice_context = CardUsageContext {
+            player_tags: vec![],
+            available_choices: vec![choice_card.card_id().clone()],
+            scene_context: SceneContext::Choice,
+        };
+        assert!(choice_card.can_be_used_in_context(&choice_context).is_ok());
     }
 }
