@@ -3,4 +3,3 @@ pub mod serialization;
 pub mod wasm_bindings;
 
 pub use serialization::*;
-pub use wasm_bindings::*;
