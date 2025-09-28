@@ -1,0 +1,162 @@
+use std::collections::HashMap;
+use chrono::{DateTime, Utc};
+use crate::domain::value_objects::{ScenarioId, SceneId, UserId, CardId};
+
+// ScenarioTemplate domain entity - 純粋なビジネスロジック
+#[derive(Debug, Clone)]
+pub struct ScenarioTemplate {
+    // Identity
+    pub scenario_id: ScenarioId,
+
+    // Metadata
+    pub name: String,
+    pub description: String,
+    pub author_id: UserId,
+
+    // Game Design
+    pub recommended_players: PlayerRange,
+    pub estimated_duration: std::time::Duration,
+    pub difficulty: Difficulty,
+
+    // Structure
+    pub scenes: HashMap<SceneId, SceneDefinition>,
+    pub initial_scene_id: Option<SceneId>,
+
+    // Resources
+    pub shared_cards: Vec<CardTemplate>,
+
+    // Metadata
+    pub created_at: DateTime<Utc>,
+    pub last_updated: DateTime<Utc>,
+    pub version: u64,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct PlayerRange {
+    pub min: usize,
+    pub max: usize,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Difficulty {
+    Beginner,
+    Intermediate,
+    Advanced,
+}
+
+#[derive(Debug, Clone)]
+pub struct SceneDefinition {
+    pub scene_id: SceneId,
+    pub name: String,
+    pub description: String,
+    pub objectives: Vec<String>,
+    pub completion_conditions: Vec<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct CardTemplate {
+    pub card_id: CardId,
+    pub name: String,
+    pub description: String,
+    pub card_type: CardType,
+    pub rarity: CardRarity,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CardType {
+    Action,
+    Resource,
+    Event,
+    Skill,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum CardRarity {
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary,
+}
+
+impl ScenarioTemplate {
+    // まず未実装の状態で構造だけ定義
+    pub fn create(
+        scenario_id: ScenarioId,
+        name: String,
+        description: String,
+        author_id: UserId,
+    ) -> Self {
+        let now = chrono::Utc::now();
+
+        Self {
+            scenario_id,
+            name,
+            description,
+            author_id,
+            recommended_players: PlayerRange { min: 1, max: 6 },
+            estimated_duration: std::time::Duration::from_secs(2 * 60 * 60), // 2 hours
+            difficulty: Difficulty::Beginner,
+            scenes: HashMap::new(),
+            initial_scene_id: None,
+            shared_cards: Vec::new(),
+            created_at: now,
+            last_updated: now,
+            version: 1,
+        }
+    }
+
+    pub fn add_scene(&mut self, scene: SceneDefinition) -> Result<(), String> {
+        unimplemented!("TDD cycle 2: add_scene")
+    }
+
+    pub fn add_shared_card(&mut self, card: CardTemplate) -> Result<(), String> {
+        unimplemented!("TDD cycle 3: add_shared_card")
+    }
+
+    pub fn validate_scene_flow(&self) -> Result<(), String> {
+        unimplemented!("TDD cycle 4: validate_scene_flow")
+    }
+
+    pub fn set_initial_scene(&mut self, scene_id: SceneId) -> Result<(), String> {
+        unimplemented!("TDD cycle 5: set_initial_scene")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // TDD Cycle 1: ScenarioTemplate::create() - RED phase
+    #[test]
+    fn test_create_scenario_template_basic() {
+        let scenario_id = ScenarioId::new();
+        let name = "Test Scenario".to_string();
+        let description = "A test scenario for TDD".to_string();
+        let author_id = UserId::new();
+
+        let scenario = ScenarioTemplate::create(
+            scenario_id.clone(),
+            name.clone(),
+            description.clone(),
+            author_id.clone(),
+        );
+
+        // 基本フィールドが正しく設定されているかテスト
+        assert_eq!(scenario.scenario_id, scenario_id);
+        assert_eq!(scenario.name, name);
+        assert_eq!(scenario.description, description);
+        assert_eq!(scenario.author_id, author_id);
+
+        // 初期値のテスト
+        assert_eq!(scenario.version, 1);
+        assert!(scenario.scenes.is_empty());
+        assert!(scenario.initial_scene_id.is_none());
+        assert!(scenario.shared_cards.is_empty());
+
+        // デフォルト値のテスト
+        assert_eq!(scenario.recommended_players.min, 1);
+        assert_eq!(scenario.recommended_players.max, 6);
+        assert_eq!(scenario.difficulty, Difficulty::Beginner);
+    }
+}
