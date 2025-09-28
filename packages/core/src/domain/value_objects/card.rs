@@ -10,7 +10,7 @@ pub struct Card {
     embedded_events: Vec<EventId>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum RuntimeCardType {
     Action,           // アクション用カード
     Choice,          // 選択肢カード
@@ -90,7 +90,7 @@ pub struct CardUsageContext {
     pub scene_context: SceneContext,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum SceneContext {
     Action,      // アクション可能なシーン
     Choice,      // 選択肢選択中
