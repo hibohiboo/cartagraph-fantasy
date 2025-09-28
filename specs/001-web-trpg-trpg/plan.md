@@ -116,12 +116,33 @@ packages/
 │   │   ├── components/
 │   │   └── stories/
 │   └── tests/
-├── core/             # Rust WebAssemblyコアロジック
+├── core/             # Rust WebAssemblyコアロジック (オニオンアーキテクチャ)
 │   ├── src/
-│   │   ├── domain/   # ゲームルールドメインモデル
-│   │   ├── usecases/ # ゲーム進行ロジック
-│   │   └── wasm/     # WebAssembly FFI
-│   └── tests/
+│   │   ├── domain/              # Domain Layer (インフラ依存なし)
+│   │   │   ├── entities/        # 集約ルート・エンティティ
+│   │   │   │   ├── game_session.rs     # GameSession集約 ✅
+│   │   │   │   ├── character.rs        # Character集約 ✅
+│   │   │   │   └── session_player.rs   # SessionPlayer エンティティ
+│   │   │   ├── value_objects/   # 値オブジェクト
+│   │   │   │   ├── identifiers.rs      # ID型定義
+│   │   │   │   ├── session_status.rs   # セッション状態
+│   │   │   │   └── player_status.rs    # プレイヤー状態
+│   │   │   ├── aggregates/      # 集約ルート定義 (将来)
+│   │   │   ├── events/          # ドメインイベント (将来)
+│   │   │   └── services/        # ドメインサービス (将来)
+│   │   ├── infrastructure/      # Infrastructure Layer
+│   │   │   ├── serialization/
+│   │   │   │   └── dto.rs       # DTO変換 (境界型安全性)
+│   │   │   └── wasm_bindings/   # WebAssembly統合 (将来)
+│   │   ├── types/               # 共通型定義 (過渡期)
+│   │   │   ├── card.rs          # カード型
+│   │   │   ├── character.rs     # キャラクター型
+│   │   │   ├── dice.rs          # ダイス型
+│   │   │   ├── scenario.rs      # シナリオ型
+│   │   │   └── session.rs       # セッション型
+│   │   ├── wasm_interface.rs    # WASM FFI境界
+│   │   └── lib.rs              # ライブラリルート
+│   └── tests/                   # テストディレクトリ
 └── shared/           # TypeScript共通型定義
     ├── src/
     │   ├── types/    # APIレスポンス型, ドメインモデル型
