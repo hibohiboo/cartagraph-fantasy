@@ -2,6 +2,9 @@
 name = "cartagraph-core"
 version = "0.1.0"
 edition = "2021"
+description = "Core game logic for Cartagraph Fantasy TRPG-style game"
+repository = "https://github.com/hibohiboo/cartagraph-fantasy"
+license = "MIT"
 
 [lib]
 crate-type = ["cdylib"]
