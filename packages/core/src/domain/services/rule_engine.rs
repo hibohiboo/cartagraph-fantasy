@@ -1,5 +1,4 @@
 use crate::domain::value_objects::*;
-use crate::domain::entities::*;
 use std::collections::HashMap;
 
 /// ゲームルールエンジン - ビジネスルールの検証と効果解決を担当するドメインサービス
@@ -220,7 +219,7 @@ impl RuleEngine {
     /// カスタムルールの検証
     fn validate_custom_rule(
         &self,
-        card: &Card,
+        _card: &Card,
         custom_rule: &CustomCardRule,
         context: &GameContext,
     ) -> Result<(), RuleViolation> {
@@ -260,7 +259,7 @@ impl RuleEngine {
     }
 
     /// ゲームコンテキストからシーンコンテキストを決定
-    fn determine_scene_context(&self, context: &GameContext) -> SceneContext {
+    fn determine_scene_context(&self, _context: &GameContext) -> SceneContext {
         // 現在の実装では基本的なロジック
         // 将来的にはより複雑なシーン状態判定を実装
         SceneContext::Action
@@ -617,6 +616,161 @@ mod tests {
                 assert!(msg.contains("Cannot transition to the same scene"));
             },
             _ => panic!("Expected CustomRuleViolation for same scene transition"),
+        }
+    }
+
+    // 追加テスト: 複合的なルール検証
+    #[test]
+    fn test_comprehensive_rule_validation() {
+        let scenario_id = ScenarioId::new();
+        let card_id = CardId::from_string("special_card".to_string());
+        let tag_id = TagId::new();
+        let from_scene = SceneId::new();
+        let to_scene = SceneId::new();
+        let event_id = EventId::new();
+
+        // シナリオ固有ルールを作成
+        let mut custom_card_rules = HashMap::new();
+        custom_card_rules.insert(card_id.clone(), CustomCardRule {
+            card_id: card_id.clone(),
+            usage_conditions: vec![
+                UsageCondition::RequireTag(tag_id.clone()),
+                UsageCondition::RequireMinPlayers(2),
+            ],
+            effects: vec![],
+        });
+
+        let mut event_effects = HashMap::new();
+        event_effects.insert(event_id.clone(), EventEffect {
+            event_id: event_id.clone(),
+            target: EffectTarget::AllPlayers,
+            modifications: vec![
+                EffectModification::AddLogEntry("Event triggered".to_string()),
+            ],
+        });
+
+        let mut scene_transition_rules = HashMap::new();
+        scene_transition_rules.insert(from_scene.clone(), vec![
+            TransitionRule {
+                from_scene: from_scene.clone(),
+                to_scene: to_scene.clone(),
+                conditions: vec![TransitionCondition::AllPlayersReady],
+            }
+        ]);
+
+        let scenario_rules = ScenarioRules {
+            scenario_id,
+            custom_card_rules,
+            scene_transition_rules,
+            event_effects,
+        };
+
+        let engine = RuleEngine::new().with_scenario_rules(scenario_rules);
+
+        // カードの作成
+        let card = Card::new(
+            card_id.clone(),
+            "Special Card".to_string(),
+            RuntimeCardType::Action,
+            vec![],
+            vec![],
+        );
+
+        // タグ付きプレイヤーコンテキスト
+        let player_id = PlayerId::new();
+        let mut player_tags = HashMap::new();
+        let tag = Tag::new(tag_id.clone(), "Test Tag".to_string(), TagCategory::Skill, Some(TagValue::Numeric(1)));
+        player_tags.insert(player_id.clone(), vec![tag]);
+
+        let context = GameContext {
+            session_id: SessionId::new(),
+            current_scene: from_scene.clone(),
+            active_players: vec![player_id.clone(), PlayerId::new()], // 2プレイヤー
+            player_tags,
+            used_cards: HashMap::new(),
+            scene_usage_count: HashMap::new(),
+            session_usage_count: HashMap::new(),
+        };
+
+        // カスタムルール付きカード使用 - 成功
+        let result = engine.validate_card_usage(&card, &context);
+        assert!(result.is_ok());
+
+        // イベント効果解決 - 成功
+        let result = engine.resolve_event_effects(&event_id, &context);
+        assert!(result.is_ok());
+        let modifications = result.unwrap();
+        assert_eq!(modifications.len(), 1);
+        match &modifications[0] {
+            EffectModification::AddLogEntry(msg) => {
+                assert_eq!(msg, "Event triggered");
+            },
+            _ => panic!("Expected AddLogEntry modification"),
+        }
+
+        // シーン遷移 - 成功
+        let result = engine.check_scene_transition(&from_scene, &to_scene, &context);
+        assert!(result.is_ok());
+
+        // 条件不足でのカード使用テスト
+        let context_insufficient = GameContext {
+            session_id: SessionId::new(),
+            current_scene: from_scene.clone(),
+            active_players: vec![PlayerId::new()], // 1プレイヤー（不足）
+            player_tags: HashMap::new(), // タグなし
+            used_cards: HashMap::new(),
+            scene_usage_count: HashMap::new(),
+            session_usage_count: HashMap::new(),
+        };
+
+        let result = engine.validate_card_usage(&card, &context_insufficient);
+        assert!(result.is_err());
+    }
+
+    // テスト: エラーケースの詳細検証
+    #[test]
+    fn test_rule_violation_error_types() {
+        let engine = RuleEngine::new();
+        let card = Card::new(
+            CardId::from_string("test_card".to_string()),
+            "Test Card".to_string(),
+            RuntimeCardType::Choice,
+            vec![],
+            vec![],
+        );
+
+        let context = GameContext {
+            session_id: SessionId::new(),
+            current_scene: SceneId::new(),
+            active_players: vec![PlayerId::new()],
+            player_tags: HashMap::new(),
+            used_cards: HashMap::new(),
+            scene_usage_count: HashMap::new(),
+            session_usage_count: HashMap::new(),
+        };
+
+        // 選択肢カードの使用制限超過テスト
+        let mut context_with_limit = context.clone();
+        context_with_limit.scene_usage_count.insert(card.card_id().clone(), 1); // デフォルト制限1に達
+
+        let result = engine.validate_card_usage(&card, &context_with_limit);
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            RuleViolation::CardUsageLimitExceeded(violated_card_id) => {
+                assert_eq!(violated_card_id, *card.card_id());
+            },
+            _ => panic!("Expected CardUsageLimitExceeded"),
+        }
+
+        // 存在しないイベントの解決テスト
+        let non_existent_event = EventId::new();
+        let result = engine.resolve_event_effects(&non_existent_event, &context);
+        assert!(result.is_err());
+        match result.unwrap_err() {
+            RuleViolation::EventNotAllowed(event_id) => {
+                assert_eq!(event_id, non_existent_event);
+            },
+            _ => panic!("Expected EventNotAllowed"),
         }
     }
 }
