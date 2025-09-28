@@ -577,4 +577,141 @@ mod character_wasm_tests {
         assert!(updated_character_json.contains("session1"));
         assert!(updated_character_json.contains("scenario1"));
     }
+
+    // ScenarioTemplate WASM interface tests
+    #[test]
+    fn test_wasm_create_scenario_template() {
+        let result = wasm_create_scenario_template("scenario1", "Test Scenario", "A test scenario", "user1");
+        assert!(result.is_ok());
+
+        let scenario_json = result.unwrap();
+        assert!(scenario_json.contains("scenario1"));
+        assert!(scenario_json.contains("Test Scenario"));
+        assert!(scenario_json.contains("user1"));
+    }
+
+    #[test]
+    fn test_wasm_add_scene_to_scenario() {
+        // まずシナリオを作成
+        let scenario_json = wasm_create_scenario_template("scenario1", "Test Scenario", "A test scenario", "user1").unwrap();
+
+        // シーンを追加
+        let result = wasm_add_scene_to_scenario(&scenario_json, "scene1", "Opening Scene", "The adventure begins");
+        assert!(result.is_ok());
+
+        let updated_scenario_json = result.unwrap();
+        assert!(updated_scenario_json.contains("scene1"));
+        assert!(updated_scenario_json.contains("Opening Scene"));
+    }
+
+    #[test]
+    fn test_wasm_validate_scenario_flow() {
+        // シナリオ作成 → シーン追加 → initial scene設定 → 検証
+        let mut scenario_json = wasm_create_scenario_template("scenario1", "Test Scenario", "A test scenario", "user1").unwrap();
+        scenario_json = wasm_add_scene_to_scenario(&scenario_json, "scene1", "Opening Scene", "The adventure begins").unwrap();
+        scenario_json = wasm_set_initial_scene_for_scenario(&scenario_json, "scene1").unwrap();
+
+        let result = wasm_validate_scenario_flow(&scenario_json);
+        assert!(result.is_ok());
+        assert!(result.unwrap().contains("validation passed"));
+    }
+}
+
+// ScenarioTemplate WASM interface functions
+fn wasm_create_scenario_template(scenario_id: &str, name: &str, description: &str, author_id: &str) -> Result<String, String> {
+    let scenario_id = crate::domain::value_objects::ScenarioId::from_string(scenario_id.to_string());
+    let author_id = crate::domain::value_objects::UserId::from_string(author_id.to_string());
+
+    let scenario = crate::domain::entities::ScenarioTemplate::create(
+        scenario_id,
+        name.to_string(),
+        description.to_string(),
+        author_id,
+    );
+
+    let dto = crate::infrastructure::serialization::dto::ScenarioTemplateDto::from(&scenario);
+    serde_json::to_string(&dto)
+        .map_err(|e| format!("Failed to serialize scenario template: {}", e))
+}
+
+fn wasm_add_scene_to_scenario(scenario_json: &str, scene_id: &str, name: &str, description: &str) -> Result<String, String> {
+    let mut scenario: crate::domain::entities::ScenarioTemplate = {
+        let dto: crate::infrastructure::serialization::dto::ScenarioTemplateDto =
+            serde_json::from_str(scenario_json)
+                .map_err(|e| format!("Failed to parse scenario JSON: {}", e))?;
+        dto.into()
+    };
+
+    let scene_id = crate::domain::value_objects::SceneId::from_string(scene_id.to_string());
+    let scene = crate::domain::entities::SceneDefinition {
+        scene_id: scene_id.clone(),
+        name: name.to_string(),
+        description: description.to_string(),
+        objectives: Vec::new(),
+        completion_conditions: Vec::new(),
+    };
+
+    scenario.add_scene(scene)
+        .map_err(|e| format!("Failed to add scene: {}", e))?;
+
+    let dto = crate::infrastructure::serialization::dto::ScenarioTemplateDto::from(&scenario);
+    serde_json::to_string(&dto)
+        .map_err(|e| format!("Failed to serialize scenario template: {}", e))
+}
+
+fn wasm_add_shared_card_to_scenario(scenario_json: &str, card_id: &str, name: &str, description: &str) -> Result<String, String> {
+    let mut scenario: crate::domain::entities::ScenarioTemplate = {
+        let dto: crate::infrastructure::serialization::dto::ScenarioTemplateDto =
+            serde_json::from_str(scenario_json)
+                .map_err(|e| format!("Failed to parse scenario JSON: {}", e))?;
+        dto.into()
+    };
+
+    let card_id = crate::domain::value_objects::CardId::from_string(card_id.to_string());
+    let card = crate::domain::entities::CardTemplate {
+        card_id: card_id.clone(),
+        name: name.to_string(),
+        description: description.to_string(),
+        card_type: crate::domain::entities::CardType::Resource,
+        rarity: crate::domain::entities::CardRarity::Common,
+    };
+
+    scenario.add_shared_card(card)
+        .map_err(|e| format!("Failed to add shared card: {}", e))?;
+
+    let dto = crate::infrastructure::serialization::dto::ScenarioTemplateDto::from(&scenario);
+    serde_json::to_string(&dto)
+        .map_err(|e| format!("Failed to serialize scenario template: {}", e))
+}
+
+fn wasm_set_initial_scene_for_scenario(scenario_json: &str, scene_id: &str) -> Result<String, String> {
+    let mut scenario: crate::domain::entities::ScenarioTemplate = {
+        let dto: crate::infrastructure::serialization::dto::ScenarioTemplateDto =
+            serde_json::from_str(scenario_json)
+                .map_err(|e| format!("Failed to parse scenario JSON: {}", e))?;
+        dto.into()
+    };
+
+    let scene_id = crate::domain::value_objects::SceneId::from_string(scene_id.to_string());
+
+    scenario.set_initial_scene(scene_id)
+        .map_err(|e| format!("Failed to set initial scene: {}", e))?;
+
+    let dto = crate::infrastructure::serialization::dto::ScenarioTemplateDto::from(&scenario);
+    serde_json::to_string(&dto)
+        .map_err(|e| format!("Failed to serialize scenario template: {}", e))
+}
+
+fn wasm_validate_scenario_flow(scenario_json: &str) -> Result<String, String> {
+    let scenario: crate::domain::entities::ScenarioTemplate = {
+        let dto: crate::infrastructure::serialization::dto::ScenarioTemplateDto =
+            serde_json::from_str(scenario_json)
+                .map_err(|e| format!("Failed to parse scenario JSON: {}", e))?;
+        dto.into()
+    };
+
+    scenario.validate_scene_flow()
+        .map_err(|e| format!("Validation failed: {}", e))?;
+
+    Ok("Scenario flow validation passed".to_string())
 }

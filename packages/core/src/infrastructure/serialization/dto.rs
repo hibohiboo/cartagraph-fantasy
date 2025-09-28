@@ -285,3 +285,184 @@ impl From<SessionRecordDto> for crate::types::SessionRecord {
         }
     }
 }
+
+// ScenarioTemplate DTO
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct ScenarioTemplateDto {
+    pub scenario_id: String,
+    pub name: String,
+    pub description: String,
+    pub author_id: String,
+    pub recommended_players: PlayerRangeDto,
+    pub estimated_duration_secs: u64,
+    pub difficulty: DifficultyDto,
+    pub scenes: HashMap<String, SceneDefinitionDto>,
+    pub initial_scene_id: Option<String>,
+    pub shared_cards: Vec<CardTemplateDto>,
+    #[ts(type = "string")]
+    pub created_at: DateTime<Utc>,
+    #[ts(type = "string")]
+    pub last_updated: DateTime<Utc>,
+    pub version: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct PlayerRangeDto {
+    pub min: usize,
+    pub max: usize,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub enum DifficultyDto {
+    Beginner,
+    Intermediate,
+    Advanced,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct SceneDefinitionDto {
+    pub scene_id: String,
+    pub name: String,
+    pub description: String,
+    pub objectives: Vec<String>,
+    pub completion_conditions: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct CardTemplateDto {
+    pub card_id: String,
+    pub name: String,
+    pub description: String,
+    pub card_type: CardTypeDto,
+    pub rarity: CardRarityDto,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub enum CardTypeDto {
+    Action,
+    Resource,
+    Event,
+    Skill,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub enum CardRarityDto {
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary,
+}
+
+// ScenarioTemplate: ドメイン → DTO変換
+impl From<&crate::domain::entities::ScenarioTemplate> for ScenarioTemplateDto {
+    fn from(scenario: &crate::domain::entities::ScenarioTemplate) -> Self {
+        Self {
+            scenario_id: scenario.scenario_id.0.clone(),
+            name: scenario.name.clone(),
+            description: scenario.description.clone(),
+            author_id: scenario.author_id.0.clone(),
+            recommended_players: PlayerRangeDto {
+                min: scenario.recommended_players.min,
+                max: scenario.recommended_players.max,
+            },
+            estimated_duration_secs: scenario.estimated_duration.as_secs(),
+            difficulty: match scenario.difficulty {
+                crate::domain::entities::Difficulty::Beginner => DifficultyDto::Beginner,
+                crate::domain::entities::Difficulty::Intermediate => DifficultyDto::Intermediate,
+                crate::domain::entities::Difficulty::Advanced => DifficultyDto::Advanced,
+            },
+            scenes: scenario.scenes.iter().map(|(id, scene)| {
+                (id.0.clone(), SceneDefinitionDto {
+                    scene_id: scene.scene_id.0.clone(),
+                    name: scene.name.clone(),
+                    description: scene.description.clone(),
+                    objectives: scene.objectives.clone(),
+                    completion_conditions: scene.completion_conditions.clone(),
+                })
+            }).collect(),
+            initial_scene_id: scenario.initial_scene_id.as_ref().map(|id| id.0.clone()),
+            shared_cards: scenario.shared_cards.iter().map(|card| CardTemplateDto {
+                card_id: card.card_id.0.clone(),
+                name: card.name.clone(),
+                description: card.description.clone(),
+                card_type: match card.card_type {
+                    crate::domain::entities::CardType::Action => CardTypeDto::Action,
+                    crate::domain::entities::CardType::Resource => CardTypeDto::Resource,
+                    crate::domain::entities::CardType::Event => CardTypeDto::Event,
+                    crate::domain::entities::CardType::Skill => CardTypeDto::Skill,
+                },
+                rarity: match card.rarity {
+                    crate::domain::entities::CardRarity::Common => CardRarityDto::Common,
+                    crate::domain::entities::CardRarity::Uncommon => CardRarityDto::Uncommon,
+                    crate::domain::entities::CardRarity::Rare => CardRarityDto::Rare,
+                    crate::domain::entities::CardRarity::Epic => CardRarityDto::Epic,
+                    crate::domain::entities::CardRarity::Legendary => CardRarityDto::Legendary,
+                },
+            }).collect(),
+            created_at: scenario.created_at,
+            last_updated: scenario.last_updated,
+            version: scenario.version,
+        }
+    }
+}
+
+// ScenarioTemplate: DTO → ドメイン変換
+impl From<ScenarioTemplateDto> for crate::domain::entities::ScenarioTemplate {
+    fn from(dto: ScenarioTemplateDto) -> Self {
+        Self {
+            scenario_id: crate::domain::value_objects::ScenarioId::from_string(dto.scenario_id),
+            name: dto.name,
+            description: dto.description,
+            author_id: crate::domain::value_objects::UserId::from_string(dto.author_id),
+            recommended_players: crate::domain::entities::PlayerRange {
+                min: dto.recommended_players.min,
+                max: dto.recommended_players.max,
+            },
+            estimated_duration: std::time::Duration::from_secs(dto.estimated_duration_secs),
+            difficulty: match dto.difficulty {
+                DifficultyDto::Beginner => crate::domain::entities::Difficulty::Beginner,
+                DifficultyDto::Intermediate => crate::domain::entities::Difficulty::Intermediate,
+                DifficultyDto::Advanced => crate::domain::entities::Difficulty::Advanced,
+            },
+            scenes: dto.scenes.into_iter().map(|(id, scene_dto)| {
+                (crate::domain::value_objects::SceneId::from_string(id), crate::domain::entities::SceneDefinition {
+                    scene_id: crate::domain::value_objects::SceneId::from_string(scene_dto.scene_id),
+                    name: scene_dto.name,
+                    description: scene_dto.description,
+                    objectives: scene_dto.objectives,
+                    completion_conditions: scene_dto.completion_conditions,
+                })
+            }).collect(),
+            initial_scene_id: dto.initial_scene_id.map(|id| crate::domain::value_objects::SceneId::from_string(id)),
+            shared_cards: dto.shared_cards.into_iter().map(|card_dto| crate::domain::entities::CardTemplate {
+                card_id: crate::domain::value_objects::CardId::from_string(card_dto.card_id),
+                name: card_dto.name,
+                description: card_dto.description,
+                card_type: match card_dto.card_type {
+                    CardTypeDto::Action => crate::domain::entities::CardType::Action,
+                    CardTypeDto::Resource => crate::domain::entities::CardType::Resource,
+                    CardTypeDto::Event => crate::domain::entities::CardType::Event,
+                    CardTypeDto::Skill => crate::domain::entities::CardType::Skill,
+                },
+                rarity: match card_dto.rarity {
+                    CardRarityDto::Common => crate::domain::entities::CardRarity::Common,
+                    CardRarityDto::Uncommon => crate::domain::entities::CardRarity::Uncommon,
+                    CardRarityDto::Rare => crate::domain::entities::CardRarity::Rare,
+                    CardRarityDto::Epic => crate::domain::entities::CardRarity::Epic,
+                    CardRarityDto::Legendary => crate::domain::entities::CardRarity::Legendary,
+                },
+            }).collect(),
+            created_at: dto.created_at,
+            last_updated: dto.last_updated,
+            version: dto.version,
+        }
+    }
+}
