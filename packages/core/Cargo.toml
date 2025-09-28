@@ -12,7 +12,8 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde-wasm-bindgen = "0.6"
 tsify = "0.5"
-ts-rs = { version = "11.0", features = ["serde-compat"] }
+# serde(transparent) で 「 warning: failed to parse serde attribute 」 が発生するので no-serde-warnings で抑制
+ts-rs = { version = "11.0", features = ["serde-compat", "no-serde-warnings"] }
 uuid = { version = "1.18", features = ["v4", "js", "serde"] }
 chrono = { version = "0.4", features = ["wasm-bindgen", "serde"] }
 js-sys = "0.3"
