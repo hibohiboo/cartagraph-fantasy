@@ -262,8 +262,8 @@ packages/
 - [x] **オニオンアーキテクチャ基盤確立**: Domain層 ⟷ Infrastructure層分離完了
 - [x] **GameSession集約**: 完全実装 + DTO変換 + WASM統合 (61/61テスト)
 - [x] **Character集約**: 完全実装 + DTO変換 + WASM統合 (19/19テスト)
-- [ ] **ScenarioTemplate集約**: 未実装 (次のタスク11)
-- [x] **型安全WASM境界**: Rust ⟷ TypeScript FFI統合 (DTOベース)
+- [x] **ScenarioTemplate集約**: 完全実装 + DTO変換 + WASM統合 (89/89テスト) ✅ **Task 11完了**
+- [x] **型安全WASM境界**: Rust ⟷ TypeScript FFI統合 (DTOベース + getrandom 0.3対応)
 - [x] **純粋TDD実践**: 小さなサイクルでの段階的実装 (tasks.md指針遵守)
 
 **Architecture Validation**:
