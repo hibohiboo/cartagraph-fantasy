@@ -72,8 +72,7 @@ impl Card {
 
     /// カードが指定されたタグを持っているかチェック
     pub fn has_tag(&self, tag_id: &TagId) -> bool {
-        // TODO: implement tag checking logic
-        unimplemented!("Tag checking not yet implemented")
+        self.tags.contains(tag_id)
     }
 
     /// カードが使用可能な状況かを検証
@@ -120,5 +119,26 @@ mod tests {
         assert_eq!(card.tags().len(), 0);
         assert_eq!(card.embedded_events().len(), 0);
         assert_eq!(card.rarity(), &rarity);
+    }
+
+    #[test]
+    fn test_card_has_tag() {
+        // TDDサイクル2: タグ所持チェック機能
+        let tag_id_1 = TagId::new();
+        let tag_id_2 = TagId::new();
+
+        let card = Card::new(
+            CardId::from_string("card_002".to_string()),
+            "スキルカード".to_string(),
+            CardType::Action,
+            vec![tag_id_1.clone()],
+            vec![],
+            Rarity::Uncommon,
+        );
+
+        // 所持しているタグ
+        assert!(card.has_tag(&tag_id_1));
+        // 所持していないタグ
+        assert!(!card.has_tag(&tag_id_2));
     }
 }
