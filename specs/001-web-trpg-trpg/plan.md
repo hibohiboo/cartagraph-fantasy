@@ -228,16 +228,31 @@ packages/
 **Phase Status**:
 - [x] Phase 0: Research complete (/plan command)
 - [x] Phase 1: Design complete (/plan command)
-- [ ] Phase 2: Task planning complete (/plan command - describe approach only)
-- [ ] Phase 3: Tasks generated (/tasks command)
-- [ ] Phase 4: Implementation complete
+- [x] Phase 2: Task planning complete (/tasks command)
+- [x] Phase 3: Tasks generated (/tasks command)
+- [x] Phase 4: Implementation **部分完了** (Core Domain層実装完了)
 - [ ] Phase 5: Validation passed
+
+**Core Implementation Status (2025-09-28)**:
+- [x] **オニオンアーキテクチャ基盤確立**: Domain層 ⟷ Infrastructure層分離完了
+- [x] **GameSession集約**: 完全実装 + DTO変換 + WASM統合 (61/61テスト)
+- [x] **Character集約**: 完全実装 + DTO変換 + WASM統合 (19/19テスト)
+- [ ] **ScenarioTemplate集約**: 未実装 (次のタスク11)
+- [x] **型安全WASM境界**: Rust ⟷ TypeScript FFI統合 (DTOベース)
+- [x] **純粋TDD実践**: 小さなサイクルでの段階的実装 (tasks.md指針遵守)
+
+**Architecture Validation**:
+- [x] **依存方向**: Infrastructure → Domain (正しいオニオンアーキテクチャ)
+- [x] **Domain層純粋性**: SerDe traits除去、インフラ依存ゼロ実現
+- [x] **型安全境界**: ドメイン型 ↔ DTO変換で境界型安全性確保
+- [x] **テスト網羅**: ドメインロジック + WASM contract + TypeScript型生成
 
 **Gate Status**:
 - [x] Initial Constitution Check: PASS (with justified complexity)
 - [x] Post-Design Constitution Check: PASS
 - [x] All NEEDS CLARIFICATION resolved
 - [x] Complexity deviations documented
+- [x] **Architecture Quality Gate**: PASS (オニオンアーキテクチャ準拠実装)
 
 ---
 *Based on Constitution v2.1.1 - See `/memory/constitution.md`*
