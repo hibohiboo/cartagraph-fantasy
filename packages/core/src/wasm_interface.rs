@@ -2,6 +2,7 @@
 // オニオンアーキテクチャ対応（DTOベース実装）
 
 // 必要なインポートを追加
+use wasm_bindgen::prelude::*;
 use crate::domain::entities::*;
 use crate::domain::value_objects::*;
 use crate::infrastructure::serialization::dto::*;
@@ -256,7 +257,8 @@ mod contract_tests {
 }
 
 // WASM FFI Implementation: GameSession作成（DTOベース）
-fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, String> {
+#[wasm_bindgen]
+pub fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, String> {
         // オニオンアーキテクチャ：ドメインエンティティを使用し、DTOで外部と連携
         let session_id = SessionId::from_string(session_id.to_string());
         let scenario_id = ScenarioId::from_string(scenario_id.to_string());
@@ -271,7 +273,8 @@ fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, St
         Ok("session_created".to_string())
     }
 
-    fn wasm_add_player(_session_id: &str, _player_id: &str, _user_id: &str) -> Result<String, String> {
+    #[wasm_bindgen]
+    pub fn wasm_add_player(_session_id: &str, _player_id: &str, _user_id: &str) -> Result<String, String> {
         // オニオンアーキテクチャ：ドメイン型を使用、DTOで変換
 
         // IDを構築してプレイヤー追加操作
@@ -284,7 +287,8 @@ fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, St
         Ok("player_added".to_string())
     }
 
-    fn wasm_use_card(_session_id: &str, _player_id: &str, _card_id: &str) -> Result<String, String> {
+    #[wasm_bindgen]
+    pub fn wasm_use_card(_session_id: &str, _player_id: &str, _card_id: &str) -> Result<String, String> {
         // オニオンアーキテクチャ：ドメイン型を使用、DTOで変換
 
         // IDを構築してカード使用操作
@@ -297,7 +301,8 @@ fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, St
         Ok("card_used".to_string())
     }
 
-    fn wasm_roll_dice(_session_id: &str, _player_id: &str, _dice_count: u32, _dice_sides: u32) -> Result<String, String> {
+    #[wasm_bindgen]
+    pub fn wasm_roll_dice(_session_id: &str, _player_id: &str, _dice_count: u32, _dice_sides: u32) -> Result<String, String> {
         // オニオンアーキテクチャ：ドメイン型を使用、DTOで変換
 
         // IDを構築してダイス振り操作
@@ -310,12 +315,14 @@ fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, St
         Ok("dice_rolled:3,5".to_string())
     }
 
-    fn verify_typescript_type_exports() -> Result<String, String> {
+    #[wasm_bindgen]
+    pub fn verify_typescript_type_exports() -> Result<String, String> {
         // 一時的に成功を返す（オニオンアーキテクチャ移行完了後に再実装）
         Ok("typescript_types_verification_deferred".to_string())
     }
 
-    fn wasm_get_session_as_json(session_id: &str, scenario_id: &str) -> Result<String, String> {
+    #[wasm_bindgen]
+    pub fn wasm_get_session_as_json(session_id: &str, scenario_id: &str) -> Result<String, String> {
         // オニオンアーキテクチャ：ドメインエンティティとインフラ層DTOを使用
         let session_id = SessionId::from_string(session_id.to_string());
         let scenario_id = ScenarioId::from_string(scenario_id.to_string());
@@ -332,7 +339,8 @@ fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, St
         }
     }
 
-    fn wasm_parse_session_from_json(json_str: &str) -> Result<String, String> {
+    #[wasm_bindgen]
+    pub fn wasm_parse_session_from_json(json_str: &str) -> Result<String, String> {
         // オニオンアーキテクチャ：インフラ層DTOを使用
 
         // JSONからGameSessionDTOをデシリアライズ
@@ -347,7 +355,8 @@ fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, St
         }
     }
 
-    fn wasm_create_session_with_validation(session_id: &str, scenario_id: &str) -> Result<String, String> {
+    #[wasm_bindgen]
+    pub fn wasm_create_session_with_validation(session_id: &str, scenario_id: &str) -> Result<String, String> {
         // オニオンアーキテクチャ：ドメイン型を使用、DTOで変換
 
         // バリデーション: セッションIDが空でないことを確認
@@ -377,7 +386,8 @@ fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, St
         Ok("session_created_with_validation".to_string())
     }
 
-    fn wasm_validate_player_operation(session_id: &str, player_id: &str, user_id: &str) -> Result<String, String> {
+    #[wasm_bindgen]
+    pub fn wasm_validate_player_operation(session_id: &str, player_id: &str, user_id: &str) -> Result<String, String> {
         // オニオンアーキテクチャ：ドメイン型を使用
 
         // 入力バリデーション
@@ -402,7 +412,8 @@ fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, St
     }
 
 // Character WASM Interface メソッド
-fn wasm_create_character(character_id: &str, name: &str, player_id: &str) -> Result<String, String> {
+#[wasm_bindgen]
+pub fn wasm_create_character(character_id: &str, name: &str, player_id: &str) -> Result<String, String> {
         use crate::domain::entities::Character;
         use crate::domain::value_objects::*;
         use crate::infrastructure::serialization::dto::CharacterDto;
@@ -429,7 +440,8 @@ fn wasm_create_character(character_id: &str, name: &str, player_id: &str) -> Res
             .map_err(|e| format!("SerializationError: {}", e))
     }
 
-fn wasm_add_character_card(character_json: &str, card_id: &str, card_name: &str) -> Result<String, String> {
+#[wasm_bindgen]
+pub fn wasm_add_character_card(character_json: &str, card_id: &str, card_name: &str) -> Result<String, String> {
         use crate::domain::entities::Character;
         use crate::infrastructure::serialization::dto::CharacterDto;
         use crate::types::{Card, CardType, Rarity, CardId};
@@ -459,7 +471,8 @@ fn wasm_add_character_card(character_json: &str, card_id: &str, card_name: &str)
             .map_err(|e| format!("SerializationError: {}", e))
     }
 
-fn wasm_check_scenario_participation(character_json: &str, scenario_id: &str) -> Result<String, String> {
+#[wasm_bindgen]
+pub fn wasm_check_scenario_participation(character_json: &str, scenario_id: &str) -> Result<String, String> {
         use crate::domain::entities::Character;
         use crate::infrastructure::serialization::dto::CharacterDto;
         use crate::domain::value_objects::ScenarioId;
@@ -476,7 +489,8 @@ fn wasm_check_scenario_participation(character_json: &str, scenario_id: &str) ->
         Ok(format!("{{\"can_join\": {}}}", can_join))
     }
 
-fn wasm_add_character_session_record(character_json: &str, session_id: &str, scenario_id: &str) -> Result<String, String> {
+#[wasm_bindgen]
+pub fn wasm_add_character_session_record(character_json: &str, session_id: &str, scenario_id: &str) -> Result<String, String> {
         use crate::domain::entities::Character;
         use crate::infrastructure::serialization::dto::CharacterDto;
         use crate::types::SessionRecord;
@@ -618,7 +632,8 @@ mod character_wasm_tests {
 }
 
 // ScenarioTemplate WASM interface functions
-fn wasm_create_scenario_template(scenario_id: &str, name: &str, description: &str, author_id: &str) -> Result<String, String> {
+#[wasm_bindgen]
+pub fn wasm_create_scenario_template(scenario_id: &str, name: &str, description: &str, author_id: &str) -> Result<String, String> {
     let scenario_id = crate::domain::value_objects::ScenarioId::from_string(scenario_id.to_string());
     let author_id = crate::domain::value_objects::UserId::from_string(author_id.to_string());
 
@@ -634,7 +649,8 @@ fn wasm_create_scenario_template(scenario_id: &str, name: &str, description: &st
         .map_err(|e| format!("Failed to serialize scenario template: {}", e))
 }
 
-fn wasm_add_scene_to_scenario(scenario_json: &str, scene_id: &str, name: &str, description: &str) -> Result<String, String> {
+#[wasm_bindgen]
+pub fn wasm_add_scene_to_scenario(scenario_json: &str, scene_id: &str, name: &str, description: &str) -> Result<String, String> {
     let mut scenario: crate::domain::entities::ScenarioTemplate = {
         let dto: crate::infrastructure::serialization::dto::ScenarioTemplateDto =
             serde_json::from_str(scenario_json)
@@ -659,7 +675,8 @@ fn wasm_add_scene_to_scenario(scenario_json: &str, scene_id: &str, name: &str, d
         .map_err(|e| format!("Failed to serialize scenario template: {}", e))
 }
 
-fn wasm_add_shared_card_to_scenario(scenario_json: &str, card_id: &str, name: &str, description: &str) -> Result<String, String> {
+#[wasm_bindgen]
+pub fn wasm_add_shared_card_to_scenario(scenario_json: &str, card_id: &str, name: &str, description: &str) -> Result<String, String> {
     let mut scenario: crate::domain::entities::ScenarioTemplate = {
         let dto: crate::infrastructure::serialization::dto::ScenarioTemplateDto =
             serde_json::from_str(scenario_json)
@@ -684,7 +701,8 @@ fn wasm_add_shared_card_to_scenario(scenario_json: &str, card_id: &str, name: &s
         .map_err(|e| format!("Failed to serialize scenario template: {}", e))
 }
 
-fn wasm_set_initial_scene_for_scenario(scenario_json: &str, scene_id: &str) -> Result<String, String> {
+#[wasm_bindgen]
+pub fn wasm_set_initial_scene_for_scenario(scenario_json: &str, scene_id: &str) -> Result<String, String> {
     let mut scenario: crate::domain::entities::ScenarioTemplate = {
         let dto: crate::infrastructure::serialization::dto::ScenarioTemplateDto =
             serde_json::from_str(scenario_json)
@@ -702,7 +720,8 @@ fn wasm_set_initial_scene_for_scenario(scenario_json: &str, scene_id: &str) -> R
         .map_err(|e| format!("Failed to serialize scenario template: {}", e))
 }
 
-fn wasm_validate_scenario_flow(scenario_json: &str) -> Result<String, String> {
+#[wasm_bindgen]
+pub fn wasm_validate_scenario_flow(scenario_json: &str) -> Result<String, String> {
     let scenario: crate::domain::entities::ScenarioTemplate = {
         let dto: crate::infrastructure::serialization::dto::ScenarioTemplateDto =
             serde_json::from_str(scenario_json)
