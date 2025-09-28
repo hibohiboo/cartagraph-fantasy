@@ -362,8 +362,14 @@ mod tests {
     }
 
     // TDDサイクル9: バッチ振りパフォーマンステスト
+    // 通常テストではスキップ、パフォーマンス測定時のみ実行
+    // 実行方法: PERF_TEST=1 cargo test dice::tests::test_batch_rolling_performance -- --ignored
     #[test]
+    #[ignore = "performance test - run with PERF_TEST=1"]
     fn test_batch_rolling_performance() {
+        if std::env::var("PERF_TEST").unwrap_or_default() != "1" {
+            return;
+        }
         let notation = DiceNotation::new_2d6();
 
         // 大量のダイス振りでパフォーマンス測定
