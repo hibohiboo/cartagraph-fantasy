@@ -193,7 +193,6 @@ mod tests {
             card_type: crate::types::CardType::Action,
             tags: vec![],
             embedded_events: vec![],
-            rarity: crate::types::Rarity::Common,
         }
     }
 

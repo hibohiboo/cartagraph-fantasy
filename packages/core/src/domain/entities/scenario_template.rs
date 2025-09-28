@@ -59,7 +59,6 @@ pub struct CardTemplate {
     pub name: String,
     pub description: String,
     pub card_type: TemplateCardType,
-    pub rarity: TemplateCardRarity,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -70,14 +69,6 @@ pub enum TemplateCardType {
     Skill,
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub enum TemplateCardRarity {
-    Common,
-    Uncommon,
-    Rare,
-    Epic,
-    Legendary,
-}
 
 impl ScenarioTemplate {
     // まず未実装の状態で構造だけ定義
@@ -231,7 +222,6 @@ mod tests {
             name: "Magic Sword".to_string(),
             description: "A powerful weapon".to_string(),
             card_type: TemplateCardType::Resource,
-            rarity: TemplateCardRarity::Rare,
         };
 
         // カード追加のテスト
@@ -242,7 +232,6 @@ mod tests {
         assert_eq!(scenario.shared_cards.len(), 1);
         assert_eq!(scenario.shared_cards[0].name, "Magic Sword");
         assert_eq!(scenario.shared_cards[0].card_type, TemplateCardType::Resource);
-        assert_eq!(scenario.shared_cards[0].rarity, TemplateCardRarity::Rare);
     }
 
     // TDD Cycle 4: validate_scene_flow() - RED phase

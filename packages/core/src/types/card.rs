@@ -10,7 +10,6 @@ pub struct Card {
     pub card_type: CardType,
     pub tags: Vec<TagId>,
     pub embedded_events: Vec<EventId>,
-    pub rarity: Rarity,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
@@ -26,18 +25,6 @@ pub enum CardType {
     SceneTransition, // シーン移動カード
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
-#[ts(export)]
-pub enum Rarity {
-    #[serde(rename = "common")]
-    Common,
-    #[serde(rename = "uncommon")]
-    Uncommon,
-    #[serde(rename = "rare")]
-    Rare,
-    #[serde(rename = "legendary")]
-    Legendary,
-}
 
 // カードテンプレート（シナリオ定義用）
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -47,6 +34,5 @@ pub struct CardTemplate {
     pub card_type: CardType,
     pub tags: Vec<String>, // タグ名の配列
     pub embedded_events: Vec<String>, // イベント名の配列
-    pub rarity: Rarity,
     pub description: Option<String>,
 }

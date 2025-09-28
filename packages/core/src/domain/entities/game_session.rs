@@ -194,7 +194,6 @@ mod tests {
             RuntimeCardType::Action,
             vec![],
             vec![],
-            RuntimeCardRarity::Common,
         );
 
         let choice_card = Card::new(
@@ -203,7 +202,6 @@ mod tests {
             RuntimeCardType::Choice,
             vec![],
             vec![],
-            RuntimeCardRarity::Common,
         );
 
         session.add_shared_card(action_card.clone());

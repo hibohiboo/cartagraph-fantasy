@@ -8,7 +8,6 @@ pub struct Card {
     card_type: RuntimeCardType,
     tags: Vec<TagId>,
     embedded_events: Vec<EventId>,
-    rarity: RuntimeCardRarity,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -19,13 +18,6 @@ pub enum RuntimeCardType {
     SceneTransition, // シーン移動カード
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub enum RuntimeCardRarity {
-    Common,
-    Uncommon,
-    Rare,
-    Legendary,
-}
 
 impl Card {
     pub fn new(
@@ -34,7 +26,6 @@ impl Card {
         card_type: RuntimeCardType,
         tags: Vec<TagId>,
         embedded_events: Vec<EventId>,
-        rarity: RuntimeCardRarity,
     ) -> Self {
         Self {
             card_id,
@@ -42,7 +33,6 @@ impl Card {
             card_type,
             tags,
             embedded_events,
-            rarity,
         }
     }
 
@@ -66,9 +56,6 @@ impl Card {
         &self.embedded_events
     }
 
-    pub fn rarity(&self) -> &RuntimeCardRarity {
-        &self.rarity
-    }
 
     /// カードが指定されたタグを持っているかチェック
     pub fn has_tag(&self, tag_id: &TagId) -> bool {
@@ -131,16 +118,14 @@ mod tests {
         let card_type = RuntimeCardType::Action;
         let tags = vec![];
         let embedded_events = vec![];
-        let rarity = RuntimeCardRarity::Common;
 
-        let card = Card::new(card_id.clone(), name.clone(), card_type.clone(), tags, embedded_events, rarity.clone());
+        let card = Card::new(card_id.clone(), name.clone(), card_type.clone(), tags, embedded_events);
 
         assert_eq!(card.card_id(), &card_id);
         assert_eq!(card.name(), &name);
         assert_eq!(card.card_type(), &card_type);
         assert_eq!(card.tags().len(), 0);
         assert_eq!(card.embedded_events().len(), 0);
-        assert_eq!(card.rarity(), &rarity);
     }
 
     #[test]
@@ -155,7 +140,6 @@ mod tests {
             RuntimeCardType::Action,
             vec![tag_id_1.clone()],
             vec![],
-            RuntimeCardRarity::Uncommon,
         );
 
         // 所持しているタグ
@@ -173,7 +157,6 @@ mod tests {
             RuntimeCardType::Action,
             vec![],
             vec![],
-            RuntimeCardRarity::Common,
         );
 
         let choice_card = Card::new(
@@ -182,7 +165,6 @@ mod tests {
             RuntimeCardType::Choice,
             vec![],
             vec![],
-            RuntimeCardRarity::Common,
         );
 
         // アクションコンテキストでのアクションカード使用 - 成功

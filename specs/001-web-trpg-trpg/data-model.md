@@ -356,7 +356,6 @@ pub struct Card {
     card_type: CardType,
     tags: Vec<Tag>,
     embedded_events: Vec<EventId>,
-    rarity: Rarity,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -367,13 +366,6 @@ pub enum CardType {
     SceneTransition, // シーン移動カード
 }
 
-#[derive(Debug, Clone, PartialEq)]
-pub enum Rarity {
-    Common,
-    Uncommon,
-    Rare,
-    Legendary,
-}
 ```
 
 ### Tag System

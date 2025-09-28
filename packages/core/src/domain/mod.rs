@@ -7,12 +7,12 @@ pub mod events;
 pub use entities::{
     GameSession, Character, ScenarioTemplate, SessionPlayer,
     SceneDefinition, PlayerRange, Difficulty,
-    CardTemplate, TemplateCardType, TemplateCardRarity,
+    CardTemplate, TemplateCardType,
 };
 pub use value_objects::{
     SessionId, PlayerId, UserId, CharacterId, ScenarioId, SceneId, EventId, CardId, TagId,
     SessionStatus, PlayerStatus,
-    Card, RuntimeCardType, RuntimeCardRarity,
+    Card, RuntimeCardType,
     Tag, TagCategory, TagValue,
     CardUsageContext, CardUsageError, SceneContext,
 };

@@ -345,7 +345,6 @@ pub struct CardTemplateDto {
     pub name: String,
     pub description: String,
     pub card_type: CardTypeDto,
-    pub rarity: CardRarityDto,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -357,15 +356,6 @@ pub enum CardTypeDto {
     Skill,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export)]
-pub enum CardRarityDto {
-    Common,
-    Uncommon,
-    Rare,
-    Epic,
-    Legendary,
-}
 
 // ScenarioTemplate: ドメイン → DTO変換
 impl From<&crate::domain::entities::ScenarioTemplate> for ScenarioTemplateDto {
@@ -404,13 +394,6 @@ impl From<&crate::domain::entities::ScenarioTemplate> for ScenarioTemplateDto {
                     crate::domain::entities::TemplateCardType::Resource => CardTypeDto::Resource,
                     crate::domain::entities::TemplateCardType::Event => CardTypeDto::Event,
                     crate::domain::entities::TemplateCardType::Skill => CardTypeDto::Skill,
-                },
-                rarity: match card.rarity {
-                    crate::domain::entities::TemplateCardRarity::Common => CardRarityDto::Common,
-                    crate::domain::entities::TemplateCardRarity::Uncommon => CardRarityDto::Uncommon,
-                    crate::domain::entities::TemplateCardRarity::Rare => CardRarityDto::Rare,
-                    crate::domain::entities::TemplateCardRarity::Epic => CardRarityDto::Epic,
-                    crate::domain::entities::TemplateCardRarity::Legendary => CardRarityDto::Legendary,
                 },
             }).collect(),
             created_at: scenario.created_at,
@@ -458,13 +441,6 @@ impl From<ScenarioTemplateDto> for crate::domain::entities::ScenarioTemplate {
                     CardTypeDto::Event => crate::domain::entities::TemplateCardType::Event,
                     CardTypeDto::Skill => crate::domain::entities::TemplateCardType::Skill,
                 },
-                rarity: match card_dto.rarity {
-                    CardRarityDto::Common => crate::domain::entities::TemplateCardRarity::Common,
-                    CardRarityDto::Uncommon => crate::domain::entities::TemplateCardRarity::Uncommon,
-                    CardRarityDto::Rare => crate::domain::entities::TemplateCardRarity::Rare,
-                    CardRarityDto::Epic => crate::domain::entities::TemplateCardRarity::Epic,
-                    CardRarityDto::Legendary => crate::domain::entities::TemplateCardRarity::Legendary,
-                },
             }).collect(),
             created_at: dto.created_at,
             last_updated: dto.last_updated,
@@ -482,7 +458,6 @@ pub struct CardDto {
     pub card_type: CardTypeValueObjectDto,
     pub tags: Vec<String>,
     pub embedded_events: Vec<String>,
-    pub rarity: RarityDto,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -494,14 +469,6 @@ pub enum CardTypeValueObjectDto {
     SceneTransition,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export)]
-pub enum RarityDto {
-    Common,
-    Uncommon,
-    Rare,
-    Legendary,
-}
 
 // Card: ドメイン → DTO変換
 impl From<&crate::domain::value_objects::Card> for CardDto {
@@ -517,12 +484,6 @@ impl From<&crate::domain::value_objects::Card> for CardDto {
             },
             tags: card.tags().iter().map(|tag| tag.0.clone()).collect(),
             embedded_events: card.embedded_events().iter().map(|event| event.0.clone()).collect(),
-            rarity: match card.rarity() {
-                crate::domain::value_objects::RuntimeCardRarity::Common => RarityDto::Common,
-                crate::domain::value_objects::RuntimeCardRarity::Uncommon => RarityDto::Uncommon,
-                crate::domain::value_objects::RuntimeCardRarity::Rare => RarityDto::Rare,
-                crate::domain::value_objects::RuntimeCardRarity::Legendary => RarityDto::Legendary,
-            },
         }
     }
 }
@@ -541,12 +502,6 @@ impl From<CardDto> for crate::domain::value_objects::Card {
             },
             dto.tags.into_iter().map(|tag| crate::domain::value_objects::TagId::from_string(tag)).collect(),
             dto.embedded_events.into_iter().map(|event| crate::domain::value_objects::EventId::from_string(event)).collect(),
-            match dto.rarity {
-                RarityDto::Common => crate::domain::value_objects::RuntimeCardRarity::Common,
-                RarityDto::Uncommon => crate::domain::value_objects::RuntimeCardRarity::Uncommon,
-                RarityDto::Rare => crate::domain::value_objects::RuntimeCardRarity::Rare,
-                RarityDto::Legendary => crate::domain::value_objects::RuntimeCardRarity::Legendary,
-            },
         )
     }
 }

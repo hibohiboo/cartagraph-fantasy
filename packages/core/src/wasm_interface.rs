@@ -444,7 +444,7 @@ pub fn wasm_create_character(character_id: &str, name: &str, player_id: &str) ->
 pub fn wasm_add_character_card(character_json: &str, card_id: &str, card_name: &str) -> Result<String, String> {
         use crate::domain::entities::Character;
         use crate::infrastructure::serialization::dto::CharacterDto;
-        use crate::types::{Card, CardType, Rarity, CardId};
+        use crate::types::{Card, CardType, CardId};
 
         // JSON からCharacterを復元
         let character_dto: CharacterDto = serde_json::from_str(character_json)
@@ -458,7 +458,6 @@ pub fn wasm_add_character_card(character_json: &str, card_id: &str, card_name: &
             card_type: CardType::Action,
             tags: vec![],
             embedded_events: vec![],
-            rarity: Rarity::Common,
         };
 
         // カード追加
@@ -690,7 +689,6 @@ pub fn wasm_add_shared_card_to_scenario(scenario_json: &str, card_id: &str, name
         name: name.to_string(),
         description: description.to_string(),
         card_type: crate::domain::entities::TemplateCardType::Resource,
-        rarity: crate::domain::entities::TemplateCardRarity::Common,
     };
 
     scenario.add_shared_card(card)
