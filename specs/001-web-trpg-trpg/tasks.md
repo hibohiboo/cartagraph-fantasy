@@ -428,21 +428,68 @@
 - Math.random()からの決定論的変換: テスト可能な乱数システム
 - 2d6確率論: TRPGメカニクスの数学的基盤実装
 
-### タスク14: ルールエンジン実装 [S]
-**タイプ**: 実装-コア | **優先度**: 中 | **工数**: 4時間
+### タスク14: ルールエンジン実装 [S] ✅ **完了**
+**タイプ**: 実装-コア | **優先度**: 中 | **工数**: 4時間 | **実績**: 4時間
 ```bash
 # ルール検証と効果解決の実装
 ```
-**受入条件**:
-- [ ] カード使用検証 (文脈依存ルール)
-- [ ] イベント効果解決
-- [ ] シーン遷移ルールチェック
-- [ ] グローバルvsシナリオ固有ルール処理
-- [ ] ルール違反エラー報告
+**完了 (100% - ドメインサービスパターン実装)**:
+- [x] **カード使用検証 (文脈依存ルール)**: 完全実装
+  - [x] グローバルルールでの使用制限チェック (シーン内/セッション内使用回数制限)
+  - [x] 必要タグチェック (プレイヤーが条件を満たすかの検証)
+  - [x] シナリオ固有カスタムルール検証 (RequireTag, RequireMinPlayers, RequireSceneContext)
+  - [x] 既存Cardロジックとの統合 (CardUsageContext活用)
+- [x] **イベント効果解決**: 完全実装
+  - [x] 対象選定システム (AllPlayers, SpecificPlayer, Session, Scene)
+  - [x] 効果修正適用 (AddCards, ModifyTags, ChangeScene, AddLogEntry)
+  - [x] エラーハンドリング (対象プレイヤー不在、不正イベント)
+- [x] **シーン遷移ルールチェック**: 完全実装
+  - [x] シナリオ固有遷移ルール検証 (TransitionCondition対応)
+  - [x] 基本ルール (同シーン遷移禁止、プレイヤー存在確認)
+  - [x] 条件チェック (AllPlayersReady, RequiredCardsUsed, TagThresholdMet, EventTriggered)
+- [x] **グローバルvsシナリオ固有ルール処理**: 完全実装
+  - [x] GlobalRules (デフォルトカード制限、プレイヤー上限、成功閾値)
+  - [x] ScenarioRules (カスタムルール、遷移ルール、イベント効果)
+  - [x] 階層的ルール処理 (Global → Scenario-specific)
+- [x] **ルール違反エラー報告**: 完全実装
+  - [x] 詳細なエラータイプ (CardUsageLimitExceeded, MissingRequiredTag, etc.)
+  - [x] コンテキスト付きエラーメッセージ
+  - [x] 型安全エラー伝播
 
-**依存関係**: タスク9, タスク10, タスク11, タスク12
-**必要テスト**: ルール検証、効果解決、エラー条件
-**成果物**: ゲームロジック検証用ルールエンジン
+**TDD実装成果**:
+- **RED→GREEN完全移行**: 7つのテスト全て成功 (初期のREDから実装によるGREEN達成)
+- **Domain Service実装**: RuleEngine, GlobalRules, ScenarioRules, GameContext
+- **型システム**: 25の枚数型定義 (UsageCondition, CardEffect, TransitionCondition等)
+- **包括的テストカバレッジ**: 基本機能テスト + 複合シナリオテスト + エラーケーステスト
+
+**技術的実装**:
+- **RuleEngine構造**: GlobalRules + Optional<ScenarioRules>の階層モデル
+- **検証パターン**: validate_card_usage(), resolve_event_effects(), check_scene_transition()
+- **効果解決**: EventEffect → EffectModification変換システム
+- **条件システム**: RequireTag(TagId), RequireMinPlayers(usize), RequireSceneContext(SceneContext)
+- **タグ閾値判定**: Numeric/Boolean/Text型対応のthreshold matching
+
+**アーキテクチャ品質**:
+- **オニオンアーキテクチャ準拠**: domain/services/rule_engine.rs配置
+- **既存システム統合**: Card::can_be_used_in_context()活用、Tag/CardIDとの型統合
+- **将来拡張性**: 新しいCondition/Effect/Rule追加対応の設計
+
+**完了日**: 2025-09-29
+**実装詳細**:
+- TDD 3サイクル (RED→GREEN→Refactor) + 4追加テストで7テスト完全実装
+- ルールエンジンのコア機能実装 (validate_card_usage, resolve_event_effects, check_scene_transition)
+- グローバル vs シナリオ固有ルール処理の階層実装
+- 包括的エラーハンドリング (CardUsageLimitExceeded, MissingRequiredTag, InvalidSceneContext等)
+- 113テスト全通過、型安全性確保
+
+**学習事項**:
+- ドメインサービスパターンによるビジネスルール集約の有効性
+- 階層的ルール処理 (Global→Scenario) による柔軟性とメンテナビリティ
+- TDDでの複雑なビジネスロジック実装手法確立
+
+**依存関係**: タスク9, タスク10, タスク11, タスク12 ✅
+**必要テスト**: ルール検証、効果解決、エラー条件 ✅ (7/7テスト通過)
+**成果物**: ゲームロジック検証用ルールエンジン ✅
 
 ### タスク15: イベントログシステム実装 [P]
 **タイプ**: 実装-コア | **優先度**: 中 | **工数**: 2時間
