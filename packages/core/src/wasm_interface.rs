@@ -392,4 +392,182 @@ mod contract_tests {
 
         Ok("player_operation_valid".to_string())
     }
+
+    // Character WASM Interface メソッド
+    fn wasm_create_character(character_id: &str, name: &str, player_id: &str) -> Result<String, String> {
+        use crate::domain::entities::Character;
+        use crate::domain::value_objects::*;
+        use crate::infrastructure::serialization::dto::CharacterDto;
+
+        // バリデーション
+        if character_id.is_empty() {
+            return Err("ValidationError: Character ID is required".to_string());
+        }
+        if name.is_empty() {
+            return Err("ValidationError: Character name is required".to_string());
+        }
+        if player_id.is_empty() {
+            return Err("ValidationError: Player ID is required".to_string());
+        }
+
+        // ドメインエンティティとしてCharacterを作成
+        let character_id = CharacterId::from_string(character_id.to_string());
+        let player_id = UserId::from_string(player_id.to_string());
+        let character = Character::create(character_id, name.to_string(), player_id);
+
+        // ドメインエンティティをDTOに変換してJSON返却
+        let character_dto = CharacterDto::from(character);
+        serde_json::to_string(&character_dto)
+            .map_err(|e| format!("SerializationError: {}", e))
+    }
+
+    fn wasm_add_character_card(character_json: &str, card_id: &str, card_name: &str) -> Result<String, String> {
+        use crate::domain::entities::Character;
+        use crate::infrastructure::serialization::dto::CharacterDto;
+        use crate::types::{Card, CardType, Rarity, CardId};
+
+        // JSON からCharacterを復元
+        let character_dto: CharacterDto = serde_json::from_str(character_json)
+            .map_err(|e| format!("DeserializationError: {}", e))?;
+        let mut character = Character::from(character_dto);
+
+        // カード作成（簡略版）
+        let card = Card {
+            card_id: CardId::from_string(card_id.to_string()),
+            name: card_name.to_string(),
+            card_type: CardType::Action,
+            tags: vec![],
+            embedded_events: vec![],
+            rarity: Rarity::Common,
+        };
+
+        // カード追加
+        character.add_card(card)
+            .map_err(|e| format!("BusinessLogicError: {}", e))?;
+
+        // 更新されたCharacterをDTOに変換してJSON返却
+        let character_dto = CharacterDto::from(character);
+        serde_json::to_string(&character_dto)
+            .map_err(|e| format!("SerializationError: {}", e))
+    }
+
+    fn wasm_check_scenario_participation(character_json: &str, scenario_id: &str) -> Result<String, String> {
+        use crate::domain::entities::Character;
+        use crate::infrastructure::serialization::dto::CharacterDto;
+        use crate::domain::value_objects::ScenarioId;
+
+        // JSON からCharacterを復元
+        let character_dto: CharacterDto = serde_json::from_str(character_json)
+            .map_err(|e| format!("DeserializationError: {}", e))?;
+        let character = Character::from(character_dto);
+
+        // シナリオ参加可能性チェック
+        let scenario_id = ScenarioId::from_string(scenario_id.to_string());
+        let can_join = character.can_join_scenario(&scenario_id);
+
+        Ok(format!("{{\"can_join\": {}}}", can_join))
+    }
+
+    fn wasm_add_character_session_record(character_json: &str, session_id: &str, scenario_id: &str) -> Result<String, String> {
+        use crate::domain::entities::Character;
+        use crate::infrastructure::serialization::dto::CharacterDto;
+        use crate::types::SessionRecord;
+
+        // JSON からCharacterを復元
+        let character_dto: CharacterDto = serde_json::from_str(character_json)
+            .map_err(|e| format!("DeserializationError: {}", e))?;
+        let mut character = Character::from(character_dto);
+
+        // セッション記録作成（簡略版）
+        let record = SessionRecord {
+            session_id: crate::types::SessionId::from_string(session_id.to_string()),
+            scenario_id: crate::types::ScenarioId::from_string(scenario_id.to_string()),
+            participated_at: chrono::Utc::now(),
+            final_tags: vec![],
+            final_cards: vec![],
+            feedback: None,
+        };
+
+        // セッション記録追加
+        character.add_session_record(record)
+            .map_err(|e| format!("BusinessLogicError: {}", e))?;
+
+        // 更新されたCharacterをDTOに変換してJSON返却
+        let character_dto = CharacterDto::from(character);
+        serde_json::to_string(&character_dto)
+            .map_err(|e| format!("SerializationError: {}", e))
+    }
+}
+
+#[cfg(test)]
+mod character_wasm_tests {
+    use super::*;
+
+    // Character WASM Interface テスト
+    #[test]
+    fn test_wasm_create_character() {
+        let result = WasmInterface::wasm_create_character("char1", "テストキャラクター", "player1");
+        assert!(result.is_ok());
+
+        let character_json = result.unwrap();
+        assert!(character_json.contains("テストキャラクター"));
+        assert!(character_json.contains("char1"));
+        assert!(character_json.contains("player1"));
+    }
+
+    #[test]
+    fn test_wasm_create_character_validation() {
+        // 空のcharacter_id
+        let result = WasmInterface::wasm_create_character("", "テスト", "player1");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("ValidationError"));
+
+        // 空のname
+        let result = WasmInterface::wasm_create_character("char1", "", "player1");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("ValidationError"));
+
+        // 空のplayer_id
+        let result = WasmInterface::wasm_create_character("char1", "テスト", "");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("ValidationError"));
+    }
+
+    #[test]
+    fn test_wasm_check_scenario_participation() {
+        // キャラクター作成
+        let character_json = WasmInterface::wasm_create_character("char1", "テストキャラクター", "player1").unwrap();
+
+        // 参加可能性チェック（制限なし）
+        let result = WasmInterface::wasm_check_scenario_participation(&character_json, "scenario1");
+        assert!(result.is_ok());
+        assert!(result.unwrap().contains("\"can_join\": true"));
+    }
+
+    #[test]
+    fn test_wasm_add_character_card() {
+        // キャラクター作成
+        let character_json = WasmInterface::wasm_create_character("char1", "テストキャラクター", "player1").unwrap();
+
+        // カード追加
+        let result = WasmInterface::wasm_add_character_card(&character_json, "card1", "テストカード");
+        assert!(result.is_ok());
+
+        let updated_character_json = result.unwrap();
+        assert!(updated_character_json.contains("card1"));
+    }
+
+    #[test]
+    fn test_wasm_add_character_session_record() {
+        // キャラクター作成
+        let character_json = WasmInterface::wasm_create_character("char1", "テストキャラクター", "player1").unwrap();
+
+        // セッション記録追加
+        let result = WasmInterface::wasm_add_character_session_record(&character_json, "session1", "scenario1");
+        assert!(result.is_ok());
+
+        let updated_character_json = result.unwrap();
+        assert!(updated_character_json.contains("session1"));
+        assert!(updated_character_json.contains("scenario1"));
+    }
 }

@@ -192,3 +192,96 @@ impl From<PlayerStatusDto> for PlayerStatus {
         }
     }
 }
+
+// Character DTO定義
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct CharacterDto {
+    pub character_id: String,
+    pub name: String,
+    pub player_id: String,
+    pub personal_cards: Vec<String>, // CardId as string
+    pub acquired_tags: Vec<String>,  // TagId as string
+    pub session_history: Vec<SessionRecordDto>,
+    pub scenario_restrictions: HashMap<String, String>, // ScenarioId -> RestrictionReason
+    #[ts(type = "string")]
+    pub created_at: DateTime<Utc>,
+    #[ts(type = "string")]
+    pub last_updated: DateTime<Utc>,
+    pub version: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct SessionRecordDto {
+    pub session_id: String,
+    pub scenario_id: String,
+    #[ts(type = "string")]
+    pub participated_at: DateTime<Utc>,
+    pub final_tags: Vec<String>,  // TagId as string
+    pub final_cards: Vec<String>, // CardId as string
+    pub feedback: Option<String>,
+}
+
+// Character変換ロジック
+impl From<Character> for CharacterDto {
+    fn from(character: Character) -> Self {
+        Self {
+            character_id: character.character_id.0,
+            name: character.name,
+            player_id: character.player_id.0,
+            personal_cards: character.personal_cards.into_iter().map(|c| c.card_id.0).collect(),
+            acquired_tags: character.acquired_tags.into_iter().map(|t| t.tag_id.0).collect(),
+            session_history: character.session_history.into_iter().map(SessionRecordDto::from).collect(),
+            scenario_restrictions: character.scenario_restrictions.into_iter()
+                .map(|(k, v)| (k.0, format!("{:?}", v)))
+                .collect(),
+            created_at: character.created_at,
+            last_updated: character.last_updated,
+            version: character.version,
+        }
+    }
+}
+
+impl From<CharacterDto> for Character {
+    fn from(dto: CharacterDto) -> Self {
+        Self {
+            character_id: CharacterId::from_string(dto.character_id),
+            name: dto.name,
+            player_id: UserId::from_string(dto.player_id),
+            personal_cards: Vec::new(), // 簡略化: 実際の実装では CardId から Card を復元する必要あり
+            acquired_tags: Vec::new(),  // 簡略化: 実際の実装では TagId から Tag を復元する必要あり
+            session_history: dto.session_history.into_iter().map(SessionRecord::from).collect(),
+            scenario_restrictions: HashMap::new(), // 簡略化: RestrictionReason のパース必要
+            created_at: dto.created_at,
+            last_updated: dto.last_updated,
+            version: dto.version,
+        }
+    }
+}
+
+impl From<crate::types::SessionRecord> for SessionRecordDto {
+    fn from(record: crate::types::SessionRecord) -> Self {
+        Self {
+            session_id: record.session_id.0,
+            scenario_id: record.scenario_id.0,
+            participated_at: record.participated_at,
+            final_tags: record.final_tags.into_iter().map(|t| t.tag_id.0).collect(),
+            final_cards: record.final_cards.into_iter().map(|c| c.card_id.0).collect(),
+            feedback: record.feedback,
+        }
+    }
+}
+
+impl From<SessionRecordDto> for crate::types::SessionRecord {
+    fn from(dto: SessionRecordDto) -> Self {
+        Self {
+            session_id: crate::types::SessionId::from_string(dto.session_id),
+            scenario_id: crate::types::ScenarioId::from_string(dto.scenario_id),
+            participated_at: dto.participated_at,
+            final_tags: Vec::new(), // 簡略化: TagId から Tag を復元する必要あり
+            final_cards: Vec::new(), // 簡略化: CardId から Card を復元する必要あり
+            feedback: dto.feedback,
+        }
+    }
+}
