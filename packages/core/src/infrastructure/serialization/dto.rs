@@ -251,7 +251,7 @@ impl From<CharacterDto> for Character {
             player_id: UserId::from_string(dto.player_id),
             personal_cards: Vec::new(), // 簡略化: 実際の実装では CardId から Card を復元する必要あり
             acquired_tags: Vec::new(),  // 簡略化: 実際の実装では TagId から Tag を復元する必要あり
-            session_history: dto.session_history.into_iter().map(SessionRecord::from).collect(),
+            session_history: dto.session_history.into_iter().map(crate::types::SessionRecord::from).collect(),
             scenario_restrictions: HashMap::new(), // 簡略化: RestrictionReason のパース必要
             created_at: dto.created_at,
             last_updated: dto.last_updated,

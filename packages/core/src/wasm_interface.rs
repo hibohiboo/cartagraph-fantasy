@@ -1,10 +1,17 @@
 // WASM FFI インターフェース - Task 7: Contract Tests
 // オニオンアーキテクチャ対応（DTOベース実装）
 
+// 必要なインポートを追加
+use crate::domain::entities::*;
+use crate::domain::value_objects::*;
+use crate::infrastructure::serialization::dto::*;
+
 #[cfg(test)]
 mod contract_tests {
-    use crate::domain::*;
-    use crate::infrastructure::*;
+    use crate::domain::entities::*;
+    use crate::domain::value_objects::*;
+    use crate::infrastructure::serialization::dto::*;
+    use super::*;
     #[test]
     fn test_create_session_wasm_contract() {
         // createSession WASM FFI メソッドのコントラクトテスト
@@ -246,9 +253,10 @@ mod contract_tests {
         let json_error = json_error_result.unwrap_err();
         assert!(json_error.starts_with("Deserialization failed:"));
     }
+}
 
-    // WASM FFI Implementation: GameSession作成（DTOベース）
-    fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, String> {
+// WASM FFI Implementation: GameSession作成（DTOベース）
+fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, String> {
         // オニオンアーキテクチャ：ドメインエンティティを使用し、DTOで外部と連携
         let session_id = SessionId::from_string(session_id.to_string());
         let scenario_id = ScenarioId::from_string(scenario_id.to_string());
@@ -393,8 +401,8 @@ mod contract_tests {
         Ok("player_operation_valid".to_string())
     }
 
-    // Character WASM Interface メソッド
-    fn wasm_create_character(character_id: &str, name: &str, player_id: &str) -> Result<String, String> {
+// Character WASM Interface メソッド
+fn wasm_create_character(character_id: &str, name: &str, player_id: &str) -> Result<String, String> {
         use crate::domain::entities::Character;
         use crate::domain::value_objects::*;
         use crate::infrastructure::serialization::dto::CharacterDto;
@@ -421,7 +429,7 @@ mod contract_tests {
             .map_err(|e| format!("SerializationError: {}", e))
     }
 
-    fn wasm_add_character_card(character_json: &str, card_id: &str, card_name: &str) -> Result<String, String> {
+fn wasm_add_character_card(character_json: &str, card_id: &str, card_name: &str) -> Result<String, String> {
         use crate::domain::entities::Character;
         use crate::infrastructure::serialization::dto::CharacterDto;
         use crate::types::{Card, CardType, Rarity, CardId};
@@ -451,7 +459,7 @@ mod contract_tests {
             .map_err(|e| format!("SerializationError: {}", e))
     }
 
-    fn wasm_check_scenario_participation(character_json: &str, scenario_id: &str) -> Result<String, String> {
+fn wasm_check_scenario_participation(character_json: &str, scenario_id: &str) -> Result<String, String> {
         use crate::domain::entities::Character;
         use crate::infrastructure::serialization::dto::CharacterDto;
         use crate::domain::value_objects::ScenarioId;
@@ -468,7 +476,7 @@ mod contract_tests {
         Ok(format!("{{\"can_join\": {}}}", can_join))
     }
 
-    fn wasm_add_character_session_record(character_json: &str, session_id: &str, scenario_id: &str) -> Result<String, String> {
+fn wasm_add_character_session_record(character_json: &str, session_id: &str, scenario_id: &str) -> Result<String, String> {
         use crate::domain::entities::Character;
         use crate::infrastructure::serialization::dto::CharacterDto;
         use crate::types::SessionRecord;
@@ -496,7 +504,6 @@ mod contract_tests {
         let character_dto = CharacterDto::from(character);
         serde_json::to_string(&character_dto)
             .map_err(|e| format!("SerializationError: {}", e))
-    }
 }
 
 #[cfg(test)]
@@ -506,7 +513,7 @@ mod character_wasm_tests {
     // Character WASM Interface テスト
     #[test]
     fn test_wasm_create_character() {
-        let result = WasmInterface::wasm_create_character("char1", "テストキャラクター", "player1");
+        let result = wasm_create_character("char1", "テストキャラクター", "player1");
         assert!(result.is_ok());
 
         let character_json = result.unwrap();
@@ -518,17 +525,17 @@ mod character_wasm_tests {
     #[test]
     fn test_wasm_create_character_validation() {
         // 空のcharacter_id
-        let result = WasmInterface::wasm_create_character("", "テスト", "player1");
+        let result = wasm_create_character("", "テスト", "player1");
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("ValidationError"));
 
         // 空のname
-        let result = WasmInterface::wasm_create_character("char1", "", "player1");
+        let result = wasm_create_character("char1", "", "player1");
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("ValidationError"));
 
         // 空のplayer_id
-        let result = WasmInterface::wasm_create_character("char1", "テスト", "");
+        let result = wasm_create_character("char1", "テスト", "");
         assert!(result.is_err());
         assert!(result.unwrap_err().contains("ValidationError"));
     }
@@ -536,10 +543,10 @@ mod character_wasm_tests {
     #[test]
     fn test_wasm_check_scenario_participation() {
         // キャラクター作成
-        let character_json = WasmInterface::wasm_create_character("char1", "テストキャラクター", "player1").unwrap();
+        let character_json = wasm_create_character("char1", "テストキャラクター", "player1").unwrap();
 
         // 参加可能性チェック（制限なし）
-        let result = WasmInterface::wasm_check_scenario_participation(&character_json, "scenario1");
+        let result = wasm_check_scenario_participation(&character_json, "scenario1");
         assert!(result.is_ok());
         assert!(result.unwrap().contains("\"can_join\": true"));
     }
@@ -547,10 +554,10 @@ mod character_wasm_tests {
     #[test]
     fn test_wasm_add_character_card() {
         // キャラクター作成
-        let character_json = WasmInterface::wasm_create_character("char1", "テストキャラクター", "player1").unwrap();
+        let character_json = wasm_create_character("char1", "テストキャラクター", "player1").unwrap();
 
         // カード追加
-        let result = WasmInterface::wasm_add_character_card(&character_json, "card1", "テストカード");
+        let result = wasm_add_character_card(&character_json, "card1", "テストカード");
         assert!(result.is_ok());
 
         let updated_character_json = result.unwrap();
@@ -560,10 +567,10 @@ mod character_wasm_tests {
     #[test]
     fn test_wasm_add_character_session_record() {
         // キャラクター作成
-        let character_json = WasmInterface::wasm_create_character("char1", "テストキャラクター", "player1").unwrap();
+        let character_json = wasm_create_character("char1", "テストキャラクター", "player1").unwrap();
 
         // セッション記録追加
-        let result = WasmInterface::wasm_add_character_session_record(&character_json, "session1", "scenario1");
+        let result = wasm_add_character_session_record(&character_json, "session1", "scenario1");
         assert!(result.is_ok());
 
         let updated_character_json = result.unwrap();
