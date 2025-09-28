@@ -3,7 +3,17 @@ pub mod entities;
 pub mod value_objects;
 pub mod events;
 
-// ドメインエンティティと値オブジェクトを公開
-pub use entities::*;
-pub use value_objects::*;
+// ドメインエンティティと値オブジェクトを公開（曖昧さ回避のため明示的にインポート）
+pub use entities::{
+    GameSession, Character, ScenarioTemplate, SessionPlayer,
+    SceneDefinition, PlayerRange, Difficulty,
+    CardTemplate, CardType as EntityCardType, CardRarity as EntityCardRarity,
+};
+pub use value_objects::{
+    SessionId, PlayerId, UserId, CharacterId, ScenarioId, SceneId, EventId, CardId, TagId,
+    SessionStatus, PlayerStatus,
+    Card, CardType as ValueCardType, Rarity,
+    Tag, TagCategory, TagValue,
+    CardUsageContext, CardUsageError, SceneContext,
+};
 pub use events::*;
