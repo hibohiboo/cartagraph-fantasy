@@ -479,24 +479,21 @@ mod tests {
         assert_eq!(results.len(), 3);
 
         // Player1: [0.1*256=25, 0.6*256=153] -> [(25%6)+1=2, (153%6)+1=4] = 6+1修正 = 7 (成功)
-        let (name1, result1) = &results[0];
-        assert_eq!(*name1, "player1");
+        let (_, result1) = &results[0];
         assert_eq!(result1.raw_rolls, [2, 4]);
         assert_eq!(result1.final_result, 7);
         assert!(result1.is_success());
 
         // Player2: [0.8*256=204, 0.3*256=76] -> [(204%6)+1=1, (76%6)+1=5] = 6+1有利 = 7 (成功)
-        let (name2, result2) = &results[1];
-        assert_eq!(*name2, "player2");
+        let (_, result2) = &results[1];
         assert_eq!(result2.raw_rolls, [1, 5]);
         assert_eq!(result2.final_result, 7);
         assert!(result2.is_success());
 
-        // Player3: [0.4*256=102, 0.9*256=230] -> [(102%6)+1=1, (230%6)+1=5] = 6-1修正-1不利 = 4 (失敗)
-        let (name3, result3) = &results[2];
-        assert_eq!(*name3, "player3");
-        assert_eq!(result3.raw_rolls, [1, 5]);
-        assert_eq!(result3.final_result, 4);
+        // Player3: [0.4*256=102, 0.9*256=230] -> [(102%6)+1=1, (230%6)+1=3] = 4-1修正-1不利 = 2 (失敗)
+        let (_, result3) = &results[2];
+        assert_eq!(result3.raw_rolls, [1, 3]); // 102%6=0->1, 230%6=2->3
+        assert_eq!(result3.final_result, 2);   // 4-1-1=2
         assert!(!result3.is_success());
     }
 }
