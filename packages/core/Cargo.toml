@@ -18,10 +18,7 @@ chrono = { version = "0.4", features = ["wasm-bindgen", "serde"] }
 js-sys = "0.3"
 web-sys = "0.3"
 console_error_panic_hook = "0.1"
-
-[dependencies.getrandom]
-version = "0.3"
-features = ["wasm_js"]
+getrandom = { version = "0.3", features = ["wasm_js"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
