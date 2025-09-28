@@ -15,5 +15,6 @@ pub use value_objects::{
     Card, RuntimeCardType,
     Tag, TagCategory, TagValue,
     CardUsageContext, CardUsageError, SceneContext,
+    DiceNotation, DiceResult, AdvantageType, DiceParseError, DiceRollError,
 };
 pub use events::*;
