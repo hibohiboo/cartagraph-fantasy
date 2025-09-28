@@ -65,8 +65,12 @@ impl Tag {
 
     /// タグの値を変更（同じタグIDで新しい値オブジェクトを作成）
     pub fn with_value(&self, new_value: Option<TagValue>) -> Self {
-        // TODO: implement value modification
-        unimplemented!("Tag value modification not yet implemented")
+        Self {
+            tag_id: self.tag_id.clone(),
+            name: self.name.clone(),
+            category: self.category.clone(),
+            value: new_value,
+        }
     }
 }
 
@@ -120,5 +124,29 @@ mod tests {
         assert_eq!(text_tag.numeric_value(), None);
         // 値なしタグからはNone
         assert_eq!(no_value_tag.numeric_value(), None);
+    }
+
+    #[test]
+    fn test_tag_value_modification() {
+        // TDDサイクル6: タグ値変更ロジック
+        let original_tag = Tag::new(
+            TagId::new(),
+            "レベル".to_string(),
+            TagCategory::Status,
+            Some(TagValue::Numeric(1)),
+        );
+
+        // 数値を増加
+        let upgraded_tag = original_tag.with_value(Some(TagValue::Numeric(2)));
+        assert_eq!(upgraded_tag.numeric_value(), Some(2));
+        // 元のタグは変更されない（値オブジェクトの不変性）
+        assert_eq!(original_tag.numeric_value(), Some(1));
+        // IDと名前は同じ
+        assert_eq!(upgraded_tag.tag_id(), original_tag.tag_id());
+        assert_eq!(upgraded_tag.name(), original_tag.name());
+
+        // 値をなしに変更
+        let cleared_tag = original_tag.with_value(None);
+        assert_eq!(cleared_tag.numeric_value(), None);
     }
 }

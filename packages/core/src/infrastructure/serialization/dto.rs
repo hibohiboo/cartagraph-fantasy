@@ -18,6 +18,8 @@ pub struct GameSessionDto {
     pub max_players: usize,
     pub current_scene: String,
     pub session_status: SessionStatusDto,
+    pub shared_cards: Vec<CardDto>,
+    pub available_choices: Vec<String>,
     pub version: u64,
 }
 
@@ -83,6 +85,8 @@ impl From<&GameSession> for GameSessionDto {
             max_players: session.max_players,
             current_scene: session.current_scene.0.clone(),
             session_status: (&session.session_status).into(),
+            shared_cards: session.shared_cards.iter().map(|card| card.into()).collect(),
+            available_choices: session.available_choices.iter().map(|choice| choice.0.clone()).collect(),
             version: session.version,
         }
     }
@@ -145,6 +149,8 @@ impl From<GameSessionDto> for GameSession {
             max_players: dto.max_players,
             current_scene: SceneId::from_string(dto.current_scene),
             session_status: dto.session_status.into(),
+            shared_cards: dto.shared_cards.into_iter().map(|card| card.into()).collect(),
+            available_choices: dto.available_choices.into_iter().map(|choice| CardId::from_string(choice)).collect(),
             version: dto.version,
         }
     }
@@ -464,5 +470,83 @@ impl From<ScenarioTemplateDto> for crate::domain::entities::ScenarioTemplate {
             last_updated: dto.last_updated,
             version: dto.version,
         }
+    }
+}
+
+// Card/Tag DTO (GameSession用)
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub struct CardDto {
+    pub card_id: String,
+    pub name: String,
+    pub card_type: CardTypeValueObjectDto,
+    pub tags: Vec<String>,
+    pub embedded_events: Vec<String>,
+    pub rarity: RarityDto,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub enum CardTypeValueObjectDto {
+    Action,
+    Choice,
+    Possession,
+    SceneTransition,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[ts(export)]
+pub enum RarityDto {
+    Common,
+    Uncommon,
+    Rare,
+    Legendary,
+}
+
+// Card: ドメイン → DTO変換
+impl From<&crate::domain::value_objects::Card> for CardDto {
+    fn from(card: &crate::domain::value_objects::Card) -> Self {
+        Self {
+            card_id: card.card_id().0.clone(),
+            name: card.name().to_string(),
+            card_type: match card.card_type() {
+                crate::domain::value_objects::CardType::Action => CardTypeValueObjectDto::Action,
+                crate::domain::value_objects::CardType::Choice => CardTypeValueObjectDto::Choice,
+                crate::domain::value_objects::CardType::Possession => CardTypeValueObjectDto::Possession,
+                crate::domain::value_objects::CardType::SceneTransition => CardTypeValueObjectDto::SceneTransition,
+            },
+            tags: card.tags().iter().map(|tag| tag.0.clone()).collect(),
+            embedded_events: card.embedded_events().iter().map(|event| event.0.clone()).collect(),
+            rarity: match card.rarity() {
+                crate::domain::value_objects::Rarity::Common => RarityDto::Common,
+                crate::domain::value_objects::Rarity::Uncommon => RarityDto::Uncommon,
+                crate::domain::value_objects::Rarity::Rare => RarityDto::Rare,
+                crate::domain::value_objects::Rarity::Legendary => RarityDto::Legendary,
+            },
+        }
+    }
+}
+
+// Card: DTO → ドメイン変換
+impl From<CardDto> for crate::domain::value_objects::Card {
+    fn from(dto: CardDto) -> Self {
+        Self::new(
+            crate::domain::value_objects::CardId::from_string(dto.card_id),
+            dto.name,
+            match dto.card_type {
+                CardTypeValueObjectDto::Action => crate::domain::value_objects::CardType::Action,
+                CardTypeValueObjectDto::Choice => crate::domain::value_objects::CardType::Choice,
+                CardTypeValueObjectDto::Possession => crate::domain::value_objects::CardType::Possession,
+                CardTypeValueObjectDto::SceneTransition => crate::domain::value_objects::CardType::SceneTransition,
+            },
+            dto.tags.into_iter().map(|tag| crate::domain::value_objects::TagId::from_string(tag)).collect(),
+            dto.embedded_events.into_iter().map(|event| crate::domain::value_objects::EventId::from_string(event)).collect(),
+            match dto.rarity {
+                RarityDto::Common => crate::domain::value_objects::Rarity::Common,
+                RarityDto::Uncommon => crate::domain::value_objects::Rarity::Uncommon,
+                RarityDto::Rare => crate::domain::value_objects::Rarity::Rare,
+                RarityDto::Legendary => crate::domain::value_objects::Rarity::Legendary,
+            },
+        )
     }
 }

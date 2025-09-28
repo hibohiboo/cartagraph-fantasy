@@ -93,6 +93,10 @@ impl EventId {
     pub fn new() -> Self {
         Self(Uuid::new_v4().to_string())
     }
+
+    pub fn from_string(s: String) -> Self {
+        Self(s)
+    }
 }
 
 impl CardId {
@@ -108,5 +112,9 @@ impl CardId {
 impl TagId {
     pub fn new() -> Self {
         Self(Uuid::new_v4().to_string())
+    }
+
+    pub fn from_string(s: String) -> Self {
+        Self(s)
     }
 }
