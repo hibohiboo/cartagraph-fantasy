@@ -687,133 +687,89 @@ pub struct GameStateSnapshot {
 
 ---
 
-## 11. Onion Architecture Implementation Status
+## 11. アーキテクチャ統合戦略
 
-### Architecture Overview (実装済み)
+### オニオンアーキテクチャ設計方針
+
+#### レイヤー分離戦略
 ```
-packages/core/src/
-├── domain/              # Domain Layer (インフラ依存なし)
-│   ├── entities/        # 集約ルート・エンティティ
-│   │   ├── game_session.rs    # GameSession集約 ✅ 完了
-│   │   └── character.rs       # Character集約 ✅ 完了
-│   ├── value_objects/   # 値オブジェクト
-│   │   └── identifiers.rs     # ID型定義 ✅ 完了
-│   └── mod.rs          # ドメイン境界定義 ✅ 完了
-├── infrastructure/     # Infrastructure Layer
-│   └── serialization/
-│       └── dto.rs      # DTO変換 ✅ 完了
-└── wasm_interface.rs   # WASM FFI境界 ✅ 完了
-```
+Domain Layer (コアビジネスロジック)
+├── Entities: ビジネス不変条件を持つ集約ルート
+├── Value Objects: 不変なドメイン概念
+└── Domain Services: 複雑なビジネス操作
 
-### Domain Layer Implementation (完了)
+Application Layer (ユースケース)
+├── Commands: 状態変更操作
+├── Queries: データ取得操作
+└── Handlers: オーケストレーションロジック
 
-#### GameSession集約
-- **純粋ドメインロジック**: Serde traitを除去、インフラ依存ゼロ実現
-- **集約ルート境界**: セッション一貫性の完全実装
-- **TDD実装**: 61/61テスト通過、小さなサイクルでの段階的実装
-- **状態遷移**: SessionStatus, PlayerStatusの完全実装
-
-#### Character集約
-- **純粋ドメインロジック**: インフラ依存なしの実装完了
-- **ビジネスルール**: カード追加、タグ管理、シナリオ制限チェック
-- **TDD実装**: 19/19テスト通過、5つのTDDサイクル完了
-- **セッション履歴**: SessionRecord管理の完全実装
-
-### Infrastructure Layer Implementation (完了)
-
-#### DTO Pattern
-```rust
-// DTOパターン: ドメイン ↔ WASM境界の型安全性確保
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
-#[ts(export)]
-pub struct GameSessionDto {
-    pub session_id: String,
-    pub scenario_id: String,
-    // ... 他のフィールド
-}
-
-// 双方向変換の実装
-impl From<&GameSession> for GameSessionDto { /* 実装済み */ }
-impl From<GameSessionDto> for GameSession { /* 実装済み */ }
+Infrastructure Layer (外部関心事)
+├── Serialization: 境界向けDTO変換
+├── Persistence: イベントソーシング & スナップショット
+└── Integration: WebAssembly FFI契約
 ```
 
-#### TypeScript型生成
-- **ts-rs統合**: Rust型から自動的にTypeScript型定義生成
-- **WASM境界**: 型安全なFFI contractsの実現
-- **型同期**: ドメイン変更 → TypeScript型の自動更新
+#### 境界間通信パターン
 
-### WASM Interface Implementation (完了)
+**Domain ↔ Infrastructure境界**:
+- **パターン**: シリアライゼーション用データ転送オブジェクト(DTO)
+- **責務**: ドメインエンティティと外部表現間の型安全変換
+- **制約**: ドメイン層は外部依存ゼロを維持
 
-#### Contract Methods
-```rust
-// GameSession WASM interface
-pub fn wasm_create_session(scenario_id: String, gm_user_id: String) -> String;
-pub fn wasm_join_session(session_data: String, player_id: String, user_id: String) -> String;
-pub fn wasm_start_session(session_data: String) -> String;
-pub fn wasm_leave_session(session_data: String, player_id: String) -> String;
+**Rust ↔ TypeScript境界**:
+- **パターン**: 構造化シリアライゼーション付きWebAssembly FFI
+- **型安全性**: Rust型からTypeScript定義の自動生成
+- **パフォーマンス**: JSONシリアライゼーション付き文字列ベースメッセージパッシング
 
-// Character WASM interface
-pub fn wasm_create_character(character_id: String, name: String, player_id: String) -> String;
-pub fn wasm_add_character_card(character_data: String, card_data: String) -> String;
-pub fn wasm_check_scenario_participation(character_data: String, scenario_id: String) -> String;
-pub fn wasm_add_character_session_record(character_data: String, record_data: String) -> String;
-```
+### 統合ポイント
 
-### Architecture Quality Assurance
+#### フロントエンド統合戦略
+- **状態管理**: IndexedDB永続化付きイベントソーシング
+- **リアルタイム同期**: クロスタブ協調用BroadcastChannel
+- **ワーカー通信**: CPU集約的操作向けWebWorker分離
+- **UI結合**: WASM操作をラップするReactフック
 
-#### 依存方向の正確性 ✅
-```
-Infrastructure → Domain (正しい)
-WASM Interface → Domain + Infrastructure (正しい)
-Domain → 外部依存なし (正しい)
-```
+#### ストレージアーキテクチャ
+- **イベントストア**: イベントストリーム用IndexedDBオブジェクトストア
+- **スナップショット**: 定期的な集約状態の物質化
+- **オフライン対応**: 最終的なバックエンド同期付きローカルファースト
+- **競合解決**: イベントタイムスタンプベースのマージ戦略
 
-#### Domain Layer純粋性 ✅
-- **Serde traits除去**: `#[derive(Serialize, Deserialize)]`を完全排除
-- **Infrastructure分離**: シリアライゼーション責任をInfrastructure層に移譲
-- **ビジネスロジック集中**: ドメインルール実装のみにフォーカス
+#### 将来のバックエンド統合
+- **API契約**: OpenAPIスキーマ駆動型生成
+- **イベントストリーミング**: ローカル → バックエンドイベントストア同期
+- **認証**: JWTベースセッション管理
+- **スケーラビリティ**: 集約単位サービス分解戦略
 
-#### 型安全境界 ✅
-- **DTO変換**: ドメイン型 ↔ DTO変換で境界型安全性確保
-- **WASM契約**: String-based FFI + 構造化シリアライゼーション
-- **TypeScript統合**: Rust型からのTypeScript定義自動生成
+### 設計品質保証
 
-### Test Coverage Status
+#### アーキテクチャ制約
+- **依存方向**: Infrastructure → Application → Domain (強制)
+- **ドメイン純粋性**: ドメイン層の外部依存なし
+- **集約境界**: 単一集約内でのトランザクション一貫性
+- **イベントソーシング**: ドメインイベントとしての全状態変更キャプチャ
 
-#### テスト実行結果 (74/74 通過)
-```bash
-GameSession Tests: 61/61 ✅
-Character Tests: 19/19 ✅
-Contract Tests: 8/8 ✅ (WASM interface)
-Integration Tests: 完了 ✅
-```
+#### 統合テスト戦略
+- **契約テスト**: API仕様準拠検証
+- **境界間テスト**: DTO変換正確性検証
+- **WebAssembly統合**: FFI契約動作検証
+- **エンドツーエンドシナリオ**: 完全ユーザーワークフロー検証
 
-#### TDD実装証跡
-- **小さなサイクル**: 各機能を1つずつテストファースト実装
-- **RED-GREEN-Refactor**: 純粋なTDDサイクルの徹底
-- **段階的拡張**: 最小ケース → 基本ケース → 制約付きケースの順次実装
+### 実装ロードマップ
 
-### Next Implementation Phase
+#### フェーズ1: ドメイン基盤 (現在)
+- ビジネスロジック付きコア集約実装
+- 型安全性向け値オブジェクト定義
+- 状態変更向けドメインイベント仕様
 
-#### ScenarioTemplate集約 (Task 11)
-- **Domain実装**: TDD-firstでのScenarioTemplate集約実装
-- **DTO統合**: ScenarioTemplateDto + 双方向変換
-- **WASM interface**: Scenario CRUD operations
-- **型生成**: TypeScript型定義の自動生成
+#### フェーズ2: アプリケーションサービス (次期)
+- ゲームフロー統制向けユースケース実装
+- CQRSパターン向けコマンド/クエリ分離
+- 集約間協調向けアプリケーションサービス
 
-#### アーキテクチャ維持方針
-- **依存方向**: Infrastructure → Domain の厳格な維持
-- **純粋性**: Domain層の外部依存ゼロ維持
-- **型安全性**: DTO境界での完全な型変換実装
-- **TDD継続**: 新機能実装での小さなサイクル徹底
+#### フェーズ3: インフラ統合 (将来)
+- 永続化向けRepositoryパターン実装
+- WebAssembly FFI最適化とエラーハンドリング
+- React状態管理付きフロントエンド統合
 
-### Summary
-
-オニオンアーキテクチャの実装により、以下を達成：
-
-1. **ドメインロジック独立性**: インフラ依存ゼロのクリーンなドメイン層
-2. **型安全WASM境界**: DTOパターンによる構造化シリアライゼーション
-3. **テスト可能性**: 74/74テスト通過、TDD実装品質保証
-4. **拡張性**: 新集約追加時の既存コード影響ゼロ設計
-
-このアーキテクチャ基盤により、ScenarioTemplate集約以降の実装も同様の品質で拡張可能。
+このアーキテクチャにより、ブラウザ環境での効率的なWebAssemblyベースゲームロジック実行を可能にしつつ、保守可能な関心事分離を保証します。
