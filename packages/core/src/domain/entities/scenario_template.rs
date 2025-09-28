@@ -107,11 +107,16 @@ impl ScenarioTemplate {
     }
 
     pub fn add_scene(&mut self, scene: SceneDefinition) -> Result<(), String> {
-        unimplemented!("TDD cycle 2: add_scene")
+        let scene_id = scene.scene_id.clone();
+        self.scenes.insert(scene_id, scene);
+        self.last_updated = chrono::Utc::now();
+        Ok(())
     }
 
     pub fn add_shared_card(&mut self, card: CardTemplate) -> Result<(), String> {
-        unimplemented!("TDD cycle 3: add_shared_card")
+        self.shared_cards.push(card);
+        self.last_updated = chrono::Utc::now();
+        Ok(())
     }
 
     pub fn validate_scene_flow(&self) -> Result<(), String> {
@@ -158,5 +163,64 @@ mod tests {
         assert_eq!(scenario.recommended_players.min, 1);
         assert_eq!(scenario.recommended_players.max, 6);
         assert_eq!(scenario.difficulty, Difficulty::Beginner);
+    }
+
+    // TDD Cycle 2: add_scene() - RED phase
+    #[test]
+    fn test_add_scene_basic() {
+        let mut scenario = ScenarioTemplate::create(
+            ScenarioId::new(),
+            "Test Scenario".to_string(),
+            "Test description".to_string(),
+            UserId::new(),
+        );
+
+        let scene_id = SceneId::new();
+        let scene = SceneDefinition {
+            scene_id: scene_id.clone(),
+            name: "Opening Scene".to_string(),
+            description: "The adventure begins".to_string(),
+            objectives: vec!["Meet the NPC".to_string()],
+            completion_conditions: vec!["Talk to innkeeper".to_string()],
+        };
+
+        // シーン追加のテスト
+        let result = scenario.add_scene(scene.clone());
+        assert!(result.is_ok());
+
+        // シーンが正しく追加されたかテスト
+        assert_eq!(scenario.scenes.len(), 1);
+        assert!(scenario.scenes.contains_key(&scene_id));
+        assert_eq!(scenario.scenes.get(&scene_id).unwrap().name, "Opening Scene");
+    }
+
+    // TDD Cycle 3: add_shared_card() - RED phase
+    #[test]
+    fn test_add_shared_card_basic() {
+        let mut scenario = ScenarioTemplate::create(
+            ScenarioId::new(),
+            "Test Scenario".to_string(),
+            "Test description".to_string(),
+            UserId::new(),
+        );
+
+        let card_id = CardId::new();
+        let card = CardTemplate {
+            card_id: card_id.clone(),
+            name: "Magic Sword".to_string(),
+            description: "A powerful weapon".to_string(),
+            card_type: CardType::Resource,
+            rarity: CardRarity::Rare,
+        };
+
+        // カード追加のテスト
+        let result = scenario.add_shared_card(card.clone());
+        assert!(result.is_ok());
+
+        // カードが正しく追加されたかテスト
+        assert_eq!(scenario.shared_cards.len(), 1);
+        assert_eq!(scenario.shared_cards[0].name, "Magic Sword");
+        assert_eq!(scenario.shared_cards[0].card_type, CardType::Resource);
+        assert_eq!(scenario.shared_cards[0].rarity, CardRarity::Rare);
     }
 }
