@@ -130,6 +130,10 @@ packages/
 │   │   │   ├── aggregates/      # 集約ルート定義 (将来)
 │   │   │   ├── events/          # ドメインイベント (将来)
 │   │   │   └── services/        # ドメインサービス (将来)
+│   │   ├── application/         # Application Layer (未実装)
+│   │   │   ├── usecases/        # ゲーム進行ロジック (Task 12+)
+│   │   │   ├── commands/        # コマンドハンドラー (将来)
+│   │   │   └── queries/         # クエリハンドラー (将来)
 │   │   ├── infrastructure/      # Infrastructure Layer
 │   │   │   ├── serialization/
 │   │   │   │   └── dto.rs       # DTO変換 (境界型安全性)
