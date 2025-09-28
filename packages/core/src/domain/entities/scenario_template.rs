@@ -120,11 +120,32 @@ impl ScenarioTemplate {
     }
 
     pub fn validate_scene_flow(&self) -> Result<(), String> {
-        unimplemented!("TDD cycle 4: validate_scene_flow")
+        if self.scenes.is_empty() {
+            return Err("No scenes defined in scenario".to_string());
+        }
+
+        if self.initial_scene_id.is_none() {
+            return Err("No initial scene set".to_string());
+        }
+
+        // Initial sceneがscenesに存在することを確認
+        if let Some(ref initial_id) = self.initial_scene_id {
+            if !self.scenes.contains_key(initial_id) {
+                return Err("Initial scene not found in scenes".to_string());
+            }
+        }
+
+        Ok(())
     }
 
     pub fn set_initial_scene(&mut self, scene_id: SceneId) -> Result<(), String> {
-        unimplemented!("TDD cycle 5: set_initial_scene")
+        if !self.scenes.contains_key(&scene_id) {
+            return Err("Scene not found in scenario".to_string());
+        }
+
+        self.initial_scene_id = Some(scene_id);
+        self.last_updated = chrono::Utc::now();
+        Ok(())
     }
 }
 
@@ -222,5 +243,67 @@ mod tests {
         assert_eq!(scenario.shared_cards[0].name, "Magic Sword");
         assert_eq!(scenario.shared_cards[0].card_type, CardType::Resource);
         assert_eq!(scenario.shared_cards[0].rarity, CardRarity::Rare);
+    }
+
+    // TDD Cycle 4: validate_scene_flow() - RED phase
+    #[test]
+    fn test_validate_scene_flow_basic() {
+        let mut scenario = ScenarioTemplate::create(
+            ScenarioId::new(),
+            "Test Scenario".to_string(),
+            "Test description".to_string(),
+            UserId::new(),
+        );
+
+        // 空のシナリオは無効
+        let result = scenario.validate_scene_flow();
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("No scenes"));
+
+        // シーンを追加してinitial_sceneがないケース
+        let scene = SceneDefinition {
+            scene_id: SceneId::new(),
+            name: "Scene 1".to_string(),
+            description: "First scene".to_string(),
+            objectives: vec!["Start the adventure".to_string()],
+            completion_conditions: vec!["Enter the dungeon".to_string()],
+        };
+        scenario.add_scene(scene).unwrap();
+
+        let result = scenario.validate_scene_flow();
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("No initial scene"));
+    }
+
+    // TDD Cycle 5: set_initial_scene() - RED phase
+    #[test]
+    fn test_set_initial_scene_basic() {
+        let mut scenario = ScenarioTemplate::create(
+            ScenarioId::new(),
+            "Test Scenario".to_string(),
+            "Test description".to_string(),
+            UserId::new(),
+        );
+
+        let scene_id = SceneId::new();
+        let scene = SceneDefinition {
+            scene_id: scene_id.clone(),
+            name: "Opening Scene".to_string(),
+            description: "The adventure begins".to_string(),
+            objectives: vec!["Meet the NPC".to_string()],
+            completion_conditions: vec!["Talk to innkeeper".to_string()],
+        };
+        scenario.add_scene(scene).unwrap();
+
+        // 存在するシーンをinitialに設定
+        let result = scenario.set_initial_scene(scene_id.clone());
+        assert!(result.is_ok());
+        assert_eq!(scenario.initial_scene_id, Some(scene_id));
+
+        // 存在しないシーンIDで設定しようとしたらエラー
+        let nonexistent_id = SceneId::new();
+        let result = scenario.set_initial_scene(nonexistent_id);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Scene not found"));
     }
 }
