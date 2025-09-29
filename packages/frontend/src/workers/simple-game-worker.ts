@@ -1,6 +1,6 @@
 // Simple Game WebWorker - MVP版
 // 最小限のWASM統合とメッセージ処理
-
+import * as cartagraph_core from '@cartagraph/core/pkg/cartagraph_core';
 // 基本メッセージ型
 interface WorkerMessage {
   type: string;
@@ -8,16 +8,7 @@ interface WorkerMessage {
   payload?: any;
 }
 
-// WASM関数の型定義
-interface WasmModule {
-  wasm_create_session: (scenarioId: string, gmUserId: string) => string;
-  wasm_add_player: (sessionId: string, userId: string, characterName: string) => string;
-  wasm_use_card: (sessionId: string, playerId: string, cardId: string) => string;
-  wasm_roll_dice: (sessionId: string, playerId: string, diceCount: number, diceSides: number) => string;
-  wasm_get_session_as_json: (sessionId: string, scenarioId: string) => string;
-  verify_typescript_type_exports: () => string;
-}
-
+type WasmModule = typeof cartagraph_core;
 let wasmModule: WasmModule | null = null;
 let initialized = false;
 
@@ -32,7 +23,7 @@ async function initializeWasm(): Promise<void> {
     // WASMモジュールを初期化
     await module.default();
 
-    wasmModule = module as WasmModule;
+    wasmModule = module;
     initialized = true;
 
     console.log('[SimpleWorker] WASM module loaded successfully');
