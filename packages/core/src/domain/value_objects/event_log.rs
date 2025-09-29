@@ -659,4 +659,78 @@ mod tests {
         assert!(start_entry.message().contains("ゲームが開始されました"));
         assert_eq!(start_entry.related_player(), &None); // SessionStartedは特定プレイヤーなし
     }
+
+    // TDDサイクル6: 大容量ログのパフォーマンステスト
+    #[test]
+    #[ignore = "performance test - run with PERF_TEST=1"]
+    fn test_large_event_log_performance() {
+        if std::env::var("PERF_TEST").unwrap_or_default() != "1" {
+            return;
+        }
+
+        let session_id = SessionId::new();
+        let mut collection = EventLogCollection::new();
+
+        // 大量のイベントログエントリを作成（10,000エントリ）
+        let start_time = std::time::Instant::now();
+        for i in 0..10_000 {
+            let entry = EventLogEntry::new(
+                EventId::new(),
+                session_id.clone(),
+                chrono::Utc::now(),
+                GameSessionEvent::SessionCreated {
+                    scenario_id: ScenarioId::new(),
+                    gm_user_id: UserId::new(),
+                },
+                if i % 3 == 0 { EventVisibility::Public } else { EventVisibility::System },
+                None,
+                format!("パフォーマンステストイベント {}", i),
+            );
+            collection.add_entry(entry);
+        }
+        let creation_duration = start_time.elapsed();
+
+        assert_eq!(collection.count(), 10_000);
+        println!("10,000エントリの作成時間: {:?}", creation_duration);
+
+        // フィルタリングパフォーマンステスト
+        let filter_start = std::time::Instant::now();
+        let filter = EventFilter {
+            session_id: Some(session_id.clone()),
+            visibility_for_player: Some((PlayerId::new(), false)), // 一般プレイヤー視点
+            ..Default::default()
+        };
+        let filtered_entries = collection.filter_entries(&filter);
+        let filter_duration = filter_start.elapsed();
+
+        // 約1/3がPublicなので、その程度の数が返されるはず
+        assert!(filtered_entries.len() > 3000);
+        assert!(filtered_entries.len() < 4000);
+        println!("10,000エントリのフィルタリング時間: {:?}", filter_duration);
+
+        // シリアライゼーションパフォーマンステスト
+        let serialize_start = std::time::Instant::now();
+        let json_result = collection.to_json();
+        let serialize_duration = serialize_start.elapsed();
+
+        assert!(json_result.is_ok());
+        let json_str = json_result.unwrap();
+        println!("10,000エントリのシリアライゼーション時間: {:?}", serialize_duration);
+
+        // デシリアライゼーションパフォーマンステスト
+        let deserialize_start = std::time::Instant::now();
+        let deserialized_result = EventLogCollection::from_json(&json_str);
+        let deserialize_duration = deserialize_start.elapsed();
+
+        assert!(deserialized_result.is_ok());
+        let deserialized_collection = deserialized_result.unwrap();
+        assert_eq!(deserialized_collection.count(), 10_000);
+        println!("10,000エントリのデシリアライゼーション時間: {:?}", deserialize_duration);
+
+        // パフォーマンス要件の検証
+        assert!(creation_duration.as_millis() < 1000, "作成時間が1秒を超えています");
+        assert!(filter_duration.as_millis() < 100, "フィルタリング時間が100msを超えています");
+        assert!(serialize_duration.as_millis() < 500, "シリアライゼーション時間が500msを超えています");
+        assert!(deserialize_duration.as_millis() < 1000, "デシリアライゼーション時間が1秒を超えています");
+    }
 }
