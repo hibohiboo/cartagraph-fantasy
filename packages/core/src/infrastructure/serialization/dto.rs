@@ -150,7 +150,7 @@ impl From<GameSessionDto> for GameSession {
             current_scene: SceneId::from_string(dto.current_scene),
             session_status: dto.session_status.into(),
             shared_cards: dto.shared_cards.into_iter().map(|card| card.into()).collect(),
-            available_choices: dto.available_choices.into_iter().map(|choice| CardId::from_string(choice)).collect(),
+            available_choices: dto.available_choices.into_iter().map(CardId::from_string).collect(),
             version: dto.version,
         }
     }
@@ -161,7 +161,7 @@ impl From<SessionPlayerDto> for SessionPlayer {
         Self {
             id: PlayerId::from_string(dto.id),
             user_id: UserId::from_string(dto.user_id),
-            character: dto.character.map(|c| CharacterId::from_string(c)),
+            character: dto.character.map(CharacterId::from_string),
             status: dto.status.into(),
             joined_at: dto.joined_at,
         }
@@ -178,7 +178,7 @@ impl From<SessionStatusDto> for SessionStatus {
             SessionStatusDto::InProgress { current_scene, active_players } => {
                 SessionStatus::InProgress {
                     current_scene: SceneId::from_string(current_scene),
-                    active_players: active_players.into_iter().map(|p| PlayerId::from_string(p)).collect(),
+                    active_players: active_players.into_iter().map(PlayerId::from_string).collect(),
                 }
             }
             SessionStatusDto::Paused => SessionStatus::Paused,
@@ -430,7 +430,7 @@ impl From<ScenarioTemplateDto> for crate::domain::entities::ScenarioTemplate {
                     completion_conditions: scene_dto.completion_conditions,
                 })
             }).collect(),
-            initial_scene_id: dto.initial_scene_id.map(|id| crate::domain::value_objects::SceneId::from_string(id)),
+            initial_scene_id: dto.initial_scene_id.map(crate::domain::value_objects::SceneId::from_string),
             shared_cards: dto.shared_cards.into_iter().map(|card_dto| crate::domain::entities::CardTemplate {
                 card_id: crate::domain::value_objects::CardId::from_string(card_dto.card_id),
                 name: card_dto.name,
@@ -500,8 +500,8 @@ impl From<CardDto> for crate::domain::value_objects::Card {
                 CardTypeValueObjectDto::Possession => crate::domain::value_objects::RuntimeCardType::Possession,
                 CardTypeValueObjectDto::SceneTransition => crate::domain::value_objects::RuntimeCardType::SceneTransition,
             },
-            dto.tags.into_iter().map(|tag| crate::domain::value_objects::TagId::from_string(tag)).collect(),
-            dto.embedded_events.into_iter().map(|event| crate::domain::value_objects::EventId::from_string(event)).collect(),
+            dto.tags.into_iter().map(crate::domain::value_objects::TagId::from_string).collect(),
+            dto.embedded_events.into_iter().map(crate::domain::value_objects::EventId::from_string).collect(),
         )
     }
 }

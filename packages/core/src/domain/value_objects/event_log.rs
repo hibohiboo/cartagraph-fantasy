@@ -1,4 +1,4 @@
-use crate::types::{EventId, SessionId, PlayerId,UserId,ScenarioId};
+use crate::types::{EventId, SessionId, PlayerId, UserId, ScenarioId};
 use crate::domain::events::{DomainEvent, GameSessionEvent};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -90,7 +90,7 @@ impl EventLogEntry {
                 (format!("セッションが作成されました (シナリオ: {:?})", scenario_id), None)
             },
             GameSessionEvent::PlayerAdded { player_id, .. } => {
-                (format!("プレイヤーが参加しました"), Some(player_id.clone()))
+                ("プレイヤーが参加しました".to_string(), Some(player_id.clone()))
             },
             GameSessionEvent::SessionStarted { current_scene } => {
                 (format!("ゲームが開始されました (シーン: {:?})", current_scene), None)
@@ -158,7 +158,7 @@ pub struct EventLogCollection {
 }
 
 /// イベントフィルタ条件
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct EventFilter {
     pub session_id: Option<SessionId>,
     pub player_id: Option<PlayerId>,
@@ -170,11 +170,19 @@ pub struct EventFilter {
 
 impl EventLogCollection {
     pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl Default for EventLogCollection {
+    fn default() -> Self {
         Self {
             entries: Vec::new(),
         }
     }
+}
 
+impl EventLogCollection {
     pub fn from_entries(entries: Vec<EventLogEntry>) -> Self {
         Self { entries }
     }
@@ -281,19 +289,6 @@ impl EventLogCollection {
     /// 永続化に適したJSON文字列に変換（整形済み）
     pub fn to_json_pretty(&self) -> Result<String, serde_json::Error> {
         serde_json::to_string_pretty(self)
-    }
-}
-
-impl Default for EventFilter {
-    fn default() -> Self {
-        Self {
-            session_id: None,
-            player_id: None,
-            category: None,
-            visibility_for_player: None,
-            after_timestamp: None,
-            before_timestamp: None,
-        }
     }
 }
 

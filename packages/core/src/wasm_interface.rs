@@ -9,9 +9,6 @@ use crate::infrastructure::serialization::dto::*;
 
 #[cfg(test)]
 mod contract_tests {
-    use crate::domain::entities::*;
-    use crate::domain::value_objects::*;
-    use crate::infrastructure::serialization::dto::*;
     use super::*;
     #[test]
     fn test_create_session_wasm_contract() {

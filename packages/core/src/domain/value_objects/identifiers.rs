@@ -39,6 +39,12 @@ impl SessionId {
     }
 }
 
+impl Default for SessionId {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PlayerId {
     pub fn new() -> Self {
         Self(Uuid::new_v4().to_string())
@@ -46,6 +52,12 @@ impl PlayerId {
 
     pub fn from_string(s: String) -> Self {
         Self(s)
+    }
+}
+
+impl Default for PlayerId {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -59,6 +71,12 @@ impl UserId {
     }
 }
 
+impl Default for UserId {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CharacterId {
     pub fn new() -> Self {
         Self(Uuid::new_v4().to_string())
@@ -66,6 +84,12 @@ impl CharacterId {
 
     pub fn from_string(s: String) -> Self {
         Self(s)
+    }
+}
+
+impl Default for CharacterId {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -79,6 +103,12 @@ impl ScenarioId {
     }
 }
 
+impl Default for ScenarioId {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SceneId {
     pub fn new() -> Self {
         Self(Uuid::new_v4().to_string())
@@ -86,6 +116,12 @@ impl SceneId {
 
     pub fn from_string(s: String) -> Self {
         Self(s)
+    }
+}
+
+impl Default for SceneId {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -99,6 +135,12 @@ impl EventId {
     }
 }
 
+impl Default for EventId {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CardId {
     pub fn new() -> Self {
         Self(Uuid::new_v4().to_string())
@@ -109,6 +151,12 @@ impl CardId {
     }
 }
 
+impl Default for CardId {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TagId {
     pub fn new() -> Self {
         Self(Uuid::new_v4().to_string())
@@ -116,5 +164,11 @@ impl TagId {
 
     pub fn from_string(s: String) -> Self {
         Self(s)
+    }
+}
+
+impl Default for TagId {
+    fn default() -> Self {
+        Self::new()
     }
 }

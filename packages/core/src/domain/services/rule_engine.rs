@@ -11,6 +11,7 @@ pub struct RuleEngine {
 /// グローバルルール（全シナリオ共通）
 #[derive(Debug, Clone)]
 pub struct GlobalRules {
+    #[allow(dead_code)]
     max_players_per_session: usize,
     card_usage_limits: HashMap<RuntimeCardType, CardUsageLimit>,
     dice_success_threshold: u8,
@@ -19,6 +20,7 @@ pub struct GlobalRules {
 /// シナリオ固有ルール
 #[derive(Debug, Clone)]
 pub struct ScenarioRules {
+    #[allow(dead_code)]
     scenario_id: ScenarioId,
     custom_card_rules: HashMap<CardId, CustomCardRule>,
     scene_transition_rules: HashMap<SceneId, Vec<TransitionRule>>,
@@ -36,8 +38,10 @@ pub struct CardUsageLimit {
 /// カスタムカードルール
 #[derive(Debug, Clone)]
 pub struct CustomCardRule {
+    #[allow(dead_code)]
     card_id: CardId,
     usage_conditions: Vec<UsageCondition>,
+    #[allow(dead_code)]
     effects: Vec<CardEffect>,
 }
 
@@ -71,6 +75,7 @@ pub enum TagModification {
 /// シーン遷移ルール
 #[derive(Debug, Clone)]
 pub struct TransitionRule {
+    #[allow(dead_code)]
     from_scene: SceneId,
     to_scene: SceneId,
     conditions: Vec<TransitionCondition>,
@@ -88,6 +93,7 @@ pub enum TransitionCondition {
 /// イベント効果
 #[derive(Debug, Clone)]
 pub struct EventEffect {
+    #[allow(dead_code)]
     event_id: EventId,
     target: EffectTarget,
     modifications: Vec<EffectModification>,
@@ -127,12 +133,20 @@ pub enum RuleViolation {
 impl RuleEngine {
     /// 新しいルールエンジンを作成
     pub fn new() -> Self {
+        Self::default()
+    }
+}
+
+impl Default for RuleEngine {
+    fn default() -> Self {
         Self {
             global_rules: GlobalRules::default(),
             scenario_rules: None,
         }
     }
+}
 
+impl RuleEngine {
     /// シナリオ固有ルールを設定
     pub fn with_scenario_rules(mut self, scenario_rules: ScenarioRules) -> Self {
         self.scenario_rules = Some(scenario_rules);
