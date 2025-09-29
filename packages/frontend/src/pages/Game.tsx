@@ -32,7 +32,10 @@ const Game = () => {
 
     return () => {
       mounted = false;
-      workerService.cleanup();
+      // 初期化が完了している場合のみクリーンアップ
+      if (workerService.isInitialized()) {
+        workerService.cleanup();
+      }
     };
   }, [workerService]);
 

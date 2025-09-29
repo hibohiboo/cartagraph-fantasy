@@ -122,6 +122,11 @@ export class SimpleWorkerService {
 
   // クリーンアップ
   cleanup(): void {
+    // 既にクリーンアップ済みの場合は何もしない
+    if (!this.initialized && !this.worker && this.pendingRequests.size === 0) {
+      return;
+    }
+
     if (this.worker) {
       this.worker.terminate();
       this.worker = null;
@@ -129,10 +134,11 @@ export class SimpleWorkerService {
     this.initialized = false;
 
     // 保留中のリクエストをキャンセル
-    this.pendingRequests.forEach((pending) => {
+      this.pendingRequests.forEach((pending) => {
       pending.reject(new Error('Service cleanup'));
     });
     this.pendingRequests.clear();
+
   }
 }
 
