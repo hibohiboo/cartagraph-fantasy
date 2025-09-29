@@ -12,6 +12,15 @@ export type { EventId } from './EventId';
 export type { CardId } from './CardId';
 export type { TagId } from './TagId';
 
+// DTO型（WASM境界用）
+export type { GameSessionDto } from './GameSessionDto';
+export type { SessionPlayerDto } from './SessionPlayerDto';
+export type { CharacterDto } from './CharacterDto';
+export type { ScenarioTemplateDto } from './ScenarioTemplateDto';
+export type { CardDto } from './CardDto';
+export type { SessionStatusDto } from './SessionStatusDto';
+export type { PlayerStatusDto } from './PlayerStatusDto';
+
 // カード関連
 export type { Card } from './Card';
 export type { CardTemplate } from './CardTemplate';
@@ -56,3 +65,8 @@ export type { CompletionCondition } from './CompletionCondition';
 export type { PlayerRange } from './PlayerRange';
 export type { Difficulty } from './Difficulty';
 export type { EventType } from './EventType';
+
+// イベント関連
+export type { DomainEvent } from './DomainEvent';
+export type { GameSessionEvent } from './GameSessionEvent';
+
