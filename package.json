@@ -1,6 +1,6 @@
 {
   "name": "cartagraph-fantasy",
-  "packageManager": "bun@1.2.22",
+  "packageManager": "bun@1.2.23",
   "private": true,
   "scripts": {
     "build": "bun run build:shared && bun run build:core && bun run build:ui && bun run build:frontend",
@@ -26,6 +26,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/minimatch": "^6.0.0",
     "typescript": "^5.9.2"
   },
   "peerDependencies": {},
