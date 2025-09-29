@@ -14,7 +14,7 @@ pub struct DomainEvent {
     pub version: u64,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, TS)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
 #[ts(export)]
 pub enum GameSessionEvent {
     #[serde(rename = "session_created")]

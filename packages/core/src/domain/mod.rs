@@ -17,6 +17,7 @@ pub use value_objects::{
     Tag, TagCategory, TagValue,
     CardUsageContext, CardUsageError, SceneContext,
     DiceNotation, DiceResult, AdvantageType, DiceParseError, DiceRollError,
+    EventLogEntry, EventVisibility, EventCategory,
 };
 pub use services::{
     RuleEngine, GlobalRules, ScenarioRules, CardUsageLimit, CustomCardRule,
