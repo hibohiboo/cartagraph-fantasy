@@ -74,6 +74,33 @@ impl EventLogEntry {
         )
     }
 
+    /// DomainEventから自動的にメッセージを生成してEventLogEntryを作成
+    pub fn from_domain_event_with_auto_message(
+        domain_event: &DomainEvent,
+        visibility: EventVisibility,
+    ) -> Self {
+        let (message, related_player) = Self::generate_log_message(&domain_event.event_type);
+        Self::from_domain_event(domain_event, visibility, related_player, message)
+    }
+
+    /// イベントタイプから自動的にログメッセージを生成
+    fn generate_log_message(event_type: &GameSessionEvent) -> (String, Option<PlayerId>) {
+        match event_type {
+            GameSessionEvent::SessionCreated { scenario_id, .. } => {
+                (format!("セッションが作成されました (シナリオ: {:?})", scenario_id), None)
+            },
+            GameSessionEvent::PlayerAdded { player_id, .. } => {
+                (format!("プレイヤーが参加しました"), Some(player_id.clone()))
+            },
+            GameSessionEvent::SessionStarted { current_scene } => {
+                (format!("ゲームが開始されました (シーン: {:?})", current_scene), None)
+            },
+            GameSessionEvent::SessionStatusChanged { new_status } => {
+                (format!("セッション状態が変更されました: {:?}", new_status), None)
+            },
+        }
+    }
+
     // Getters
     pub fn event_id(&self) -> &EventId {
         &self.event_id
@@ -155,6 +182,22 @@ impl EventLogCollection {
     /// イベントログエントリを追加
     pub fn add_entry(&mut self, entry: EventLogEntry) {
         self.entries.push(entry);
+    }
+
+    /// DomainEventからEventLogEntryを作成して追加
+    pub fn add_domain_event(
+        &mut self,
+        domain_event: &DomainEvent,
+        visibility: EventVisibility,
+        message: Option<String>,
+    ) {
+        let entry = if let Some(msg) = message {
+            let (_, related_player) = EventLogEntry::generate_log_message(&domain_event.event_type);
+            EventLogEntry::from_domain_event(domain_event, visibility, related_player, msg)
+        } else {
+            EventLogEntry::from_domain_event_with_auto_message(domain_event, visibility)
+        };
+        self.add_entry(entry);
     }
 
     /// 全エントリの取得
@@ -535,5 +578,85 @@ mod tests {
         let invalid_json = "{ invalid json }";
         let error_result = EventLogCollection::from_json(invalid_json);
         assert!(error_result.is_err());
+    }
+
+    // TDDサイクル5: DomainEventとの統合機能テスト
+    #[test]
+    fn test_domain_event_integration() {
+        let session_id = SessionId::new();
+        let player_id = PlayerId::new();
+
+        // DomainEventを作成
+        let domain_event = DomainEvent::new(
+            session_id.clone(),
+            GameSessionEvent::PlayerAdded {
+                player_id: player_id.clone(),
+                user_id: UserId::new(),
+            },
+            1,
+        );
+
+        // DomainEventから直接EventLogEntryを作成（手動メッセージ）
+        let manual_entry = EventLogEntry::from_domain_event(
+            &domain_event,
+            EventVisibility::Public,
+            Some(player_id.clone()),
+            "カスタムメッセージ".to_string(),
+        );
+
+        assert_eq!(manual_entry.message(), "カスタムメッセージ");
+        assert_eq!(manual_entry.session_id(), &session_id);
+        assert_eq!(manual_entry.related_player(), &Some(player_id.clone()));
+
+        // DomainEventから自動メッセージでEventLogEntryを作成
+        let auto_entry = EventLogEntry::from_domain_event_with_auto_message(
+            &domain_event,
+            EventVisibility::Public,
+        );
+
+        assert_eq!(auto_entry.message(), "プレイヤーが参加しました");
+        assert_eq!(auto_entry.session_id(), &session_id);
+        assert_eq!(auto_entry.related_player(), &Some(player_id.clone()));
+
+        // EventLogCollectionにDomainEventを直接追加
+        let mut collection = EventLogCollection::new();
+
+        // カスタムメッセージで追加
+        collection.add_domain_event(
+            &domain_event,
+            EventVisibility::Private(player_id.clone()),
+            Some("コレクション用カスタムメッセージ".to_string()),
+        );
+
+        // 自動メッセージで追加
+        collection.add_domain_event(
+            &domain_event,
+            EventVisibility::Public,
+            None,
+        );
+
+        assert_eq!(collection.count(), 2);
+        let entries = collection.entries();
+        assert_eq!(entries[0].message(), "コレクション用カスタムメッセージ");
+        assert_eq!(entries[0].visibility(), &EventVisibility::Private(player_id.clone()));
+        assert_eq!(entries[1].message(), "プレイヤーが参加しました");
+        assert_eq!(entries[1].visibility(), &EventVisibility::Public);
+
+        // 異なるイベントタイプでの自動メッセージ生成テスト
+        let session_start_event = DomainEvent::new(
+            session_id.clone(),
+            GameSessionEvent::SessionStarted {
+                current_scene: crate::types::SceneId::new(),
+            },
+            2,
+        );
+
+        let start_entry = EventLogEntry::from_domain_event_with_auto_message(
+            &session_start_event,
+            EventVisibility::Public,
+        );
+
+        assert!(start_entry.message().contains("ゲームが開始されました"));
+        assert_eq!(start_entry.related_player(), &None); // SessionStartedは特定プレイヤーなし
     }
 }
