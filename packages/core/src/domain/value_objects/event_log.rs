@@ -159,4 +159,85 @@ mod tests {
         assert_eq!(log_entry.related_player(), &related_player);
         assert_eq!(log_entry.message(), &message);
     }
+
+    // TDDサイクル2: 可視性制御機能テスト
+    #[test]
+    fn test_event_visibility_control() {
+        let player1 = PlayerId::new();
+        let player2 = PlayerId::new();
+
+        // Public イベントのテスト
+        let public_event = EventLogEntry::new(
+            EventId::new(),
+            SessionId::new(),
+            chrono::Utc::now(),
+            GameSessionEvent::SessionStarted {
+                current_scene: crate::types::SceneId::new(),
+            },
+            EventVisibility::Public,
+            None,
+            "ゲーム開始！".to_string(),
+        );
+
+        // Public は全員に可視
+        assert!(public_event.is_visible_to_player(&player1, false)); // 一般プレイヤー
+        assert!(public_event.is_visible_to_player(&player2, false)); // 別プレイヤー
+        assert!(public_event.is_visible_to_player(&player1, true));  // GM
+
+        // Private イベントのテスト
+        let private_event = EventLogEntry::new(
+            EventId::new(),
+            SessionId::new(),
+            chrono::Utc::now(),
+            GameSessionEvent::PlayerAdded {
+                player_id: player1.clone(),
+                user_id: UserId::new(),
+            },
+            EventVisibility::Private(player1.clone()),
+            Some(player1.clone()),
+            "秘密の情報".to_string(),
+        );
+
+        // Private は対象プレイヤーのみ可視
+        assert!(private_event.is_visible_to_player(&player1, false));  // 対象プレイヤー
+        assert!(!private_event.is_visible_to_player(&player2, false)); // 別プレイヤー
+        assert!(!private_event.is_visible_to_player(&player2, true));  // GM（対象外）
+
+        // GMOnly イベントのテスト
+        let gm_event = EventLogEntry::new(
+            EventId::new(),
+            SessionId::new(),
+            chrono::Utc::now(),
+            GameSessionEvent::SessionStatusChanged {
+                new_status: crate::types::SessionStatus::Completed,
+            },
+            EventVisibility::GMOnly,
+            None,
+            "GM専用メッセージ".to_string(),
+        );
+
+        // GMOnly はGMのみ可視
+        assert!(!gm_event.is_visible_to_player(&player1, false)); // 一般プレイヤー
+        assert!(!gm_event.is_visible_to_player(&player2, false)); // 別プレイヤー
+        assert!(gm_event.is_visible_to_player(&player1, true));   // GM
+
+        // System イベントのテスト
+        let system_event = EventLogEntry::new(
+            EventId::new(),
+            SessionId::new(),
+            chrono::Utc::now(),
+            GameSessionEvent::SessionCreated {
+                scenario_id: ScenarioId::new(),
+                gm_user_id: UserId::new(),
+            },
+            EventVisibility::System,
+            None,
+            "システムログ".to_string(),
+        );
+
+        // System は誰にも可視でない
+        assert!(!system_event.is_visible_to_player(&player1, false)); // 一般プレイヤー
+        assert!(!system_event.is_visible_to_player(&player2, false)); // 別プレイヤー
+        assert!(!system_event.is_visible_to_player(&player1, true));  // GM
+    }
 }
