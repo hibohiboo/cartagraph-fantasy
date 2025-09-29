@@ -84,15 +84,11 @@ components:
         dice_sides:
           type: integer
           enum: [6, 20]
-        entropy:
-          type: string
-          description: 乱数生成用エントロピー（hex形式）
       required:
         - session_id
         - player_id
         - dice_count
         - dice_sides
-        - entropy
 
     # セッション状態取得（簡略版）
     GameSessionJson:
@@ -172,7 +168,7 @@ paths:
       wasm_use_card(session_id: &str, player_id: &str, card_id: &str) -> Result<String, String>
   /wasm_roll_dice:
     description: |
-      wasm_roll_dice(session_id: &str, player_id: &str, dice_count: u8, dice_sides: u8) -> Result<String, String>
+      wasm_roll_dice(session_id: &str, player_id: &str, dice_count: u32, dice_sides: u32) -> Result<String, String>
   /wasm_get_session_as_json:
     description: |
       wasm_get_session_as_json(session_id: &str, scenario_id: &str) -> Result<String, String>
