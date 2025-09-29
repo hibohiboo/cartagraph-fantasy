@@ -491,21 +491,74 @@
 **必要テスト**: ルール検証、効果解決、エラー条件 ✅ (7/7テスト通過)
 **成果物**: ゲームロジック検証用ルールエンジン ✅
 
-### タスク15: イベントログシステム実装 [P]
-**タイプ**: 実装-コア | **優先度**: 中 | **工数**: 2時間
+### タスク15: イベントログシステム実装 [P] ✅ **完了**
+**タイプ**: 実装-コア | **優先度**: 中 | **工数**: 2時間 | **実績**: 2時間
 ```bash
 # 構造化イベントログの実装
 ```
-**受入条件**:
-- [ ] 可視性制御付きイベントログ
-- [ ] 永続化用ログエントリシリアライゼーション
-- [ ] イベント種別、プレイヤー、可視性によるログフィルタ
-- [ ] ドメインイベントとの統合
-- [ ] 大容量ログのパフォーマンステスト
+**完了 (100% - 完全なイベントログシステム実装)**:
+- [x] **可視性制御付きイベントログ**: 完全実装
+  - [x] EventVisibility::Public - 全プレイヤーに可視
+  - [x] EventVisibility::Private(PlayerId) - 特定プレイヤーのみ可視
+  - [x] EventVisibility::GMOnly - GMのみ可視
+  - [x] EventVisibility::System - システムログ（通常非表示）
+  - [x] `is_visible_to_player()` - プレイヤー・GM権限での可視性判定
+- [x] **永続化用ログエントリシリアライゼーション**: 完全実装
+  - [x] JSON形式でのシリアライゼーション・デシリアライゼーション
+  - [x] `to_json()`, `from_json()` - コンパクトJSON変換
+  - [x] `to_json_pretty()` - 整形済みJSON変換（永続化用）
+  - [x] Serde準拠のEventLogEntry/EventLogCollection
+- [x] **イベント種別、プレイヤー、可視性によるログフィルタ**: 完全実装
+  - [x] EventFilter - 複合条件フィルタリングシステム
+  - [x] セッションID・プレイヤーID・カテゴリ・可視性・時間範囲フィルタ
+  - [x] EventCategory分類 (Session, Player, Card, Dice, Scene, System)
+  - [x] `filter_entries()` - 高性能フィルタリング実装
+- [x] **ドメインイベントとの統合**: 完全実装
+  - [x] `from_domain_event()` - DomainEventからEventLogEntry変換
+  - [x] `from_domain_event_with_auto_message()` - 自動メッセージ生成
+  - [x] `add_domain_event()` - EventLogCollectionへの直接追加
+  - [x] 各GameSessionEventタイプでの自動メッセージ生成
+- [x] **大容量ログのパフォーマンステスト**: 完全実装
+  - [x] 10,000エントリでの性能測定 (条件付き実行 PERF_TEST=1)
+  - [x] フィルタリング性能 <100ms, シリアライゼーション <500ms
+  - [x] 作成・復元性能 <1秒の性能要件確保
 
-**依存関係**: タスク9
-**必要テスト**: ログ機能、可視性ルール、永続化
-**成果物**: ゲーム履歴用イベントログシステム
+**TDD実装成果**:
+- **完全TDD実装**: 6サイクル (RED→GREEN→Refactor)
+- **EventLogEntry値オブジェクト**: 可視性制御・メッセージ生成・カテゴリ分類
+- **EventLogCollection集約**: フィルタリング・JSON永続化・DomainEvent統合
+- **包括的テストカバレッジ**: 基本機能 + フィルタリング + シリアライゼーション + 統合 + パフォーマンス
+
+**技術的実装**:
+- **可視性システム**: `EventVisibility::is_visible_to_player(player_id, is_gm)`
+- **フィルタリング**: `EventFilter{session_id, player_id, category, visibility_for_player, time_range}`
+- **永続化**: `EventLogCollection::to_json()` → IndexedDB永続化準備完了
+- **自動統合**: `EventLogEntry::from_domain_event_with_auto_message()` - DomainEvent自動変換
+- **パフォーマンス**: 条件付き性能テスト、開発効率と品質保証の両立
+
+**アーキテクチャ品質**:
+- **オニオンアーキテクチャ準拠**: domain/value_objects/event_log.rs配置
+- **既存システム統合**: DomainEvent/GameSessionEventとの完全統合
+- **型安全性**: Serde + 強型付けEventVisibility/EventCategory
+- **将来拡張性**: 新しいEventCategory・Visibilityルール追加対応設計
+
+**完了日**: 2025-09-29
+**実装詳細**:
+- TDD 6サイクル完全実装 (基本作成 → 可視性制御 → フィルタリング → シリアライゼーション → DomainEvent統合 → パフォーマンス)
+- EventLogEntry/EventLogCollection/EventFilter/EventVisibility/EventCategory実装
+- DomainEventからの自動ログエントリ生成システム
+- 条件付きパフォーマンステスト (PERF_TEST=1) による開発効率向上
+- 121テスト全通過、型安全性・性能要件確保
+
+**学習事項**:
+- 可視性制御による情報セキュリティの重要性とゲーム体験への影響
+- 大容量データでのフィルタリング性能最適化手法
+- DomainEventとEventLogの統合による一貫性のあるログシステム設計
+- 条件付きパフォーマンステストによる開発体験と品質保証の両立
+
+**依存関係**: タスク9 ✅
+**必要テスト**: ログ機能、可視性ルール、永続化 ✅ (5/5テスト通過)
+**成果物**: ゲーム履歴用イベントログシステム ✅
 
 ### タスク16: WebAssembly FFIインターフェース実装 [S]
 **タイプ**: 実装-統合 | **優先度**: クリティカル | **工数**: 4時間
