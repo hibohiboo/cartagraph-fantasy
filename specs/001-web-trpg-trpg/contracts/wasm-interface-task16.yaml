@@ -1,0 +1,184 @@
+openapi: 3.0.3
+info:
+  title: WebAssembly Interface - Task 16 MVP Implementation
+  description: タスク16で実装するコアWASMインターフェース（4時間スコープ）
+  version: 0.1.0
+
+components:
+  schemas:
+    # 基本レスポンス型
+    WasmResult:
+      type: object
+      description: WASM関数の基本レスポンス型
+      properties:
+        success:
+          type: boolean
+        data:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+      required:
+        - success
+
+    # セッション初期化（簡略版）
+    InitializeSessionRequest:
+      type: object
+      properties:
+        scenario_id:
+          type: string
+        gm_user_id:
+          type: string
+        max_players:
+          type: integer
+          minimum: 1
+          maximum: 10
+      required:
+        - scenario_id
+        - gm_user_id
+        - max_players
+
+    # プレイヤー追加（簡略版）
+    AddPlayerRequest:
+      type: object
+      properties:
+        session_id:
+          type: string
+        user_id:
+          type: string
+        character_name:
+          type: string
+      required:
+        - session_id
+        - user_id
+        - character_name
+
+    # カード使用（簡略版）
+    UseCardRequest:
+      type: object
+      properties:
+        session_id:
+          type: string
+        player_id:
+          type: string
+        card_id:
+          type: string
+      required:
+        - session_id
+        - player_id
+        - card_id
+
+    # ダイス振り（簡略版）
+    RollDiceRequest:
+      type: object
+      properties:
+        session_id:
+          type: string
+        player_id:
+          type: string
+        dice_count:
+          type: integer
+          minimum: 1
+          maximum: 10
+        dice_sides:
+          type: integer
+          enum: [6, 20]
+        entropy:
+          type: string
+          description: 乱数生成用エントロピー（hex形式）
+      required:
+        - session_id
+        - player_id
+        - dice_count
+        - dice_sides
+        - entropy
+
+    # セッション状態取得（簡略版）
+    GameSessionJson:
+      type: object
+      properties:
+        session_id:
+          type: string
+        scenario_id:
+          type: string
+        session_status:
+          type: string
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerJson'
+        current_scene:
+          type: string
+        version:
+          type: integer
+      required:
+        - session_id
+        - scenario_id
+        - session_status
+        - players
+        - current_scene
+        - version
+
+    PlayerJson:
+      type: object
+      properties:
+        player_id:
+          type: string
+        user_id:
+          type: string
+        character_name:
+          type: string
+        status:
+          type: string
+      required:
+        - player_id
+        - user_id
+        - character_name
+        - status
+
+    # エラー情報
+    WasmError:
+      type: object
+      properties:
+        error_type:
+          type: string
+          enum:
+            - validation_error
+            - session_not_found
+            - player_not_found
+            - rule_violation
+            - internal_error
+        message:
+          type: string
+        details:
+          type: string
+          nullable: true
+      required:
+        - error_type
+        - message
+
+# 実装対象のWASM関数（Task 16スコープ）
+# これらの関数は既存のコントラクトテストが期待している
+paths:
+  /wasm_create_session:
+    description: |
+      wasm_create_session(scenario_id: &str, gm_user_id: &str) -> Result<String, String>
+  /wasm_add_player:
+    description: |
+      wasm_add_player(session_id: &str, user_id: &str, character_name: &str) -> Result<String, String>
+  /wasm_use_card:
+    description: |
+      wasm_use_card(session_id: &str, player_id: &str, card_id: &str) -> Result<String, String>
+  /wasm_roll_dice:
+    description: |
+      wasm_roll_dice(session_id: &str, player_id: &str, dice_count: u8, dice_sides: u8) -> Result<String, String>
+  /wasm_get_session_as_json:
+    description: |
+      wasm_get_session_as_json(session_id: &str, scenario_id: &str) -> Result<String, String>
+  /wasm_parse_session_from_json:
+    description: |
+      wasm_parse_session_from_json(json_str: &str) -> Result<String, String>
+  /verify_typescript_type_exports:
+    description: |
+      verify_typescript_type_exports() -> Result<String, String>
