@@ -18,10 +18,10 @@ mod contract_tests {
         // createSession WASM FFI メソッドのコントラクトテスト
         // JSからWASM経由でGameSessionを作成
 
-        let session_id_str = "session-123";
         let scenario_id_str = "scenario-456";
+        let gm_user_id_str = "gm-123";
 
-        let result = wasm_create_session(session_id_str, scenario_id_str);
+        let result = wasm_create_session(scenario_id_str, gm_user_id_str);
 
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "session_created");
@@ -33,10 +33,10 @@ mod contract_tests {
         // JSからWASM経由でプレイヤーを追加
 
         let session_id_str = "session-123";
-        let player_id_str = "player-456";
         let user_id_str = "user-789";
+        let character_name_str = "Test Character";
 
-        let result = wasm_add_player(session_id_str, player_id_str, user_id_str);
+        let result = wasm_add_player(session_id_str, user_id_str, character_name_str);
 
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), "player_added");
@@ -89,13 +89,13 @@ mod contract_tests {
         // WASM境界型一貫性テスト: 文字列 → Rust型 → 処理 → 結果の型安全性確認
 
         // 1. createSessionの型一貫性確認
-        let session_result = wasm_create_session("test-session-id", "test-scenario-id");
+        let session_result = wasm_create_session("test-scenario-id", "test-gm-user-id");
         assert!(session_result.is_ok());
         let session_response = session_result.unwrap();
         assert_eq!(session_response, "session_created");
 
         // 2. addPlayerの型一貫性確認
-        let player_result = wasm_add_player("test-session-id", "test-player-id", "test-user-id");
+        let player_result = wasm_add_player("test-session-id", "test-user-id", "Test Character");
         assert!(player_result.is_ok());
         let player_response = player_result.unwrap();
         assert_eq!(player_response, "player_added");
@@ -258,11 +258,11 @@ mod contract_tests {
 
 // WASM FFI Implementation: GameSession作成（DTOベース）
 #[wasm_bindgen]
-pub fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String, String> {
+pub fn wasm_create_session(scenario_id: &str, gm_user_id: &str) -> Result<String, String> {
         // オニオンアーキテクチャ：ドメインエンティティを使用し、DTOで外部と連携
-        let session_id = SessionId::from_string(session_id.to_string());
+        let session_id = SessionId::new(); // session_idは内部で生成
         let scenario_id = ScenarioId::from_string(scenario_id.to_string());
-        let gm_user_id = UserId::new(); // 仮のGMユーザーID
+        let gm_user_id = UserId::from_string(gm_user_id.to_string());
 
         let session = GameSession::create(session_id, scenario_id, gm_user_id);
 
@@ -274,16 +274,18 @@ pub fn wasm_create_session(session_id: &str, scenario_id: &str) -> Result<String
     }
 
     #[wasm_bindgen]
-    pub fn wasm_add_player(_session_id: &str, _player_id: &str, _user_id: &str) -> Result<String, String> {
+    pub fn wasm_add_player(_session_id: &str, _user_id: &str, _character_name: &str) -> Result<String, String> {
         // オニオンアーキテクチャ：ドメイン型を使用、DTOで変換
 
         // IDを構築してプレイヤー追加操作
         let _session_id = SessionId::from_string(_session_id.to_string());
-        let _player_id = PlayerId::from_string(_player_id.to_string());
         let _user_id = UserId::from_string(_user_id.to_string());
+        // player_idは内部で生成
+        let _player_id = PlayerId::new();
 
-        // TODO: 実際の実装では、セッションを取得してプレイヤーを追加する
+        // TODO: 実際の実装では、セッションを取得してキャラクター名でプレイヤーを追加する
         // 結果はDTOでシリアライズして返す
+        let _ = _character_name; // パラメータ使用を明示
         Ok("player_added".to_string())
     }
 
