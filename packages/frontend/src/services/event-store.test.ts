@@ -1,8 +1,13 @@
 // Event Store Performance Tests
+// 実行方法: BROWSER_TEST=1 bun test src/services/event-store.test.ts
+// 注意: IndexedDBが必要なため、ブラウザ環境でのみ動作します
 import { describe, it, expect, beforeEach } from 'vitest';
 import { EventStoreService, type StoredEvent } from './event-store';
 
-describe('EventStore Performance Tests', () => {
+const shouldRunBrowserTests = process.env.BROWSER_TEST === '1';
+const describeOrSkip = shouldRunBrowserTests ? describe : describe.skip;
+
+describeOrSkip('EventStore Performance Tests', () => {
   let eventStore: EventStoreService;
   const testSessionId = 'perf-test-session';
 
@@ -165,7 +170,7 @@ describe('EventStore Performance Tests', () => {
   });
 });
 
-describe('SyncManager Basic Tests', () => {
+describeOrSkip('SyncManager Basic Tests', () => {
   it('should initialize without errors', async () => {
     const { SyncManager } = await import('./sync-manager');
     const manager = new SyncManager();
