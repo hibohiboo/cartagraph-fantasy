@@ -26,6 +26,7 @@ export default defineConfig({
   ],
   plugins: { 'unused-imports': unuserdPlugin, sonarjs },
   rules: {
+    "sonarjs/redundant-type-aliases": ['off'], // エイリアスをつけていくスタイルのため
     'linebreak-style': ['error', 'unix'],
     semi: ['error', 'always'],
     complexity: ['error', 7], // 複雑度の設定
