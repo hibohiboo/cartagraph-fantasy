@@ -1,4 +1,6 @@
-use crate::types::{EventId, SessionId, PlayerId, UserId, ScenarioId};
+use crate::types::{EventId, SessionId, PlayerId};
+#[cfg(test)]
+use crate::types::{UserId, ScenarioId};
 use crate::domain::events::{DomainEvent, GameSessionEvent};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
