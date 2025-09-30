@@ -1,5 +1,5 @@
 {
-  "extends": "../typescript-config/base.json",
+  "extends": "../config-typescript/base.json",
   "compilerOptions": {
     "composite": true,
     "types": ["@cloudflare/workers-types", "@types/bun"],

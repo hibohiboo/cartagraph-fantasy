@@ -1,5 +1,5 @@
 {
-  "name": "@cartagraph-fantasy/typescript-config",
+  "name": "@cartagraph/config-typescript",
   "private": true,
   "scripts": {
     "ncu": "ncu -u"
