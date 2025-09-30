@@ -46,21 +46,21 @@ const Game = () => {
 
       // 1. セッション作成
       const sessionResult = await workerService.createSession('scenario-001', 'gm-user-001');
-      setTestOutput(prev => prev + `✅ セッション作成: ${sessionResult}\n`);
+      setTestOutput(prev => `${prev  }✅ セッション作成: ${sessionResult}\n`);
 
       // 2. プレイヤー追加
       const playerResult = await workerService.addPlayer('session-123', 'user-001', 'テストキャラクター');
-      setTestOutput(prev => prev + `✅ プレイヤー追加: ${playerResult}\n`);
+      setTestOutput(prev => `${prev  }✅ プレイヤー追加: ${playerResult}\n`);
 
       // 3. ダイス振り
       const diceResult = await workerService.rollDice('session-123', 'player-001', 2, 6);
-      setTestOutput(prev => prev + `✅ ダイス振り: ${diceResult}\n`);
+      setTestOutput(prev => `${prev  }✅ ダイス振り: ${diceResult}\n`);
 
-      setTestOutput(prev => prev + '\n🎉 全テスト成功！');
+      setTestOutput(prev => `${prev  }\n🎉 全テスト成功！`);
 
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      setTestOutput(prev => prev + `\n❌ エラー: ${errorMsg}`);
+      setTestOutput(prev => `${prev  }\n❌ エラー: ${errorMsg}`);
     }
   };
 

@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
 import './Home.css';
 
-const Home = () => {
-  return (
+const Home = () => (
     <div className="home">
       <header className="home-header">
         <h1>遺跡漁りとドブさらい</h1>
@@ -53,6 +52,5 @@ const Home = () => {
       </div>
     </div>
   );
-};
 
 export default Home;

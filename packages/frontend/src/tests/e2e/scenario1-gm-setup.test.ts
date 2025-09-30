@@ -5,7 +5,7 @@
  * TDD RED Phase: 最初の失敗テスト
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it } from 'vitest';
 
 describe.skip('E2E Scenario 1: シナリオ作成者のワークフロー', () => {
   it('should allow user to create scenario template and start session', async () => {

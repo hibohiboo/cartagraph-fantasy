@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { database, initDatabase } from '../services/database';
-import type { GameSession, SessionPlayer, Character } from '@cartagraph/shared/types';
+import type { GameSession, SessionPlayer } from '@cartagraph/shared/types';
 
 // データベース初期化フック
 export function useDatabase() {

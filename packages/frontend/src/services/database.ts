@@ -30,7 +30,9 @@ interface CartagraphDB extends DBSchema {
 
 class DatabaseService {
   private db: IDBPDatabase<CartagraphDB> | null = null;
+
   private readonly dbName = 'cartagraph-game';
+
   private readonly version = 1;
 
   async init(): Promise<void> {

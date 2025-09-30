@@ -14,7 +14,9 @@ interface PendingRequest {
 
 export class SimpleWorkerService {
   private worker: Worker | null = null;
+
   private pendingRequests = new Map<string, PendingRequest>();
+
   private initialized = false;
 
   // 初期化

@@ -2,7 +2,7 @@
 // 実行方法: BROWSER_TEST=1 bun test src/services/event-store.test.ts
 // 注意: IndexedDBが必要なため、ブラウザ環境でのみ動作します
 import { describe, it, expect, beforeEach } from 'vitest';
-import { EventStoreService, type StoredEvent } from './event-store';
+import { EventStoreService } from './event-store';
 
 const shouldRunBrowserTests = process.env.BROWSER_TEST === '1';
 const describeOrSkip = shouldRunBrowserTests ? describe : describe.skip;

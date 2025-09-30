@@ -14,8 +14,11 @@ export type SyncListener = (message: SyncMessage) => void;
 
 export class SyncManager {
   private channel: BroadcastChannel | null = null;
+
   private readonly channelName = 'cartagraph-sync';
+
   private listeners: Set<SyncListener> = new Set();
+
   private initialized = false;
 
   // 初期化

@@ -18,7 +18,7 @@ async function initializeWasm(): Promise<void> {
     console.log('[SimpleWorker] Loading WASM module...');
 
     // 相対パスでWASMモジュールを読み込み
-    const module = await import('../../../core/pkg/cartagraph_core.js');
+    const module = await import("cartagraph-core/cartagraph_core.js");
 
     // WASMモジュールを初期化
     await module.default();

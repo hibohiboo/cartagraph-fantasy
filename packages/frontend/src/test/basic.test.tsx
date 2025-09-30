@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import Navigation from '../components/Navigation';
 import { MemoryRouter } from 'react-router-dom';
+import { describe, it, expect } from 'vitest';
+import Navigation from '../components/Navigation';
 
 describe('Basic Component Tests', () => {
   it('should render Navigation component', () => {

@@ -62,8 +62,11 @@ export interface EventQuery {
 
 export class EventStoreService {
   private db: IDBPDatabase<EventStoreDB> | null = null;
+
   private readonly dbName = 'cartagraph-event-store';
+
   private readonly version = 1;
+
   private readonly snapshotInterval = 100; // 100イベントごとにスナップショット
 
   async init(): Promise<void> {

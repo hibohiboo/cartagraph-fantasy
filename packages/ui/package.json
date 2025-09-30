@@ -31,9 +31,6 @@
     "storybook": "^9.1.9",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4",
-    "@testing-library/react": "^16.3.0",
-    "eslint": "^9.36.0",
-    "@typescript-eslint/eslint-plugin": "^8.45.0",
-    "@typescript-eslint/parser": "^8.45.0"
+    "@testing-library/react": "^16.3.0"
   }
 }
