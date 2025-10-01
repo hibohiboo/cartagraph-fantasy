@@ -1,8 +1,9 @@
+import { CreateSessionForm, CreateSessionFormData } from '@cartagraph/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreateSessionForm, CreateSessionFormData } from '@cartagraph-fantasy/ui';
-import { getSimpleWorkerService } from '../services/simple-worker-service';
+
 import { getSessionStore } from '../services/session-store';
+import { getSimpleWorkerService } from '../services/simple-worker-service';
 
 const CreateSession = () => {
   const navigate = useNavigate();
@@ -39,7 +40,7 @@ const CreateSession = () => {
       // セッションを作成
       const result = await workerService.createSession(
         data.scenarioId,
-        data.gmUserId
+        data.gmUserId,
       );
 
       console.log('Session created:', result);
@@ -50,7 +51,7 @@ const CreateSession = () => {
 
       // IndexedDBにセッションメタデータを保存
       await sessionStore.saveSession({
-        sessionId: sessionId,
+        sessionId,
         scenarioId: data.scenarioId,
         gmUserId: data.gmUserId,
         status: 'WaitingForPlayers',
@@ -70,9 +71,7 @@ const CreateSession = () => {
       navigate('/sessions');
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : 'セッションの作成に失敗しました'
+        err instanceof Error ? err.message : 'セッションの作成に失敗しました',
       );
     } finally {
       setIsSubmitting(false);

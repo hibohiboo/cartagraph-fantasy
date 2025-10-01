@@ -5,11 +5,11 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 // ページコンポーネント
 import App from './App';
+import CreateSession from './pages/CreateSession';
 import Game from './pages/Game';
 import Home from './pages/Home';
 import Scenario from './pages/Scenario';
 import Sessions from './pages/Sessions';
-import CreateSession from './pages/CreateSession';
 
 // Reactクエリクライアント
 const queryClient = new QueryClient({

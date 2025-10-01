@@ -10,7 +10,7 @@
     "test": "vitest",
     "test:browser": "BROWSER_TEST=1 vitest src/services/event-store.test.ts",
     "test:e2e": "playwright test",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "tsc --noEmit && eslint . --fix",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

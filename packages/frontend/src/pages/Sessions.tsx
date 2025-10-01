@@ -1,12 +1,43 @@
-import { useState, useEffect } from 'react';
+import { SessionList, SessionCardProps } from '@cartagraph/ui';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { SessionList, SessionCardProps } from '@cartagraph-fantasy/ui';
 import { getSessionStore } from '../services/session-store';
 
 const Sessions = () => {
   const [sessions, setSessions] = useState<SessionCardProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const loadSessions = useCallback(async () => {
+    try {
+      setLoading(true);
+      const sessionStore = getSessionStore();
+
+      const sessionMetadata = await sessionStore.getAllSessions();
+
+      const sessionProps: SessionCardProps[] = sessionMetadata.map(
+        (session) => ({
+          sessionId: session.sessionId,
+          scenarioId: session.scenarioId,
+          gmUserId: session.gmUserId,
+          status: session.status,
+          playerCount: session.playerCount,
+          createdAt: session.createdAt,
+        }),
+      );
+
+      setSessions(sessionProps);
+      setError(null);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'セッションの読み込みに失敗しました',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     loadSessions();
@@ -15,7 +46,10 @@ const Sessions = () => {
     const channel = new BroadcastChannel('trpg-session-sync');
 
     const handleMessage = (event: MessageEvent) => {
-      if (event.data.type === 'SESSION_CREATED' || event.data.type === 'SESSION_UPDATED') {
+      if (
+        event.data.type === 'SESSION_CREATED' ||
+        event.data.type === 'SESSION_UPDATED'
+      ) {
         // セッション一覧を再読み込み
         loadSessions();
       }
@@ -27,34 +61,7 @@ const Sessions = () => {
       channel.removeEventListener('message', handleMessage);
       channel.close();
     };
-  }, []);
-
-  const loadSessions = async () => {
-    try {
-      setLoading(true);
-      const sessionStore = getSessionStore();
-
-      // IndexedDBからセッション一覧を取得
-      const sessionMetadata = await sessionStore.getAllSessions();
-
-      // SessionCardProps形式に変換
-      const sessionProps: SessionCardProps[] = sessionMetadata.map((session) => ({
-        sessionId: session.sessionId,
-        scenarioId: session.scenarioId,
-        gmUserId: session.gmUserId,
-        status: session.status,
-        playerCount: session.playerCount,
-        createdAt: session.createdAt,
-      }));
-
-      setSessions(sessionProps);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'セッションの読み込みに失敗しました');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [loadSessions]);
 
   const handleViewSession = (sessionId: string) => {
     window.location.href = `/game/${sessionId}`;
@@ -66,7 +73,7 @@ const Sessions = () => {
   };
 
   const activeSessions = sessions.filter(
-    (s) => s.status === 'InProgress' || s.status === 'WaitingForPlayers'
+    (s) => s.status === 'InProgress' || s.status === 'WaitingForPlayers',
   );
   const completedSessions = sessions.filter((s) => s.status === 'Completed');
 

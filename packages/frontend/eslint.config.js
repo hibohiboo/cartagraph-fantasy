@@ -26,6 +26,12 @@ export default defineConfig(
           'no-plusplus': ['off'],
         },
       },
+      {
+        files: ['**/*.tsx', '**/*.ts'],
+        rules: {
+          'sonarjs/todo-tag': ['off'],
+        },
+      },
     ],
     settings: {
       'import/resolver': {

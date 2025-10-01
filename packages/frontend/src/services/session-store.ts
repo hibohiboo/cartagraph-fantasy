@@ -29,11 +29,13 @@
 
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
+type SessionStatus = 'WaitingForPlayers' | 'InProgress' | 'Completed';
+
 interface SessionMetadata {
   sessionId: string;
   scenarioId: string;
   gmUserId: string;
-  status: 'WaitingForPlayers' | 'InProgress' | 'Completed';
+  status: SessionStatus;
   playerCount: number;
   createdAt: string;
   updatedAt: string;
@@ -52,7 +54,9 @@ interface SessionDBSchema extends DBSchema {
 
 class SessionStoreService {
   private db: IDBPDatabase<SessionDBSchema> | null = null;
+
   private readonly DB_NAME = 'trpg-sessions';
+
   private readonly DB_VERSION = 1;
 
   async init(): Promise<void> {
@@ -84,29 +88,24 @@ class SessionStoreService {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
-    return await this.db.get('sessions', sessionId);
+    return this.db.get('sessions', sessionId);
   }
 
   async getAllSessions(): Promise<SessionMetadata[]> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
-    return await this.db.getAll('sessions');
+    return this.db.getAll('sessions');
   }
 
-  async getSessionsByStatus(
-    status: 'WaitingForPlayers' | 'InProgress' | 'Completed'
-  ): Promise<SessionMetadata[]> {
+  async getSessionsByStatus(status: SessionStatus): Promise<SessionMetadata[]> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
-    return await this.db.getAllFromIndex('sessions', 'by-status', status);
+    return this.db.getAllFromIndex('sessions', 'by-status', status);
   }
 
-  async updateSessionStatus(
-    sessionId: string,
-    status: 'WaitingForPlayers' | 'InProgress' | 'Completed'
-  ): Promise<void> {
+  async updateSessionStatus(sessionId: string, status: SessionStatus): Promise<void> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
@@ -157,4 +156,4 @@ export function getSessionStore(): SessionStoreService {
   return sessionStoreInstance;
 }
 
-export type { SessionMetadata };
+export type { SessionMetadata, SessionStatus };
