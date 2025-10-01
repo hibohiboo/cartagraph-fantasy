@@ -8,6 +8,8 @@ import App from './App';
 import Game from './pages/Game';
 import Home from './pages/Home';
 import Scenario from './pages/Scenario';
+import Sessions from './pages/Sessions';
+import CreateSession from './pages/CreateSession';
 
 // Reactクエリクライアント
 const queryClient = new QueryClient({
@@ -36,6 +38,14 @@ const router = createBrowserRouter([
       {
         path: 'scenario/:scenarioId?',
         element: <Scenario />,
+      },
+      {
+        path: 'sessions',
+        element: <Sessions />,
+      },
+      {
+        path: 'sessions/new',
+        element: <CreateSession />,
       },
     ],
   },

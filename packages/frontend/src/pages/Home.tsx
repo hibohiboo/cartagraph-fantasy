@@ -22,8 +22,16 @@ const Home = () => (
         <section className="actions-section">
           <div className="action-cards">
             <div className="action-card">
-              <h3>新しいゲームを始める</h3>
-              <p>新しいセッションを作成してゲームを開始します</p>
+              <h3>セッション管理</h3>
+              <p>セッション一覧の確認や新しいセッションを作成します</p>
+              <Link to="/sessions" className="btn btn-primary">
+                セッション管理
+              </Link>
+            </div>
+
+            <div className="action-card">
+              <h3>ゲームプレイ</h3>
+              <p>進行中のゲームセッションでプレイします</p>
               <Link to="/game" className="btn btn-primary">
                 ゲーム開始
               </Link>
