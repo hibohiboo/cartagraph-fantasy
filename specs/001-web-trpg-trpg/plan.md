@@ -89,6 +89,7 @@ specs/001-web-trpg-trpg/
 ├── plan.md              # This file (/plan command output)
 ├── research.md          # Phase 0 output (/plan command)
 ├── data-model.md        # Phase 1 output (/plan command)
+├── frontend-design.md   # Frontend architecture & pages (Phase 3)
 ├── quickstart.md        # Phase 1 output (/plan command)
 ├── contracts/           # Phase 1 output (/plan command)
 └── tasks.md             # Phase 2 output (/tasks command - NOT created by /plan)
@@ -107,10 +108,11 @@ packages/
 │   └── tests/
 ├── frontend/         # React + TypeScript + WebAssembly
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── hooks/
-│   │   └── workers/  # WebWorker (Rust WASM呼び出し)
+│   │   ├── components/  # ページ固有コンポーネント
+│   │   ├── pages/       # ルーティングページ (詳細: frontend-design.md)
+│   │   ├── services/    # ビジネスロジック層
+│   │   ├── hooks/       # カスタムReact Hooks
+│   │   └── workers/     # WebWorker (Rust WASM呼び出し)
 │   └── tests/
 ├── ui/               # Storybook + Reactコンポーネント
 │   ├── src/
