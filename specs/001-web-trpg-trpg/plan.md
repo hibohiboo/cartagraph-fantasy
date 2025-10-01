@@ -35,6 +35,7 @@
 **Package Management**: bun（モノレポのパッケージ管理に採用。高速な依存解決とスクリプト実行の統一を目的）
 **Language/Version**: Rust 1.75 (コアロジック), TypeScript 5.3 (フロントエンド/バックエンド), Node.js 22+
 **Primary Dependencies**: React 19, React router v7, Hono, wasm-pack, Storybook, Cloudflare Workers
+**UI Framework**: Tailwind CSS（フロントエンドスタイリングに採用。ユーティリティファーストでコンポーネントスタイル記述を効率化）
 **Storage**: 初期実装 - IndexedDB/LocalStorage, 将来 - PostgreSQL (Neon), Neo4j
 ※UIレイヤーではReact Flowを利用し、Neo4jとのグラフ構造移行を見据えた編集体験を提供予定
 **Testing**: cargo test (Rust), Vitest + React Testing Library (React), Vitest (Node.js)
