@@ -1,6 +1,30 @@
 /**
  * セッションメタデータストレージサービス
  * セッション一覧の高速取得のためのメタデータ管理
+ *
+ * ## 仕様
+ *
+ * ### 保存
+ * - saveSession: セッションメタデータを保存（既存データは上書き）
+ * - updatedAtは自動的に現在時刻に更新される
+ *
+ * ### 取得
+ * - getSession: sessionIdで単一セッション取得（存在しない場合はundefined）
+ * - getAllSessions: 全セッション取得（作成順ではなくストア順）
+ * - getSessionsByStatus: ステータスでフィルタして取得
+ *
+ * ### 更新
+ * - updateSessionStatus: セッションステータスのみ更新（セッション不在時はエラー）
+ * - updatePlayerCount: プレイヤー数のみ更新（セッション不在時はエラー）
+ * - 更新時はupdatedAtも自動更新される
+ *
+ * ### 削除
+ * - deleteSession: セッション削除（存在しなくてもエラーにならない）
+ * - clear: 全セッション削除
+ *
+ * ### 初期化
+ * - init: データベース初期化（自動的に呼ばれる、複数回呼んでも安全）
+ * - シングルトンパターン（getSessionStore()で同一インスタンス取得）
  */
 
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
