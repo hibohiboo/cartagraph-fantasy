@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreateSessionForm, CreateSessionFormData } from '@cartagraph-fantasy/ui';
 import { getSimpleWorkerService } from '../services/simple-worker-service';
+import { getSessionStore } from '../services/session-store';
 
 const CreateSession = () => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const CreateSession = () => {
       setError(null);
 
       const workerService = getSimpleWorkerService();
+      const sessionStore = getSessionStore();
 
       // セッションを作成
       const result = await workerService.createSession(
@@ -41,6 +43,28 @@ const CreateSession = () => {
       );
 
       console.log('Session created:', result);
+
+      // 結果をパース（JSON形式）
+      const sessionData = JSON.parse(result);
+      const sessionId = sessionData.session_id || sessionData.sessionId;
+
+      // IndexedDBにセッションメタデータを保存
+      await sessionStore.saveSession({
+        sessionId: sessionId,
+        scenarioId: data.scenarioId,
+        gmUserId: data.gmUserId,
+        status: 'WaitingForPlayers',
+        playerCount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      console.log('Session saved to IndexedDB:', sessionId);
+
+      // BroadcastChannelで他のタブに通知
+      const channel = new BroadcastChannel('trpg-session-sync');
+      channel.postMessage({ type: 'SESSION_CREATED', sessionId });
+      channel.close();
 
       // セッション一覧ページに戻る
       navigate('/sessions');

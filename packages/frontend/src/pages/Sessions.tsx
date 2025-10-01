@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { SessionList, SessionCardProps } from '@cartagraph-fantasy/ui';
+import { getSessionStore } from '../services/session-store';
 
 const Sessions = () => {
   const [sessions, setSessions] = useState<SessionCardProps[]>([]);
@@ -9,14 +10,44 @@ const Sessions = () => {
 
   useEffect(() => {
     loadSessions();
+
+    // BroadcastChannelでセッション作成・更新を監視
+    const channel = new BroadcastChannel('trpg-session-sync');
+
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'SESSION_CREATED' || event.data.type === 'SESSION_UPDATED') {
+        // セッション一覧を再読み込み
+        loadSessions();
+      }
+    };
+
+    channel.addEventListener('message', handleMessage);
+
+    return () => {
+      channel.removeEventListener('message', handleMessage);
+      channel.close();
+    };
   }, []);
 
   const loadSessions = async () => {
     try {
       setLoading(true);
-      // TODO: IndexedDBからセッション一覧を取得
-      // 現在は空の配列を返す
-      setSessions([]);
+      const sessionStore = getSessionStore();
+
+      // IndexedDBからセッション一覧を取得
+      const sessionMetadata = await sessionStore.getAllSessions();
+
+      // SessionCardProps形式に変換
+      const sessionProps: SessionCardProps[] = sessionMetadata.map((session) => ({
+        sessionId: session.sessionId,
+        scenarioId: session.scenarioId,
+        gmUserId: session.gmUserId,
+        status: session.status,
+        playerCount: session.playerCount,
+        createdAt: session.createdAt,
+      }));
+
+      setSessions(sessionProps);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'セッションの読み込みに失敗しました');
