@@ -398,6 +398,7 @@ gameChannel.postMessage({
 2. **Monorepo TypeScript**: Bun Workspaces + Project References + "Live Types" パターン
 3. **DDD + Onion Architecture**: Session中心の集約ルート + イベントソーシング
 4. **IndexedDB Storage**: イベントソーシング + BroadcastChannel クロスタブ同期
+5. **Tailwind CSS**: ユーティリティファーストでコンポーネントスタイル記述を効率化
 
 ### 次のフェーズ
 - **Phase 1**: data-model.md, contracts/, quickstart.md, CLAUDE.md の作成
