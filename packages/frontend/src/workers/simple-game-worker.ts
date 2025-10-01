@@ -17,7 +17,7 @@ type WorkerMessageMap = {
   ERROR: { error: string };
   INIT_SUCCESS: { message: string };
 };
-type WorkerMessage = {
+export type WorkerMessage = {
   [K in keyof WorkerMessageMap]: {
     type: K;
     id: string;

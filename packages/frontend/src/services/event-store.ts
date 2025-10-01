@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Event Store Service - Event Sourcing用IndexedDB実装
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 
@@ -75,16 +76,26 @@ export class EventStoreService {
     try {
       this.db = await openDB<EventStoreDB>(this.dbName, this.version, {
         upgrade(db, oldVersion, newVersion, transaction) {
-          console.log(`[EventStore] Upgrading from v${oldVersion} to v${newVersion}`);
+          console.log(
+            `[EventStore] Upgrading from v${oldVersion} to v${newVersion}`,
+          );
 
           // イベントストア
           if (!db.objectStoreNames.contains('events')) {
             const eventStore = db.createObjectStore('events', {
               keyPath: 'eventId',
             });
-            eventStore.createIndex('by-session', 'sessionId', { unique: false });
-            eventStore.createIndex('by-session-sequence', ['sessionId', 'sequence'], { unique: true });
-            eventStore.createIndex('by-timestamp', 'timestamp', { unique: false });
+            eventStore.createIndex('by-session', 'sessionId', {
+              unique: false,
+            });
+            eventStore.createIndex(
+              'by-session-sequence',
+              ['sessionId', 'sequence'],
+              { unique: true },
+            );
+            eventStore.createIndex('by-timestamp', 'timestamp', {
+              unique: false,
+            });
           }
 
           // スナップショットストア
@@ -92,7 +103,11 @@ export class EventStoreService {
             const snapshotStore = db.createObjectStore('snapshots', {
               keyPath: 'sessionId',
             });
-            snapshotStore.createIndex('by-session-sequence', ['sessionId', 'sequence'], { unique: false });
+            snapshotStore.createIndex(
+              'by-session-sequence',
+              ['sessionId', 'sequence'],
+              { unique: false },
+            );
           }
 
           // メタデータストア
@@ -126,10 +141,17 @@ export class EventStoreService {
     const eventStore = tx.objectStore('events');
 
     // 次のシーケンス番号を取得
-    const lastEvent = await eventStore.index('by-session-sequence')
-      .openCursor(IDBKeyRange.bound([event.sessionId, 0], [event.sessionId, Number.MAX_SAFE_INTEGER]), 'prev');
+    const lastEvent = await eventStore
+      .index('by-session-sequence')
+      .openCursor(
+        IDBKeyRange.bound(
+          [event.sessionId, 0],
+          [event.sessionId, Number.MAX_SAFE_INTEGER],
+        ),
+        'prev',
+      );
 
-    const sequence = lastEvent ? (lastEvent.value.sequence + 1) : 0;
+    const sequence = lastEvent ? lastEvent.value.sequence + 1 : 0;
 
     // イベント保存
     const storedEvent: StoredEvent = {
@@ -140,7 +162,9 @@ export class EventStoreService {
 
     // スナップショット判定
     if (sequence > 0 && sequence % this.snapshotInterval === 0) {
-      console.log(`[EventStore] Snapshot interval reached at sequence ${sequence}`);
+      console.log(
+        `[EventStore] Snapshot interval reached at sequence ${sequence}`,
+      );
       // スナップショット作成は外部で行う（ゲームロジックに依存）
     }
 
@@ -152,22 +176,34 @@ export class EventStoreService {
   async getEvents(query: EventQuery): Promise<StoredEvent[]> {
     if (!this.db) throw new Error('Event Store not initialized');
 
-    const { sessionId, fromSequence = 0, toSequence = Number.MAX_SAFE_INTEGER, limit } = query;
+    const {
+      sessionId,
+      fromSequence = 0,
+      toSequence = Number.MAX_SAFE_INTEGER,
+      limit,
+    } = query;
 
     const events = await this.db.getAllFromIndex(
       'events',
       'by-session-sequence',
-      IDBKeyRange.bound([sessionId, fromSequence], [sessionId, toSequence])
+      IDBKeyRange.bound([sessionId, fromSequence], [sessionId, toSequence]),
     );
 
     return limit ? events.slice(0, limit) : events;
   }
 
   // 最新イベント取得
-  async getLatestEvents(sessionId: string, count: number = 10): Promise<StoredEvent[]> {
+  async getLatestEvents(
+    sessionId: string,
+    count: number = 10,
+  ): Promise<StoredEvent[]> {
     if (!this.db) throw new Error('Event Store not initialized');
 
-    const allEvents = await this.db.getAllFromIndex('events', 'by-session', sessionId);
+    const allEvents = await this.db.getAllFromIndex(
+      'events',
+      'by-session',
+      sessionId,
+    );
     return allEvents.slice(-count);
   }
 
@@ -175,7 +211,11 @@ export class EventStoreService {
   async getEventCount(sessionId: string): Promise<number> {
     if (!this.db) throw new Error('Event Store not initialized');
 
-    const events = await this.db.getAllFromIndex('events', 'by-session', sessionId);
+    const events = await this.db.getAllFromIndex(
+      'events',
+      'by-session',
+      sessionId,
+    );
     return events.length;
   }
 
@@ -184,18 +224,22 @@ export class EventStoreService {
     if (!this.db) throw new Error('Event Store not initialized');
 
     await this.db.put('snapshots', snapshot);
-    console.log(`[EventStore] Snapshot saved for session ${snapshot.sessionId} at sequence ${snapshot.sequence}`);
+    console.log(
+      `[EventStore] Snapshot saved for session ${snapshot.sessionId} at sequence ${snapshot.sequence}`,
+    );
   }
 
   // 最新スナップショット取得
   async getLatestSnapshot(sessionId: string): Promise<Snapshot | undefined> {
     if (!this.db) throw new Error('Event Store not initialized');
 
-    return await this.db.get('snapshots', sessionId);
+    return this.db.get('snapshots', sessionId);
   }
 
   // スナップショットからの復元 + イベント再生
-  async loadSessionState(sessionId: string): Promise<{ snapshot: Snapshot | null; events: StoredEvent[] }> {
+  async loadSessionState(
+    sessionId: string,
+  ): Promise<{ snapshot: Snapshot | null; events: StoredEvent[] }> {
     if (!this.db) throw new Error('Event Store not initialized');
 
     // 最新スナップショット取得
@@ -205,7 +249,9 @@ export class EventStoreService {
     const fromSequence = snapshot ? snapshot.sequence + 1 : 0;
     const events = await this.getEvents({ sessionId, fromSequence });
 
-    console.log(`[EventStore] Loaded session ${sessionId}: snapshot=${snapshot?.sequence ?? 'none'}, events=${events.length}`);
+    console.log(
+      `[EventStore] Loaded session ${sessionId}: snapshot=${snapshot?.sequence ?? 'none'}, events=${events.length}`,
+    );
 
     return {
       snapshot: snapshot ?? null,
@@ -221,12 +267,17 @@ export class EventStoreService {
 
     // イベント削除
     const eventStore = tx.objectStore('events');
-    const eventCursor = await eventStore.index('by-session').openCursor(sessionId);
+    const eventCursor = await eventStore
+      .index('by-session')
+      .openCursor(sessionId);
     let deletedEvents = 0;
 
     while (eventCursor) {
+      // eslint-disable-next-line no-await-in-loop
       await eventCursor.delete();
+      // eslint-disable-next-line no-plusplus
       deletedEvents++;
+      // eslint-disable-next-line no-await-in-loop
       await eventCursor.continue();
     }
 
@@ -234,7 +285,9 @@ export class EventStoreService {
     await tx.objectStore('snapshots').delete(sessionId);
 
     await tx.done;
-    console.log(`[EventStore] Deleted session ${sessionId}: ${deletedEvents} events`);
+    console.log(
+      `[EventStore] Deleted session ${sessionId}: ${deletedEvents} events`,
+    );
   }
 
   // パフォーマンス統計
@@ -246,7 +299,11 @@ export class EventStoreService {
   }> {
     if (!this.db) throw new Error('Event Store not initialized');
 
-    const events = await this.db.getAllFromIndex('events', 'by-session', sessionId);
+    const events = await this.db.getAllFromIndex(
+      'events',
+      'by-session',
+      sessionId,
+    );
     const snapshot = await this.getLatestSnapshot(sessionId);
 
     return {
@@ -261,7 +318,10 @@ export class EventStoreService {
   async clearAll(): Promise<void> {
     if (!this.db) throw new Error('Event Store not initialized');
 
-    const tx = this.db.transaction(['events', 'snapshots', 'metadata'], 'readwrite');
+    const tx = this.db.transaction(
+      ['events', 'snapshots', 'metadata'],
+      'readwrite',
+    );
     await Promise.all([
       tx.objectStore('events').clear(),
       tx.objectStore('snapshots').clear(),

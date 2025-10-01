@@ -36,7 +36,9 @@ describeOrSkip('EventStore Performance Tests', () => {
     const endTime = performance.now();
     const duration = endTime - startTime;
 
-    console.log(`Appended ${eventCount} events in ${duration.toFixed(2)}ms (${(duration / eventCount).toFixed(2)}ms per event)`);
+    console.log(
+      `Appended ${eventCount} events in ${duration.toFixed(2)}ms (${(duration / eventCount).toFixed(2)}ms per event)`,
+    );
 
     // 1000イベントを10秒以内に追加できることを確認
     expect(duration).toBeLessThan(10000);
@@ -104,11 +106,14 @@ describeOrSkip('EventStore Performance Tests', () => {
 
     // 状態読み込みパフォーマンス測定
     const startTime = performance.now();
-    const { snapshot, events } = await eventStore.loadSessionState(testSessionId);
+    const { snapshot, events } =
+      await eventStore.loadSessionState(testSessionId);
     const endTime = performance.now();
 
     const duration = endTime - startTime;
-    console.log(`Loaded session state in ${duration.toFixed(2)}ms (snapshot + ${events.length} events)`);
+    console.log(
+      `Loaded session state in ${duration.toFixed(2)}ms (snapshot + ${events.length} events)`,
+    );
 
     // 状態読み込みが100ms以内に完了することを確認
     expect(duration).toBeLessThan(100);

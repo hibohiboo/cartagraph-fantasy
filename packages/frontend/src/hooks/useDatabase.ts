@@ -14,7 +14,9 @@ export function useDatabase() {
         setIsInitialized(true);
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Database initialization failed');
+        setError(
+          err instanceof Error ? err.message : 'Database initialization failed',
+        );
         setIsInitialized(false);
       }
     }
@@ -80,7 +82,7 @@ export function useSessions() {
 
 // ゲーム状態管理フック
 export function useGameState(sessionId: string | null) {
-  const [gameState, setGameState] = useState<any>(null);
+  const [gameState, setGameState] = useState<unknown>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -91,13 +93,15 @@ export function useGameState(sessionId: string | null) {
       const state = await database.getGameState(sid);
       setGameState(state);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load game state');
+      setError(
+        err instanceof Error ? err.message : 'Failed to load game state',
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const saveGameState = async (state: any) => {
+  const saveGameState = async (state: unknown) => {
     if (!sessionId) {
       setError('Session ID is required');
       return;
@@ -108,7 +112,9 @@ export function useGameState(sessionId: string | null) {
       setGameState(state);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save game state');
+      setError(
+        err instanceof Error ? err.message : 'Failed to save game state',
+      );
       throw err;
     }
   };

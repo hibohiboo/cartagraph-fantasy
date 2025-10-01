@@ -7,7 +7,13 @@ export default defineConfig(
     extends: [
       ...customConfig,
       {
-        files: ['**/tests/**','**/*.test.tsx','**/*.test.ts','vitest.config.ts'],
+        files: [
+          '**/tests/**',
+          '**/test/**',
+          '**/*.test.tsx',
+          '**/*.test.ts',
+          'vitest.config.ts',
+        ],
         rules: {
           'import/extensions': ['off'],
           'import/no-extraneous-dependencies': ['off'],
@@ -17,8 +23,9 @@ export default defineConfig(
           'no-restricted-syntax': ['off'],
           'no-await-in-loop': ['off'],
           '@typescript-eslint/no-explicit-any': ['off'],
+          'no-plusplus': ['off'],
         },
-      }
+      },
     ],
     settings: {
       'import/resolver': {

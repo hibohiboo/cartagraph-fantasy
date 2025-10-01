@@ -1,5 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import type { GameSession, SessionPlayer, Character } from '@cartagraph/shared/types';
+import type {
+  GameSession,
+  SessionPlayer,
+  Character,
+} from '@cartagraph/shared/types';
 
 // データベース スキーマ定義
 interface CartagraphDB extends DBSchema {
@@ -81,12 +86,12 @@ class DatabaseService {
 
   async getSession(sessionId: string): Promise<GameSession | undefined> {
     if (!this.db) throw new Error('Database not initialized');
-    return await this.db.get('sessions', sessionId);
+    return this.db.get('sessions', sessionId);
   }
 
   async getAllSessions(): Promise<GameSession[]> {
     if (!this.db) throw new Error('Database not initialized');
-    return await this.db.getAll('sessions');
+    return this.db.getAll('sessions');
   }
 
   async deleteSession(sessionId: string): Promise<void> {
@@ -102,7 +107,7 @@ class DatabaseService {
 
   async getPlayersBySession(sessionId: string): Promise<SessionPlayer[]> {
     if (!this.db) throw new Error('Database not initialized');
-    return await this.db.getAllFromIndex('players', 'by-session', sessionId);
+    return this.db.getAllFromIndex('players', 'by-session', sessionId);
   }
 
   // キャラクター操作
@@ -113,7 +118,7 @@ class DatabaseService {
 
   async getCharactersByPlayer(playerId: string): Promise<Character[]> {
     if (!this.db) throw new Error('Database not initialized');
-    return await this.db.getAllFromIndex('characters', 'by-player', playerId);
+    return this.db.getAllFromIndex('characters', 'by-player', playerId);
   }
 
   // ゲーム状態操作
@@ -136,7 +141,10 @@ class DatabaseService {
   async clearAll(): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
 
-    const tx = this.db.transaction(['sessions', 'players', 'characters', 'gameState'], 'readwrite');
+    const tx = this.db.transaction(
+      ['sessions', 'players', 'characters', 'gameState'],
+      'readwrite',
+    );
     await Promise.all([
       tx.objectStore('sessions').clear(),
       tx.objectStore('players').clear(),

@@ -1,13 +1,10 @@
 // Simple Worker Service - MVP版
 // 基本的なWebWorker通信のみ
 
-interface WorkerMessage {
-  type: string;
-  id: string;
-  payload?: any;
-}
+import { WorkerMessage } from '../workers/simple-game-worker';
 
 interface PendingRequest {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   resolve: (result: any) => void;
   reject: (error: Error) => void;
 }
@@ -26,7 +23,7 @@ export class SimpleWorkerService {
     // WebWorker作成
     this.worker = new Worker(
       new URL('../workers/simple-game-worker.ts', import.meta.url),
-      { type: 'module' }
+      { type: 'module' },
     );
 
     // メッセージリスナー設定
@@ -41,6 +38,7 @@ export class SimpleWorkerService {
   }
 
   // メッセージ送信
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private sendMessage(type: string, payload: any): Promise<any> {
     return new Promise((resolve, reject) => {
       if (!this.worker) {
@@ -95,25 +93,49 @@ export class SimpleWorkerService {
 
   // 公開API - セッション作成
   async createSession(scenarioId: string, gmUserId: string): Promise<string> {
-    const result = await this.sendMessage('CREATE_SESSION', { scenarioId, gmUserId });
+    const result = await this.sendMessage('CREATE_SESSION', {
+      scenarioId,
+      gmUserId,
+    });
     return result.result;
   }
 
   // 公開API - プレイヤー追加
-  async addPlayer(sessionId: string, userId: string, characterName: string): Promise<string> {
-    const result = await this.sendMessage('ADD_PLAYER', { sessionId, userId, characterName });
+  async addPlayer(
+    sessionId: string,
+    userId: string,
+    characterName: string,
+  ): Promise<string> {
+    const result = await this.sendMessage('ADD_PLAYER', {
+      sessionId,
+      userId,
+      characterName,
+    });
     return result.result;
   }
 
   // 公開API - ダイス振り
-  async rollDice(sessionId: string, playerId: string, diceCount: number, diceSides: number): Promise<string> {
-    const result = await this.sendMessage('ROLL_DICE', { sessionId, playerId, diceCount, diceSides });
+  async rollDice(
+    sessionId: string,
+    playerId: string,
+    diceCount: number,
+    diceSides: number,
+  ): Promise<string> {
+    const result = await this.sendMessage('ROLL_DICE', {
+      sessionId,
+      playerId,
+      diceCount,
+      diceSides,
+    });
     return result.result;
   }
 
   // 公開API - セッション取得
   async getSession(sessionId: string, scenarioId: string): Promise<string> {
-    const result = await this.sendMessage('GET_SESSION', { sessionId, scenarioId });
+    const result = await this.sendMessage('GET_SESSION', {
+      sessionId,
+      scenarioId,
+    });
     return result.result;
   }
 
@@ -136,11 +158,10 @@ export class SimpleWorkerService {
     this.initialized = false;
 
     // 保留中のリクエストをキャンセル
-      this.pendingRequests.forEach((pending) => {
+    this.pendingRequests.forEach((pending) => {
       pending.reject(new Error('Service cleanup'));
     });
     this.pendingRequests.clear();
-
   }
 }
 

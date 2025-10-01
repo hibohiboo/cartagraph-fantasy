@@ -66,7 +66,7 @@ export class SyncManager {
     console.log('[SyncManager] Received:', message.type, message.sessionId);
 
     // 全リスナーに通知
-    this.listeners.forEach(listener => {
+    this.listeners.forEach((listener) => {
       try {
         listener(message);
       } catch (error) {
@@ -74,17 +74,16 @@ export class SyncManager {
       }
     });
 
-    // メッセージタイプ別処理
-    switch (message.type) {
-      case 'REQUEST_SYNC':
-        this.handleSyncRequest(message);
-        break;
-      // 他のメッセージはリスナーで処理
+    // メッセージタイプ別処理   // 他のメッセージはリスナーで処理
+    if (message.type === 'REQUEST_SYNC') {
+      this.handleSyncRequest(message);
     }
   }
 
   // 同期リクエスト処理
-  private async handleSyncRequest(message: Extract<SyncMessage, { type: 'REQUEST_SYNC' }>): Promise<void> {
+  private async handleSyncRequest(
+    message: Extract<SyncMessage, { type: 'REQUEST_SYNC' }>,
+  ): Promise<void> {
     try {
       const events = await eventStore.getEvents({
         sessionId: message.sessionId,
