@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { Card } from './Card';
+import type { Meta, StoryObj } from '@storybook/react';
 
 const meta = {
   title: 'Components/Card',
@@ -64,8 +64,13 @@ export const LongContent: Story = {
     title: 'Card with Long Content',
     children: (
       <div>
-        <p className="mb-2">This card contains multiple paragraphs of content.</p>
-        <p className="mb-2">It demonstrates how the card handles longer text content and maintains proper spacing.</p>
+        <p className="mb-2">
+          This card contains multiple paragraphs of content.
+        </p>
+        <p className="mb-2">
+          It demonstrates how the card handles longer text content and maintains
+          proper spacing.
+        </p>
         <p>The card automatically adjusts its height based on the content.</p>
       </div>
     ),
