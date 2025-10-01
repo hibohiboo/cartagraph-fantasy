@@ -6,12 +6,9 @@
     "declarationMap": true,
     "jsx": "react-jsx",
     "outDir": "./dist",
-    "rootDir": "./src",
     "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "./global.d.ts", "./.storybook/*"],
   "exclude": ["node_modules", "dist", "storybook-static"],
-  "references": [
-    { "path": "../shared" }
-  ]
+  "references": [{ "path": "../shared" }]
 }
