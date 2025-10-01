@@ -26,13 +26,10 @@
     "@cartagraph/ui": "workspace:*"
   },
   "devDependencies": {
-    "@types/react": "^19.1.15",
-    "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.4",
     "vite": "^7.1.7",
     "vite-plugin-wasm": "^3.5.0",
     "vite-plugin-top-level-await": "^1.6.0",
-    "typescript": "^5.9.2",
     "vitest": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "@testing-library/react": "^16.3.0",
