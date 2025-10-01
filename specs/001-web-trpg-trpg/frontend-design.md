@@ -294,6 +294,10 @@ interface CreateSessionFormData {
 ### 1. simple-worker-service.ts
 **目的**: WebWorker通信のシングルトンサービス
 
+**WASM契約仕様**:
+- `specs/001-web-trpg-trpg/contracts/wasm-interface-task16.yaml` - MVP版インターフェース (現在実装)
+- `specs/001-web-trpg-trpg/contracts/wasm-interface-future.yaml` - 将来版インターフェース (計画)
+
 **主要メソッド**:
 ```typescript
 class SimpleWorkerService {
@@ -309,6 +313,22 @@ class SimpleWorkerService {
 - UUID付きリクエスト追跡
 - 10秒タイムアウト
 - シングルトンパターン (`getSimpleWorkerService()`)
+
+**WASM FFI境界**:
+```
+SimpleWorkerService (TypeScript)
+  ↓ postMessage
+simple-game-worker.ts (WebWorker)
+  ↓ WASM bindings
+packages/core/src/wasm_interface.rs (Rust)
+  ↓ Domain Layer
+GameSession, Character, ScenarioTemplate集約
+```
+
+**契約仕様との対応**:
+- `wasm-interface-task16.yaml` で定義された関数がRustで実装済み
+- TypeScript側はWebWorkerメッセージング層でラップ
+- 型安全性はts-rsによる自動生成で保証
 
 **使用箇所**:
 - CreateSession.tsx (セッション作成)
