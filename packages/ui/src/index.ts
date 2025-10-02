@@ -23,3 +23,12 @@ export type { CharacterCardProps } from './components/CharacterCard';
 
 export { CreateCharacterForm } from './components/CreateCharacterForm';
 export type { CreateCharacterFormProps, CreateCharacterFormData } from './components/CreateCharacterForm';
+
+export { SceneDisplay } from './components/SceneDisplay';
+export type { SceneDisplayProps } from './components/SceneDisplay';
+
+export { DiceRollPanel } from './components/DiceRollPanel';
+export type { DiceRollPanelProps, DiceRollResult } from './components/DiceRollPanel';
+
+export { EventLogPanel } from './components/EventLogPanel';
+export type { EventLogPanelProps, EventLogEntry } from './components/EventLogPanel';

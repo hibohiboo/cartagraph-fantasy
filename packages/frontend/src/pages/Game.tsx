@@ -1,5 +1,12 @@
+import {
+  SceneDisplay,
+  DiceRollPanel,
+  EventLogPanel,
+  DiceRollResult,
+  EventLogEntry,
+} from '@cartagraph/ui';
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { getSimpleWorkerService } from '../services/simple-worker-service';
 
 const Game = () => {
@@ -9,9 +16,9 @@ const Game = () => {
     'loading',
   );
   const [error, setError] = useState<string>('');
-  const [testOutput, setTestOutput] = useState<string>('');
+  const [events, setEvents] = useState<EventLogEntry[]>([]);
 
-  // WebWorker初期化
+  // WebWorker初期化とゲームデータ読み込み
   useEffect(() => {
     let mounted = true;
 
@@ -20,6 +27,15 @@ const Game = () => {
         await workerService.initialize();
         if (mounted) {
           setStatus('ready');
+
+          // 初期イベントログを追加
+          const systemEvent: EventLogEntry = {
+            id: crypto.randomUUID(),
+            timestamp: new Date().toISOString(),
+            type: 'system',
+            message: `ゲームを開始しました (セッションID: ${sessionId || '未設定'})`,
+          };
+          setEvents([systemEvent]);
         }
       } catch (err) {
         console.error('Worker initialization failed:', err);
@@ -34,151 +50,88 @@ const Game = () => {
 
     return () => {
       mounted = false;
-      // 初期化が完了している場合のみクリーンアップ
       if (workerService.isInitialized()) {
         workerService.cleanup();
       }
     };
-  }, [workerService]);
+  }, [workerService, sessionId]);
 
-  // WebWorkerテスト実行
-  const runTest = async () => {
-    try {
-      setTestOutput('テスト実行中...\n');
+  // ダイスロール処理
+  const handleDiceRoll = async (result: DiceRollResult) => {
+    const modifierSign = result.modifier > 0 ? '+' : '';
+    const modifierText = result.modifier !== 0
+      ? ` (修正: ${modifierSign}${result.modifier})`
+      : '';
 
-      // 1. セッション作成
-      const sessionResult = await workerService.createSession(
-        'scenario-001',
-        'gm-user-001',
-      );
-      setTestOutput((prev) => `${prev}✅ セッション作成: ${sessionResult}\n`);
-
-      // 2. プレイヤー追加
-      const playerResult = await workerService.addPlayer(
-        'session-123',
-        'user-001',
-        'テストキャラクター',
-      );
-      setTestOutput((prev) => `${prev}✅ プレイヤー追加: ${playerResult}\n`);
-
-      // 3. ダイス振り
-      const diceResult = await workerService.rollDice(
-        'session-123',
-        'player-001',
-        2,
-        6,
-      );
-      setTestOutput((prev) => `${prev}✅ ダイス振り: ${diceResult}\n`);
-
-      setTestOutput((prev) => `${prev}\n🎉 全テスト成功！`);
-    } catch (e) {
-      const errorMsg = e instanceof Error ? e.message : 'Unknown error';
-      setTestOutput((prev) => `${prev}\n❌ エラー: ${errorMsg}`);
-    }
+    const logEntry: EventLogEntry = {
+      id: crypto.randomUUID(),
+      timestamp: result.timestamp,
+      type: 'dice',
+      actor: 'プレイヤー',
+      message: `2D6を振った: ${result.dice1} + ${result.dice2} = ${result.total}${modifierText} → 最終結果: ${result.finalResult}`,
+    };
+    setEvents((prev) => [...prev, logEntry]);
   };
 
-  const getStatusColor = () => {
-    switch (status) {
-      case 'loading':
-        return '#ffa500';
-      case 'ready':
-        return '#4caf50';
-      case 'error':
-        return '#f44336';
-      default:
-        return '#ccc';
-    }
-  };
+  // ローディング・エラー表示
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-xl text-gray-600">ゲームを読み込み中...</div>
+      </div>
+    );
+  }
 
-  const getStatusText = () => {
-    switch (status) {
-      case 'loading':
-        return 'WebWorker初期化中...';
-      case 'ready':
-        return 'WebWorker準備完了';
-      case 'error':
-        return 'エラー';
-      default:
-        return '不明なステータス';
-    }
-  };
+  if (status === 'error') {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <div className="text-xl text-red-600">エラー: {error}</div>
+        <Link
+          to="/sessions"
+          className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        >
+          セッション一覧に戻る
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-      <h1>ゲーム画面 - シンプルWebWorker統合</h1>
-      {sessionId && <p>セッションID: {sessionId}</p>}
-
-      <div
-        style={{
-          backgroundColor: '#2a2a2a',
-          padding: '1.5rem',
-          borderRadius: '8px',
-          margin: '1rem 0',
-        }}
-      >
-        <h2>WebWorker統合ステータス</h2>
-
-        <div style={{ marginBottom: '1rem' }}>
-          <span
-            style={{
-              display: 'inline-block',
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              backgroundColor: getStatusColor(),
-              marginRight: '0.5rem',
-            }}
-          ></span>
-          ステータス: {getStatusText()}
-        </div>
-
-        {status === 'ready' && (
-          <button
-            onClick={runTest}
-            style={{
-              backgroundColor: '#4a9eff',
-              color: 'white',
-              border: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">ゲームプレイ</h1>
+            {sessionId && (
+              <p className="text-sm text-gray-600 mt-1">
+                セッションID: {sessionId}
+              </p>
+            )}
+          </div>
+          <Link
+            to="/sessions"
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
           >
-            WebWorker + WASMテスト実行
-          </button>
-        )}
+            セッション一覧に戻る
+          </Link>
+        </header>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <SceneDisplay
+              sceneName="遺跡の入口"
+              description="古代の遺跡の入口に到着した。石造りの門は半分崩れているが、奥への道は続いている。"
+              objective="遺跡の奥に進み、隠された宝物を見つける"
+            />
+
+            <DiceRollPanel onRoll={handleDiceRoll} />
+          </div>
+
+          <div className="lg:col-span-1">
+            <EventLogPanel events={events} maxHeight="600px" />
+          </div>
+        </div>
       </div>
-
-      {error && (
-        <div
-          style={{
-            backgroundColor: '#4c1e1e',
-            padding: '1rem',
-            borderRadius: '4px',
-            color: '#f44336',
-            marginBottom: '1rem',
-          }}
-        >
-          エラー: {error}
-        </div>
-      )}
-
-      {testOutput && (
-        <div
-          style={{
-            backgroundColor: '#1e1e1e',
-            padding: '1rem',
-            borderRadius: '4px',
-            fontFamily: 'monospace',
-            whiteSpace: 'pre-wrap',
-            fontSize: '0.9rem',
-            border: '1px solid #444',
-          }}
-        >
-          <h3>テスト結果:</h3>
-          {testOutput}
-        </div>
-      )}
     </div>
   );
 };
