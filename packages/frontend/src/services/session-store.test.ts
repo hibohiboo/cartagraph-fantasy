@@ -9,9 +9,13 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { getSessionStore, SessionMetadata } from './session-store';
 
 // テストヘルパー: モックセッションデータ生成
-function createMockSession(overrides: Partial<SessionMetadata> = {}): SessionMetadata {
+let mockIdCounter = 0;
+function createMockSession(
+  overrides: Partial<SessionMetadata> = {},
+): SessionMetadata {
+  mockIdCounter += 1;
   return {
-    sessionId: `session-${Date.now()}-${Math.random()}`,
+    sessionId: `session-${Date.now()}-${mockIdCounter}`,
     scenarioId: 'scenario-001',
     gmUserId: 'gm-user-123',
     status: 'WaitingForPlayers',
@@ -45,7 +49,7 @@ describe('SessionStoreService', () => {
       await store.init();
       await store.init();
       await store.init();
-      // エラーが発生しないことを確認
+      expect(store).toBeDefined();
     });
   });
 
@@ -76,13 +80,15 @@ describe('SessionStoreService', () => {
     });
 
     it('updatedAtが自動的に更新される', async () => {
-      const session = createMockSession({ updatedAt: '2020-01-01T00:00:00.000Z' });
+      const session = createMockSession({
+        updatedAt: '2020-01-01T00:00:00.000Z',
+      });
       await store.saveSession(session);
 
       const retrieved = await store.getSession(session.sessionId);
       expect(retrieved?.updatedAt).not.toBe('2020-01-01T00:00:00.000Z');
       expect(new Date(retrieved!.updatedAt).getTime()).toBeGreaterThan(
-        new Date('2020-01-01T00:00:00.000Z').getTime()
+        new Date('2020-01-01T00:00:00.000Z').getTime(),
       );
     });
   });
@@ -117,8 +123,12 @@ describe('SessionStoreService', () => {
 
   describe('ステータス別取得', () => {
     beforeEach(async () => {
-      await store.saveSession(createMockSession({ status: 'WaitingForPlayers' }));
-      await store.saveSession(createMockSession({ status: 'WaitingForPlayers' }));
+      await store.saveSession(
+        createMockSession({ status: 'WaitingForPlayers' }),
+      );
+      await store.saveSession(
+        createMockSession({ status: 'WaitingForPlayers' }),
+      );
       await store.saveSession(createMockSession({ status: 'InProgress' }));
       await store.saveSession(createMockSession({ status: 'Completed' }));
     });
@@ -126,7 +136,9 @@ describe('SessionStoreService', () => {
     it('WaitingForPlayersステータスのセッションを取得', async () => {
       const sessions = await store.getSessionsByStatus('WaitingForPlayers');
       expect(sessions).toHaveLength(2);
-      expect(sessions.every((s) => s.status === 'WaitingForPlayers')).toBe(true);
+      expect(sessions.every((s) => s.status === 'WaitingForPlayers')).toBe(
+        true,
+      );
     });
 
     it('InProgressステータスのセッションを取得', async () => {
@@ -164,7 +176,7 @@ describe('SessionStoreService', () => {
 
     it('存在しないセッションの更新はエラー', async () => {
       await expect(
-        store.updateSessionStatus('non-existent-id', 'InProgress')
+        store.updateSessionStatus('non-existent-id', 'InProgress'),
       ).rejects.toThrow('Session non-existent-id not found');
     });
 
@@ -173,7 +185,9 @@ describe('SessionStoreService', () => {
       await store.saveSession(session);
 
       // 少し待機
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
 
       const beforeUpdate = await store.getSession(session.sessionId);
       await store.updateSessionStatus(session.sessionId, 'InProgress');
@@ -198,9 +212,9 @@ describe('SessionStoreService', () => {
     });
 
     it('存在しないセッションの更新はエラー', async () => {
-      await expect(store.updatePlayerCount('non-existent-id', 5)).rejects.toThrow(
-        'Session non-existent-id not found'
-      );
+      await expect(
+        store.updatePlayerCount('non-existent-id', 5),
+      ).rejects.toThrow('Session non-existent-id not found');
     });
 
     it('プレイヤー数更新時にupdatedAtも更新される', async () => {
@@ -208,7 +222,9 @@ describe('SessionStoreService', () => {
       await store.saveSession(session);
 
       // 少し待機
-      await new Promise((resolve) => setTimeout(resolve, 10));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 10);
+      });
 
       const beforeUpdate = await store.getSession(session.sessionId);
       await store.updatePlayerCount(session.sessionId, 2);
@@ -231,7 +247,8 @@ describe('SessionStoreService', () => {
 
     it('存在しないセッションの削除はエラーにならない', async () => {
       await store.deleteSession('non-existent-id');
-      // エラーが発生しないことを確認
+      const allSessions = await store.getAllSessions();
+      expect(allSessions).toHaveLength(0);
     });
 
     it('clear()で全セッションを削除できる', async () => {
@@ -283,8 +300,12 @@ describe('SessionStoreService', () => {
 
     it('複数ステータスのセッションを管理できる', async () => {
       // 複数のセッションを作成
-      await store.saveSession(createMockSession({ status: 'WaitingForPlayers' }));
-      await store.saveSession(createMockSession({ status: 'WaitingForPlayers' }));
+      await store.saveSession(
+        createMockSession({ status: 'WaitingForPlayers' }),
+      );
+      await store.saveSession(
+        createMockSession({ status: 'WaitingForPlayers' }),
+      );
       await store.saveSession(createMockSession({ status: 'InProgress' }));
       await store.saveSession(createMockSession({ status: 'Completed' }));
       await store.saveSession(createMockSession({ status: 'Completed' }));

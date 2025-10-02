@@ -348,15 +348,66 @@ GameSession, Character, ScenarioTemplate集約
 **実装状態**: ✅ 完了 (タスク19)
 
 **使用予定箇所**:
-- Sessions.tsx (セッション一覧取得)
-- CreateSession.tsx (セッション保存)
 - Game.tsx (ゲーム状態管理)
 
 **未統合**: フロントエンドページとの統合が必要
 
 ---
 
-### 3. database.ts
+### 3. session-store.ts
+**目的**: セッションメタデータ管理用IndexedDBストア
+
+**主要機能**:
+- セッションメタデータのCRUD操作
+- ステータスによるフィルタリング
+- 自動的なupdatedAt更新
+- シングルトンパターン
+
+**データ構造**:
+```typescript
+interface SessionMetadata {
+  sessionId: string;
+  scenarioId: string;
+  gmUserId: string;
+  status: 'WaitingForPlayers' | 'InProgress' | 'Completed';
+  playerCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+**主要メソッド**:
+- `saveSession()`: セッション保存 (上書き可)
+- `getSession()`: 単一セッション取得
+- `getAllSessions()`: 全セッション取得
+- `getSessionsByStatus()`: ステータスでフィルタ
+- `updateSessionStatus()`: ステータス更新
+- `updatePlayerCount()`: プレイヤー数更新
+- `deleteSession()`: セッション削除
+- `clear()`: 全削除
+
+**IndexedDBスキーマ**:
+- **Store**: `sessions`
+- **KeyPath**: `sessionId`
+- **Indexes**:
+  - `by-status`: ステータスでの検索
+  - `by-createdAt`: 作成日時でのソート
+
+**実装状態**: ✅ 完了 (タスク20)
+
+**テスト**: session-store.test.ts (23テスト全通過)
+
+**使用箇所**:
+- Sessions.tsx (セッション一覧表示)
+- CreateSession.tsx (セッション作成・保存)
+
+**BroadcastChannel連携**:
+- `trpg-session-sync` チャネルで他タブと同期
+- `SESSION_CREATED`, `SESSION_UPDATED` イベント
+
+---
+
+### 4. database.ts
 **目的**: IndexedDB初期化とスキーマ定義
 
 **実装状態**: ✅ 完了
@@ -555,6 +606,7 @@ type SyncMessage =
 ### IndexedDB Performance
 - **イベントクエリ**: <50ms (目標達成済み)
 - **スナップショット読み込み**: <100ms (目標達成済み)
+- **セッションメタデータ操作**: <50ms (目標達成済み)
 
 ---
 
@@ -584,7 +636,7 @@ type SyncMessage =
 
 ### Integration Testing
 - **WebWorker統合**: Game.tsx に基本テスト実装済み
-- **IndexedDB統合**: 未実装
+- **IndexedDB統合**: session-store.test.ts に実装済み (23テスト全通過)
 
 ---
 
