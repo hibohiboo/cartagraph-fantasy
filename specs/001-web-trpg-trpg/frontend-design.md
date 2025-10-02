@@ -100,14 +100,20 @@ const [error, setError] = useState<string | null>(null);
 
 **データフロー**:
 ```
-IndexedDB (TODO) → loadSessions() → sessions state → SessionList → SessionCard
+IndexedDB → loadSessions() → sessions state → SessionList → SessionCard
+SessionCard.onManagePlayers → handleManagePlayers() → PlayerManagementModal表示
 ```
 
+**実装済み機能** (タスク20):
+- ✅ IndexedDBからのセッション一覧取得
+- ✅ BroadcastChannelによるクロスタブ同期
+- ✅ ステータス別セッション表示 (アクティブ/完了)
+- ✅ プレイヤー管理モーダル統合
+
 **未実装機能**:
-- IndexedDBからのセッション一覧取得
-- プレイヤー管理UI (招待、キック、ステータス変更)
-- セッションステータス更新
-- リアルタイム同期 (BroadcastChannel)
+- ❌ プレイヤー管理のバックエンド連携 (現在はモックデータ)
+- ❌ セッションステータス更新
+- ❌ プレイヤー招待メール送信
 
 ---
 
@@ -277,7 +283,60 @@ interface CreateSessionFormData {
 
 ---
 
-#### 4. 既存コンポーネント (タスク5で実装)
+#### 4. PlayerManagementModal
+**ファイル**: `packages/ui/src/components/PlayerManagementModal.tsx`
+
+**Props**:
+```typescript
+interface PlayerManagementModalProps {
+  sessionId: string;
+  players: Player[];
+  isOpen: boolean;
+  onClose: () => void;
+  onInvitePlayer?: (email: string) => void;
+  onKickPlayer?: (userId: string) => void;
+  onChangePlayerStatus?: (userId: string, status: Player['status']) => void;
+}
+
+interface Player {
+  userId: string;
+  characterName: string;
+  status: 'pending' | 'active' | 'kicked';
+  joinedAt: string;
+}
+```
+
+**機能**:
+- プレイヤー招待 (メールアドレス入力)
+- ステータス別プレイヤー表示
+  - アクティブ (active): 参加中のプレイヤー
+  - 承認待ち (pending): 参加申請中のプレイヤー
+  - キック済み (kicked): 除外されたプレイヤー
+- プレイヤー操作
+  - キック: アクティブプレイヤーを除外
+  - 承認: 承認待ちプレイヤーをアクティブ化
+  - 拒否: 承認待ちプレイヤーを拒否
+  - 復帰: キック済みプレイヤーをアクティブに戻す
+
+**UIパターン**:
+- モーダルオーバーレイ (固定位置、背景透過)
+- ステータス別カラーコーディング
+  - アクティブ: 緑系 (bg-green-50, border-green-200)
+  - 承認待ち: 黄色系 (bg-yellow-50, border-yellow-200)
+  - キック済み: 灰色系 (bg-gray-50, border-gray-200)
+- スクロール可能なコンテンツエリア
+- 日時のローカライズ表示
+
+**実装状態**: ✅ 完了 (タスク20)
+
+**Storybookストーリー**: 7種類 (Default, EmptyPlayers, WithPendingPlayers, WithKickedPlayers, AllPlayerTypes, Closed, ReadOnly)
+
+**使用箇所**:
+- Sessions.tsx (セッション一覧からプレイヤー管理)
+
+---
+
+#### 5. 既存コンポーネント (タスク5で実装)
 
 **Button**:
 - 3種類のバリアント (primary, secondary, outline)

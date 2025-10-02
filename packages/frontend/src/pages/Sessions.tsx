@@ -1,12 +1,16 @@
-import { SessionList, SessionCardProps } from '@cartagraph/ui';
+import { SessionList, SessionCardProps, PlayerManagementModal, Player } from '@cartagraph/ui';
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+
+
 import { getSessionStore } from '../services/session-store';
 
 const Sessions = () => {
   const [sessions, setSessions] = useState<SessionCardProps[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [players, setPlayers] = useState<Player[]>([]);
 
   const loadSessions = useCallback(async () => {
     try {
@@ -68,8 +72,45 @@ const Sessions = () => {
   };
 
   const handleManagePlayers = (sessionId: string) => {
-    console.log('Manage players:', sessionId);
-    // TODO: プレイヤー管理モーダルを開く
+    setSelectedSessionId(sessionId);
+    // TODO: 実際のプレイヤーデータをWASMまたはIndexedDBから取得
+    const mockPlayers: Player[] = [
+      {
+        userId: 'player-1',
+        characterName: '勇者アレックス',
+        status: 'active',
+        joinedAt: new Date().toISOString(),
+      },
+      {
+        userId: 'player-2',
+        characterName: '魔法使いベラ',
+        status: 'pending',
+        joinedAt: new Date().toISOString(),
+      },
+    ];
+    setPlayers(mockPlayers);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedSessionId(null);
+    setPlayers([]);
+  };
+
+  const handleInvitePlayer = async (email: string) => {
+    console.log('Invite player:', email, 'to session:', selectedSessionId);
+    // TODO: プレイヤー招待のWASM実装
+  };
+
+  const handleKickPlayer = async (userId: string) => {
+    console.log('Kick player:', userId, 'from session:', selectedSessionId);
+    // TODO: プレイヤーキックのWASM実装
+    setPlayers((prev) => prev.map((p) => (p.userId === userId ? { ...p, status: 'kicked' as const } : p)));
+  };
+
+  const handleChangePlayerStatus = async (userId: string, status: Player['status']) => {
+    console.log('Change player status:', userId, 'to', status, 'in session:', selectedSessionId);
+    // TODO: ステータス変更のWASM実装
+    setPlayers((prev) => prev.map((p) => (p.userId === userId ? { ...p, status } : p)));
   };
 
   const activeSessions = sessions.filter(
@@ -131,6 +172,16 @@ const Sessions = () => {
           />
         </section>
       </div>
+
+      <PlayerManagementModal
+        sessionId={selectedSessionId || ''}
+        players={players}
+        isOpen={selectedSessionId !== null}
+        onClose={handleCloseModal}
+        onInvitePlayer={handleInvitePlayer}
+        onKickPlayer={handleKickPlayer}
+        onChangePlayerStatus={handleChangePlayerStatus}
+      />
     </div>
   );
 };
