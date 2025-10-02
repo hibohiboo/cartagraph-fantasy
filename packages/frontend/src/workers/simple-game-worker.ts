@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 // Simple Game WebWorker - MVP版
 // 最小限のWASM統合とメッセージ処理
 import * as cartagraphCore from '@cartagraph/core/pkg/cartagraph_core';
@@ -51,14 +52,14 @@ async function initializeWasm(): Promise<void> {
 
 // メッセージハンドラー
 // eslint-disable-next-line complexity
-window.self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
+self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
   const { type, id, payload } = event.data;
 
   try {
     switch (type) {
       case 'INIT':
         await initializeWasm();
-        window.self.postMessage({
+        self.postMessage({
           type: 'INIT_SUCCESS',
           id,
           payload: { message: 'WASM initialized successfully' },
@@ -73,7 +74,7 @@ window.self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
           payload.scenarioId,
           payload.gmUserId,
         );
-        window.self.postMessage({
+        self.postMessage({
           type: 'SUCCESS',
           id,
           payload: { result: sessionResult },
@@ -90,7 +91,7 @@ window.self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
           payload.userId,
           payload.characterName,
         );
-        window.self.postMessage({
+        self.postMessage({
           type: 'SUCCESS',
           id,
           payload: { result: playerResult },
@@ -108,7 +109,7 @@ window.self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
           payload.diceCount,
           payload.diceSides,
         );
-        window.self.postMessage({
+        self.postMessage({
           type: 'SUCCESS',
           id,
           payload: { result: diceResult },
@@ -124,7 +125,7 @@ window.self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
           payload.sessionId,
           payload.scenarioId,
         );
-        window.self.postMessage({
+        self.postMessage({
           type: 'SUCCESS',
           id,
           payload: { result: sessionData },
@@ -137,7 +138,7 @@ window.self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
     }
   } catch (error) {
     console.error(`[SimpleWorker] Error handling ${type}:`, error);
-    window.self.postMessage({
+    self.postMessage({
       type: 'ERROR',
       id,
       payload: {
@@ -148,7 +149,7 @@ window.self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
 };
 
 // エラーハンドラー
-window.self.onerror = (error) => {
+self.onerror = (error) => {
   console.error('[SimpleWorker] Global error:', error);
 };
 
