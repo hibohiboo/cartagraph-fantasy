@@ -1,5 +1,5 @@
 import { CreateSessionForm, CreateSessionFormData } from '@cartagraph/ui';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { getSessionStore } from '../services/session-store';
@@ -10,7 +10,26 @@ const CreateSession = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [workerReady, setWorkerReady] = useState(false);
   const currentUserId = useAppStore((state) => state.currentUserId);
+
+  // Worker初期化
+  useEffect(() => {
+    const initWorker = async () => {
+      try {
+        const workerService = getSimpleWorkerService();
+        if (!workerService.isInitialized()) {
+          await workerService.initialize();
+        }
+        setWorkerReady(true);
+      } catch (err) {
+        setError('Workerの初期化に失敗しました');
+        console.error('Worker initialization failed:', err);
+      }
+    };
+
+    initWorker();
+  }, []);
 
   // TODO: 実際のシナリオ一覧を取得
   const mockScenarios = [
@@ -86,6 +105,14 @@ const CreateSession = () => {
   const handleCancel = () => {
     navigate('/sessions');
   };
+
+  if (!workerReady) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12 px-4 flex items-center justify-center">
+        <div className="text-xl text-gray-600">初期化中...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
