@@ -807,44 +807,47 @@ Backend → WASM (サーバーサイドロジック)
 
 ### ✅ 完了
 - Routing基盤 (React Router v7)
-- Home, Sessions, CreateSession ページ
-- SessionCard, SessionList, CreateSessionForm コンポーネント
+- Home, Sessions, CreateSession, Characters, CreateCharacter, Game ページ
+- SessionCard, SessionList, CreateSessionForm, PlayerManagementModal コンポーネント (タスク20)
+- CharacterCard, CreateCharacterForm コンポーネント (タスク21)
+- SceneDisplay, DiceRollPanel, EventLogPanel コンポーネント (タスク22)
 - WebWorker統合サービス
 - IndexedDB Event Store基盤
+- IndexedDB session-store (タスク20)
+- IndexedDB character-store (タスク21)
 - Tailwind CSS スタイリング
+- プレイヤー管理UI (タスク20)
+- ゲームプレイUI MVP (タスク22)
 
 ### 🚧 一部完了
-- Sessions ページ (プレイヤー管理UI、IndexedDB統合が未完了)
-- CreateSession ページ (IndexedDB保存が未完了)
+- Game ページ (WASM統合済み、シーン/ダイス/ログUI完成、実際のゲーム状態連携は将来実装)
 
 ### ❌ 未実装
-- Game ページ (ゲームプレイUI)
-- Scenario ページ
-- Characters ページ
-- プレイヤー管理UI
-- IndexedDB統合 (セッション一覧取得・保存)
-- クロスタブ同期UI
+- Scenario ページ (シナリオエディター)
+- クロスタブ同期UI (BroadcastChannel実装済みだが、UI未統合)
 - 状態管理 (Zustand + React Query)
 - E2Eテスト
+- ドラッグ&ドロップカード操作
+- アニメーション (シーン遷移、ダイス振り)
 
 ---
 
 ## Next Steps
 
-### 短期 (タスク20完了)
-1. プレイヤー管理UIコンポーネント実装
-2. IndexedDB統合 (セッション保存・取得)
-3. BroadcastChannel統合 (セッション一覧の自動更新)
+### 短期 (タスク23)
+1. シナリオエディターUI実装 (React Flow統合)
+2. シーン・イベント作成フォーム
+3. シナリオテスト・検証ツール
 
-### 中期 (タスク21-23)
-1. キャラクター管理UIページ実装
-2. ゲームプレイUIページ実装
-3. シナリオエディターUI実装
-
-### 長期 (タスク24-26)
-1. クロスタブ同期完全実装
+### 中期 (タスク24-26)
+1. クロスタブ同期完全実装 (UIとの統合)
 2. Zustand + React Query 状態管理移行
-3. E2Eテスト完全実装
+3. E2Eテスト完全実装 (quickstart.mdシナリオ)
+
+### 長期 (将来改善)
+1. ドラッグ&ドロップカード操作
+2. アニメーション (シーン遷移、ダイス振り)
+3. リアルタイム更新 (他プレイヤーの行動)
 
 ---
 
