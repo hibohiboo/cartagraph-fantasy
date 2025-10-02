@@ -587,16 +587,31 @@ User Input (CreateSessionForm)
   ↓
 handleSubmit()
   ↓
+getSimpleWorkerService().initialize() (useEffect)
+  ↓ (Worker準備完了待機)
 getSimpleWorkerService().createSession()
-  ↓ (WebWorker経由)
-WASM: wasm_create_session()
-  ↓ (レスポンス)
-Session JSON
-  ↓ (TODO)
-IndexedDB保存 (EventStore)
+  ↓ (WebWorker経由 postMessage)
+simple-game-worker.ts
+  ↓
+WASM: wasm_create_session(scenario_id, gm_user_id)
+  ↓ (レスポンス: JSON文字列)
+Session JSON: {"session_id": "...", "scenario_id": "...", "session_status": "waiting_for_players", ...}
+  ↓ (postMessage back)
+SimpleWorkerService (Promise resolve)
+  ↓
+JSON.parse(result) → sessionData
+  ↓
+IndexedDB保存 (session-store.saveSession)
+  ↓
+BroadcastChannel通知 ('SESSION_CREATED')
   ↓
 navigate('/sessions')
 ```
+
+**重要な設計変更 (2025-01-XX)**:
+- **Worker初期化**: CreateSession.tsx の useEffect で Worker を事前初期化
+- **JSON形式統一**: `wasm_create_session()` は JSON 文字列を返す（`wasm_create_character()` と同様）
+- **エラーハンドリング**: Worker 初期化失敗時は UI に「初期化中...」表示、エラー時はエラーメッセージ表示
 
 ### 2. セッション一覧表示フロー (計画)
 ```

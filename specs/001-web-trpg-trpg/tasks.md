@@ -1020,13 +1020,61 @@
 # E2Eシナリオ段階的検証 (タスク8統合)
 ```
 **MVP受入条件** (段階的実施):
-- [ ] **シナリオ1**: GMがシナリオ作成、セッション開始 (Playwright自動テスト)
+- [ ] **シナリオ1**: GMがシナリオ作成、セッション開始 (Playwright自動テスト) - **実装中**
   - ユーザーID設定 → シナリオ作成 → セッション作成 → IndexedDB確認
+  - **ブロッカー発見**: WASM `wasm_create_session()` がプレーンテキスト返却、JSON期待との不一致
 - [ ] **シナリオ2**: プレイヤーがキャラクター作成、セッション参加 (手動検証)
   - キャラクター作成 → セッション一覧表示 → 参加可能性確認
 - [ ] **シナリオ3**: ゲームプレイ - ダイス振り、イベントログ (手動検証)
   - ゲーム画面表示 → ダイス振り → イベントログ記録確認
 - [x] パフォーマンス目標達成 (< 5MB WASM、レスポンシブUI)
+
+**E2Eテスト実装中の問題と対応**:
+
+**問題点**:
+1. **WASM戻り値の不一致** (wasm_interface.rs:270)
+   - `wasm_create_session()`: `Ok("session_created".to_string())` を返却
+   - Frontend期待値: JSON文字列 `{"session_id": "...", "scenario_id": "...", ...}`
+   - Contract仕様 (wasm-interface-task16.yaml:162): `Result<String, String>` でJSON返却
+   - frontend-design.md:594: Session JSON期待
+
+2. **実装の不一致**:
+   - `wasm_create_character()` (438行目): ✅ 正しくJSON返却 (`serde_json::to_string(&character_dto)`)
+   - `wasm_create_session()` (270行目): ❌ プレーンテキスト "session_created"
+   - `wasm_get_session_as_json()` (324行目): ✅ 正しくJSON返却
+
+**対応方法**:
+1. **`wasm_create_session()` 修正** (packages/core/src/wasm_interface.rs:256-271)
+   ```rust
+   #[wasm_bindgen]
+   pub fn wasm_create_session(scenario_id: &str, gm_user_id: &str) -> Result<String, String> {
+       let session_id = SessionId::new();
+       let scenario_id = ScenarioId::from_string(scenario_id.to_string());
+       let gm_user_id = UserId::from_string(gm_user_id.to_string());
+
+       let session = GameSession::create(session_id, scenario_id, gm_user_id);
+       let session_dto = GameSessionDto::from(&session);
+
+       // JSON文字列として返す (wasm_create_character()と同様)
+       serde_json::to_string(&session_dto)
+           .map_err(|e| format!("Serialization failed: {}", e))
+   }
+   ```
+
+2. **CreateSession.tsx 修正** (packages/frontend/src/pages/CreateSession.tsx:73-74)
+   - `JSON.parse(result)` がそのまま使える
+   - エラーハンドリング簡素化
+
+3. **契約テスト更新** (wasm_interface.rs:24)
+   ```rust
+   assert!(result.is_ok());
+   let json = result.unwrap();
+   assert!(json.contains("session_id"));
+   ```
+
+**副次的な修正**:
+- `wasm_add_player()`, `wasm_roll_dice()` も同様にJSON返却に統一
+- Contract tests全体の見直し (プレーンテキストからJSON形式へ)
 
 **パフォーマンス検証結果**:
 - **WASM サイズ**: 273KB (目標 < 5MB: ✅ 達成、目標の5.5%のみ)

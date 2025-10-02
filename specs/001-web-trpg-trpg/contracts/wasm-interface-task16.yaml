@@ -160,21 +160,48 @@ paths:
   /wasm_create_session:
     description: |
       wasm_create_session(scenario_id: &str, gm_user_id: &str) -> Result<String, String>
+
+      戻り値: GameSessionDtoのJSON文字列
+      成功例: {"session_id":"...", "scenario_id":"...", "session_status":"waiting_for_players", "players":{}, "current_scene":"initial", "version":0, "created_at":"2025-01-03T..."}
+      エラー例: Err("Serialization failed: ...")
+
+      注意: 過去の実装は Ok("session_created") を返していたが、フロントエンドとの統合のため JSON 形式に変更（Task 26 E2E実装時に発覚）
+
   /wasm_add_player:
     description: |
       wasm_add_player(session_id: &str, user_id: &str, character_name: &str) -> Result<String, String>
+
+      戻り値: PlayerDto のJSON文字列（将来実装）
+      現在: Ok("player_added") ※要JSON化
+
   /wasm_use_card:
     description: |
       wasm_use_card(session_id: &str, player_id: &str, card_id: &str) -> Result<String, String>
+
+      戻り値: CardUsageResult のJSON文字列（将来実装）
+      現在: Ok("card_used") ※要JSON化
+
   /wasm_roll_dice:
     description: |
       wasm_roll_dice(session_id: &str, player_id: &str, dice_count: u32, dice_sides: u32) -> Result<String, String>
+
+      戻り値: DiceRollResult のJSON文字列（将来実装）
+      現在: Ok("dice_rolled:3,5") ※要JSON化
+
   /wasm_get_session_as_json:
     description: |
       wasm_get_session_as_json(session_id: &str, scenario_id: &str) -> Result<String, String>
+
+      戻り値: GameSessionDtoのJSON文字列 ✅ 実装済み
+
   /wasm_parse_session_from_json:
     description: |
       wasm_parse_session_from_json(json_str: &str) -> Result<String, String>
+
+      戻り値: Ok("session_parsed_successfully") ✅ 実装済み
+
   /verify_typescript_type_exports:
     description: |
       verify_typescript_type_exports() -> Result<String, String>
+
+      戻り値: Ok("typescript_types_verification_deferred") （暫定実装）
