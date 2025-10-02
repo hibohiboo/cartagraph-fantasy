@@ -38,9 +38,9 @@ const Home = () => (
             </div>
 
             <div className="action-card">
-              <h3>シナリオを閲覧</h3>
-              <p>利用可能なシナリオを見つけて参加します</p>
-              <Link to="/scenario" className="btn btn-secondary">
+              <h3>シナリオ管理</h3>
+              <p>シナリオを作成・管理します</p>
+              <Link to="/scenarios" className="btn btn-secondary">
                 シナリオ一覧
               </Link>
             </div>

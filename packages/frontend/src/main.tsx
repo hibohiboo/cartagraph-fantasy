@@ -7,10 +7,13 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './App';
 import Characters from './pages/Characters';
 import CreateCharacter from './pages/CreateCharacter';
+import CreateScenario from './pages/CreateScenario';
 import CreateSession from './pages/CreateSession';
 import Game from './pages/Game';
 import Home from './pages/Home';
 import Scenario from './pages/Scenario';
+import ScenarioDetail from './pages/ScenarioDetail';
+import Scenarios from './pages/Scenarios';
 import Sessions from './pages/Sessions';
 
 // Reactクエリクライアント
@@ -40,6 +43,18 @@ const router = createBrowserRouter([
       {
         path: 'scenario/:scenarioId?',
         element: <Scenario />,
+      },
+      {
+        path: 'scenarios',
+        element: <Scenarios />,
+      },
+      {
+        path: 'scenarios/new',
+        element: <CreateScenario />,
+      },
+      {
+        path: 'scenarios/:scenarioId',
+        element: <ScenarioDetail />,
       },
       {
         path: 'sessions',
