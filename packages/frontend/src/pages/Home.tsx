@@ -1,7 +1,25 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+
+import { useAppStore } from '../stores/app-store';
 import './Home.css';
 
-const Home = () => (
+const Home = () => {
+  const { currentUserId, setCurrentUserId } = useAppStore();
+  const [isEditing, setIsEditing] = useState(false);
+  const [tempUserId, setTempUserId] = useState(currentUserId || '');
+
+  const handleSave = () => {
+    setCurrentUserId(tempUserId || null);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setTempUserId(currentUserId || '');
+    setIsEditing(false);
+  };
+
+  return (
     <div className="home">
       <header className="home-header">
         <h1>遺跡漁りとドブさらい</h1>
@@ -17,6 +35,41 @@ const Home = () => (
             このゲームは遺跡を探索し、宝物を発見する非同期のターン制冒険ゲームです。
             他のプレイヤーと協力して、謎に満ちた遺跡の深部を目指しましょう。
           </p>
+        </section>
+
+        <section className="user-section">
+          <h2>ユーザー設定</h2>
+          {!isEditing ? (
+            <div className="user-display">
+              <p>
+                現在のユーザーID: <strong>{currentUserId || '未設定'}</strong>
+              </p>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="btn btn-secondary"
+              >
+                ユーザーIDを{currentUserId ? '変更' : '設定'}
+              </button>
+            </div>
+          ) : (
+            <div className="user-edit">
+              <input
+                type="text"
+                value={tempUserId}
+                onChange={(e) => setTempUserId(e.target.value)}
+                placeholder="ユーザーIDを入力"
+                className="user-input"
+              />
+              <div className="button-group">
+                <button onClick={handleSave} className="btn btn-primary">
+                  保存
+                </button>
+                <button onClick={handleCancel} className="btn btn-secondary">
+                  キャンセル
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
         <section className="actions-section">
@@ -68,5 +121,6 @@ const Home = () => (
       </div>
     </div>
   );
+};
 
 export default Home;

@@ -2,13 +2,14 @@ import { CreateCharacterForm, CreateCharacterFormData } from '@cartagraph/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
 import { getCharacterStore } from '../services/character-store';
+import { useAppStore } from '../stores/app-store';
 
 const CreateCharacter = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const currentUserId = useAppStore((state) => state.currentUserId);
 
   const handleSubmit = async (data: CreateCharacterFormData) => {
     try {
@@ -18,11 +19,13 @@ const CreateCharacter = () => {
       const characterStore = getCharacterStore();
 
       const characterId = `char-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+      // playerIdが指定されていない場合はcurrentUserIdを使用
+      const playerId = data.playerId || currentUserId || 'default-player';
 
       await characterStore.saveCharacter({
         characterId,
         name: data.name,
-        playerId: data.playerId,
+        playerId,
         createdAt: new Date().toISOString(),
         lastUpdated: new Date().toISOString(),
       });

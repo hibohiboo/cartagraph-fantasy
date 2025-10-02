@@ -4,11 +4,13 @@ import { useNavigate } from 'react-router-dom';
 
 import { getSessionStore } from '../services/session-store';
 import { getSimpleWorkerService } from '../services/simple-worker-service';
+import { useAppStore } from '../stores/app-store';
 
 const CreateSession = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const currentUserId = useAppStore((state) => state.currentUserId);
 
   // TODO: 実際のシナリオ一覧を取得
   const mockScenarios = [
@@ -37,10 +39,13 @@ const CreateSession = () => {
       const workerService = getSimpleWorkerService();
       const sessionStore = getSessionStore();
 
+      // gmUserIdが指定されていない場合はcurrentUserIdを使用
+      const gmUserId = data.gmUserId || currentUserId || 'default-gm';
+
       // セッションを作成
       const result = await workerService.createSession(
         data.scenarioId,
-        data.gmUserId,
+        gmUserId,
       );
 
       console.log('Session created:', result);
@@ -53,7 +58,7 @@ const CreateSession = () => {
       await sessionStore.saveSession({
         sessionId,
         scenarioId: data.scenarioId,
-        gmUserId: data.gmUserId,
+        gmUserId,
         status: 'WaitingForPlayers',
         playerCount: 0,
         createdAt: new Date().toISOString(),

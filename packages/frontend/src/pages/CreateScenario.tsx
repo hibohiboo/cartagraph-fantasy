@@ -3,11 +3,13 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { getScenarioStore } from '../services/scenario-store';
+import { useAppStore } from '../stores/app-store';
 
 const CreateScenario = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
+  const currentUserId = useAppStore((state) => state.currentUserId);
 
   const handleSubmit = async (data: CreateScenarioFormData) => {
     setIsSubmitting(true);
@@ -18,13 +20,15 @@ const CreateScenario = () => {
 
       const scenarioId = `scenario-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
       const now = new Date().toISOString();
+      // authorIdが指定されていない場合はcurrentUserIdを使用
+      const authorId = data.authorId || currentUserId || 'default-author';
 
       await scenarioStore.saveScenario({
         scenarioId,
         title: data.title,
         description: data.description,
         initialSceneName: data.initialSceneName,
-        authorId: data.authorId,
+        authorId,
         createdAt: now,
         lastUpdated: now,
       });
