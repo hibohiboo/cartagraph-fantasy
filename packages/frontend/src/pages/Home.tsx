@@ -44,6 +44,14 @@ const Home = () => (
                 シナリオ一覧
               </Link>
             </div>
+
+            <div className="action-card">
+              <h3>キャラクター管理</h3>
+              <p>キャラクターを作成・管理します</p>
+              <Link to="/characters" className="btn btn-secondary">
+                キャラクター一覧
+              </Link>
+            </div>
           </div>
         </section>
 

@@ -17,3 +17,9 @@ export type { CreateSessionFormProps, CreateSessionFormData } from './components
 
 export { PlayerManagementModal } from './components/PlayerManagementModal';
 export type { PlayerManagementModalProps, Player } from './components/PlayerManagementModal';
+
+export { CharacterCard } from './components/CharacterCard';
+export type { CharacterCardProps } from './components/CharacterCard';
+
+export { CreateCharacterForm } from './components/CreateCharacterForm';
+export type { CreateCharacterFormProps, CreateCharacterFormData } from './components/CreateCharacterForm';

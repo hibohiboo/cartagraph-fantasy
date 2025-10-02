@@ -181,43 +181,44 @@ const mockScenarios = [
 
 **目的**: キャラクター作成・管理
 
-**機能** (タスク21):
-- キャラクター一覧表示
-- キャラクター作成フォーム
-- カード・タグ管理インターフェース
-- キャラクター履歴表示
-- セッション参加ステータス
-- エクスポート/インポート機能
+**機能** (タスク21 MVP):
+- ✅ キャラクター一覧表示
+- ✅ キャラクター作成フォーム (名前のみ)
+- ✅ IndexedDB永続化
+- ❌ カード・タグ管理 → タスク22で実装
+- ❌ 履歴表示 → 将来実装
+- ❌ エクスポート/インポート → 将来実装
 
-**実装状態**: ❌ 未実装
+**実装状態**: 🚧 MVP実装中 (タスク21)
 
-**データモデル** (data-model.md 参照):
+**MVP データモデル**:
 ```typescript
-interface Character {
+// MVP: 最小限のキャラクター情報
+interface CharacterMetadata {
   characterId: string;
   name: string;
   playerId: string;
-  personalCards: Card[];
-  acquiredTags: Tag[];
-  sessionHistory: SessionRecord[];
-  scenarioRestrictions: Map<string, string>;
   createdAt: string;
   lastUpdated: string;
 }
 
-interface SessionRecord {
-  sessionId: string;
-  scenarioId: string;
-  participatedAt: string;
-  finalTags: Tag[];
-  finalCards: Card[];
-  feedback?: string;
+// 将来: 完全なキャラクターモデル
+interface Character extends CharacterMetadata {
+  personalCards: Card[];
+  acquiredTags: Tag[];
+  sessionHistory: SessionRecord[];
+  scenarioRestrictions: Map<string, string>;
 }
 ```
 
-**未実装機能**:
-- キャラクター作成フォーム
-- カード・タグ選択UI
+**データフロー** (MVP):
+```
+CreateCharacterForm → handleSubmit() → IndexedDB保存 → navigate('/characters')
+IndexedDB → loadCharacters() → CharacterList表示
+```
+
+**未実装機能 (将来タスク)**:
+- カード・タグ選択UI (タスク22で必要)
 - 履歴表示
 - エクスポート/インポート
 
