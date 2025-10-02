@@ -14,3 +14,6 @@ export type { SessionListProps } from './components/SessionList';
 
 export { CreateSessionForm } from './components/CreateSessionForm';
 export type { CreateSessionFormProps, CreateSessionFormData } from './components/CreateSessionForm';
+
+export { PlayerManagementModal } from './components/PlayerManagementModal';
+export type { PlayerManagementModalProps, Player } from './components/PlayerManagementModal';

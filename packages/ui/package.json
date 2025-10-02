@@ -15,7 +15,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test": "vitest",
-    "lint": "eslint ."
+    "lint": "eslint . --fix"
   },
   "dependencies": {
     "@cartagraph/shared": "workspace:*",
