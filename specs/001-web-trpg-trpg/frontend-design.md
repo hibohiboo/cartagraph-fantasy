@@ -177,7 +177,53 @@ const mockScenarios = [
 
 ---
 
-### 5. Scenario (`/scenario/:scenarioId?`)
+### 5. Character (`/characters` / `/characters/new` / `/characters/:characterId`)
+
+**目的**: キャラクター作成・管理
+
+**機能** (タスク21):
+- キャラクター一覧表示
+- キャラクター作成フォーム
+- カード・タグ管理インターフェース
+- キャラクター履歴表示
+- セッション参加ステータス
+- エクスポート/インポート機能
+
+**実装状態**: ❌ 未実装
+
+**データモデル** (data-model.md 参照):
+```typescript
+interface Character {
+  characterId: string;
+  name: string;
+  playerId: string;
+  personalCards: Card[];
+  acquiredTags: Tag[];
+  sessionHistory: SessionRecord[];
+  scenarioRestrictions: Map<string, string>;
+  createdAt: string;
+  lastUpdated: string;
+}
+
+interface SessionRecord {
+  sessionId: string;
+  scenarioId: string;
+  participatedAt: string;
+  finalTags: Tag[];
+  finalCards: Card[];
+  feedback?: string;
+}
+```
+
+**未実装機能**:
+- キャラクター作成フォーム
+- カード・タグ選択UI
+- 履歴表示
+- エクスポート/インポート
+
+---
+
+### 6. Scenario (`/scenario/:scenarioId?`)
 
 **目的**: シナリオ閲覧・選択
 
