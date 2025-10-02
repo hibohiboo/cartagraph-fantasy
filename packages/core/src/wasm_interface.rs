@@ -21,7 +21,16 @@ mod contract_tests {
         let result = wasm_create_session(scenario_id_str, gm_user_id_str);
 
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), "session_created");
+        let json = result.unwrap();
+
+        // JSON文字列として返されることを確認
+        assert!(json.contains("session_id"));
+        assert!(json.contains("scenario_id"));
+        assert!(json.contains("session_status"));
+
+        // JSONとしてパース可能であることを確認
+        let parsed: Result<serde_json::Value, _> = serde_json::from_str(&json);
+        assert!(parsed.is_ok());
     }
 
     #[test]
@@ -85,25 +94,28 @@ mod contract_tests {
     fn test_wasm_boundary_type_roundtrip() {
         // WASM境界型一貫性テスト: 文字列 → Rust型 → 処理 → 結果の型安全性確認
 
-        // 1. createSessionの型一貫性確認
+        // 1. createSessionの型一貫性確認 - JSON形式
         let session_result = wasm_create_session("test-scenario-id", "test-gm-user-id");
         assert!(session_result.is_ok());
         let session_response = session_result.unwrap();
-        assert_eq!(session_response, "session_created");
+        // JSON文字列であることを確認
+        assert!(session_response.contains("session_id"));
+        let parsed: Result<serde_json::Value, _> = serde_json::from_str(&session_response);
+        assert!(parsed.is_ok());
 
-        // 2. addPlayerの型一貫性確認
+        // 2. addPlayerの型一貫性確認 - プレーンテキスト（将来JSON化予定）
         let player_result = wasm_add_player("test-session-id", "test-user-id", "Test Character");
         assert!(player_result.is_ok());
         let player_response = player_result.unwrap();
         assert_eq!(player_response, "player_added");
 
-        // 3. useCardの型一貫性確認
+        // 3. useCardの型一貫性確認 - プレーンテキスト（将来JSON化予定）
         let card_result = wasm_use_card("test-session-id", "test-player-id", "test-card-id");
         assert!(card_result.is_ok());
         let card_response = card_result.unwrap();
         assert_eq!(card_response, "card_used");
 
-        // 4. rollDiceの型一貫性確認
+        // 4. rollDiceの型一貫性確認 - プレーンテキスト（将来JSON化予定）
         let dice_result = wasm_roll_dice("test-session-id", "test-player-id", 2, 6);
         assert!(dice_result.is_ok());
         let dice_response = dice_result.unwrap();
@@ -263,11 +275,12 @@ pub fn wasm_create_session(scenario_id: &str, gm_user_id: &str) -> Result<String
 
         let session = GameSession::create(session_id, scenario_id, gm_user_id);
 
-        // ドメインエンティティをDTOに変換（必要に応じて）
-        let _session_dto = GameSessionDto::from(&session);
+        // ドメインエンティティをDTOに変換してJSON文字列として返す
+        let session_dto = GameSessionDto::from(&session);
 
-        // 成功レスポンスを返す（将来的にJsValueに変換予定）
-        Ok("session_created".to_string())
+        // JSON文字列として返す（wasm_create_character()と同様）
+        serde_json::to_string(&session_dto)
+            .map_err(|e| format!("Serialization failed: {}", e))
     }
 
     #[wasm_bindgen]

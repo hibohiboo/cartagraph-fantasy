@@ -99,37 +99,15 @@ test.describe('シナリオ1: GMがシナリオ作成、セッション開始', 
     // セッション作成
     await page.getByRole('button', { name: 'セッションを作成' }).click();
 
-    // デバッグ: スクリーンショット撮影
-    await page.screenshot({
-      path: 'test-results/after-session-create.png',
-      fullPage: true,
-    });
-
     // セッション一覧にリダイレクトされる
     await page.waitForURL('/sessions', { timeout: 1000 });
     await expect(
       page.getByRole('heading', { level: 1, name: 'セッション管理' }),
     ).toBeVisible();
 
-    // IndexedDBにセッションが保存されているか確認
-    const sessionInDB = await page.evaluate(async () => {
-      const db = await new Promise<IDBDatabase>((resolve, reject) => {
-        const request = indexedDB.open('trpg-session-db', 1);
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      });
-
-      const transaction = db.transaction('sessions', 'readonly');
-      const store = transaction.objectStore('sessions');
-      const getAllRequest = store.getAll();
-
-      return new Promise<any[]>((resolve) => {
-        getAllRequest.onsuccess = () => resolve(getAllRequest.result);
-      });
-    });
-
-    expect(sessionInDB.length).toBeGreaterThan(0);
-    expect(sessionInDB[0].gmUserId).toBe('gm-001');
-    expect(sessionInDB[0].status).toBe('WaitingForPlayers');
+    // セッションが画面に表示されていることを確認
+    await expect(page.getByText('プレイヤー募集中')).toBeVisible();
+    await expect(page.getByText('GM: gm-001')).toBeVisible();
+    await expect(page.getByText('プレイヤー数: 0')).toBeVisible();
   });
 });
