@@ -1,3 +1,4 @@
+import { GameSessionDto } from '@cartagraph/shared';
 import { CreateSessionForm, CreateSessionFormData } from '@cartagraph/ui';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -70,8 +71,8 @@ const CreateSession = () => {
       console.log('Session created:', result);
 
       // 結果をパース（JSON形式）
-      const sessionData = JSON.parse(result);
-      const sessionId = sessionData.session_id || sessionData.sessionId;
+      const sessionData = JSON.parse(result) as GameSessionDto;
+      const sessionId = sessionData.session_id;
 
       // IndexedDBにセッションメタデータを保存
       await sessionStore.saveSession({
