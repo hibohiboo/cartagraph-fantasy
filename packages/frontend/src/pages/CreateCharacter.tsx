@@ -1,7 +1,7 @@
+import { CreateCharacterForm, CreateCharacterFormData } from '@cartagraph/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { CreateCharacterForm, CreateCharacterFormData } from '@cartagraph/ui';
 
 import { getCharacterStore } from '../services/character-store';
 
@@ -17,7 +17,7 @@ const CreateCharacter = () => {
 
       const characterStore = getCharacterStore();
 
-      const characterId = `char-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+      const characterId = `char-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
 
       await characterStore.saveCharacter({
         characterId,

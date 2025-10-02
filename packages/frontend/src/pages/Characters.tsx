@@ -1,7 +1,7 @@
+import { CharacterCard, CharacterCardProps } from '@cartagraph/ui';
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
-import { CharacterCard, CharacterCardProps } from '@cartagraph/ui';
 
 import { getCharacterStore } from '../services/character-store';
 
