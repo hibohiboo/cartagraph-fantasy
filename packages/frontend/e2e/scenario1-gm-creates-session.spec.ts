@@ -13,6 +13,8 @@ test.describe('シナリオ1: GMがシナリオ作成、セッション開始', 
   });
 
   test('GMがユーザーID設定、シナリオ作成、セッション作成', async ({ page }) => {
+    test.setTimeout(30000); // 30秒
+
     // ステップ1: ホーム画面でユーザーIDを設定
     await page.goto('/');
     await expect(page.getByRole('heading', { level: 1 }).first()).toContainText(
@@ -23,21 +25,28 @@ test.describe('シナリオ1: GMがシナリオ作成、セッション開始', 
     await page.getByText('ユーザーIDを設定').click();
     await page.fill('input[placeholder="ユーザーIDを入力"]', 'gm-001');
     await page.getByText('保存').click();
-    await expect(page.locator('text=現在のユーザーID:')).toContainText('gm-001');
+    await expect(page.locator('text=現在のユーザーID:')).toContainText(
+      'gm-001',
+    );
 
     // ステップ2: シナリオを作成
     await page.getByText('シナリオ一覧').click();
-    await expect(page.getByRole('main').getByRole('heading', { level: 1 })).toContainText(
-      'シナリオ一覧',
-    );
+    await expect(
+      page.getByRole('main').getByRole('heading', { level: 1 }),
+    ).toContainText('シナリオ一覧');
 
     await page.getByRole('link', { name: '新規作成' }).click();
     await page.waitForURL('/scenarios/new');
-    await expect(page.getByRole('heading', { level: 1, name: 'シナリオ新規作成' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'シナリオ新規作成' }),
+    ).toBeVisible();
 
     // シナリオフォーム入力
     await page.fill('#title', 'テストシナリオ: 遺跡の探索');
-    await page.fill('#description', 'これはE2Eテスト用のシナリオです。古代の遺跡を探索します。');
+    await page.fill(
+      '#description',
+      'これはE2Eテスト用のシナリオです。古代の遺跡を探索します。',
+    );
     await page.fill('#initialSceneName', '酒場での出会い');
     await page.fill('#authorId', 'gm-001');
 
@@ -46,7 +55,9 @@ test.describe('シナリオ1: GMがシナリオ作成、セッション開始', 
 
     // シナリオ一覧にリダイレクトされ、作成したシナリオが表示される
     await page.waitForURL('/scenarios');
-    await expect(page.getByRole('heading', { level: 1, name: 'シナリオ一覧' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'シナリオ一覧' }),
+    ).toBeVisible();
     await expect(page.locator('text=テストシナリオ: 遺跡の探索')).toBeVisible();
 
     // IndexedDBにシナリオが保存されているか確認
@@ -72,7 +83,9 @@ test.describe('シナリオ1: GMがシナリオ作成、セッション開始', 
 
     // ステップ3: セッションを作成
     await page.goto('/sessions');
-    await expect(page.getByRole('heading', { level: 1, name: 'セッション管理' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'セッション管理' }),
+    ).toBeVisible();
 
     await page.getByRole('link', { name: '新しいセッションを作成' }).click();
     await page.waitForURL('/sessions/new');
@@ -86,9 +99,17 @@ test.describe('シナリオ1: GMがシナリオ作成、セッション開始', 
     // セッション作成
     await page.getByRole('button', { name: 'セッションを作成' }).click();
 
+    // デバッグ: スクリーンショット撮影
+    await page.screenshot({
+      path: 'test-results/after-session-create.png',
+      fullPage: true,
+    });
+
     // セッション一覧にリダイレクトされる
-    await page.waitForURL('/sessions');
-    await expect(page.getByRole('heading', { level: 1, name: 'セッション管理' })).toBeVisible();
+    await page.waitForURL('/sessions', { timeout: 1000 });
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'セッション管理' }),
+    ).toBeVisible();
 
     // IndexedDBにセッションが保存されているか確認
     const sessionInDB = await page.evaluate(async () => {

@@ -10,6 +10,7 @@ export default defineConfig(
         files: [
           '**/tests/**',
           '**/test/**',
+          '**/e2e/**',
           '**/*.test.tsx',
           '**/*.test.ts',
           'vitest.config.ts',
