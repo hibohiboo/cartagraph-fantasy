@@ -10,10 +10,11 @@ export default defineConfig(
         files: [
           '**/tests/**',
           '**/test/**',
-          '**/e2e/**',
+          '**/e2e/**/*',
           '**/*.test.tsx',
           '**/*.test.ts',
           'vitest.config.ts',
+          'playwright.config.ts',
         ],
         rules: {
           'import/extensions': ['off'],
@@ -25,6 +26,7 @@ export default defineConfig(
           'no-await-in-loop': ['off'],
           '@typescript-eslint/no-explicit-any': ['off'],
           'no-plusplus': ['off'],
+          'sonarjs/no-nested-functions': ['off'],
         },
       },
       {
