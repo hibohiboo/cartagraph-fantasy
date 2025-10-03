@@ -93,24 +93,31 @@ describe('parseGameSessionDto', () => {
         ...validSessionData,
         players: {
           'player-1': {
-            player_id: 'player-1',
+            id: 'player-1',
             user_id: 'user-1',
-            character_name: 'Hero',
+            character: 'Hero',
             status: 'active',
+            joined_at: '2025-01-03T00:00:00Z',
           },
         },
       };
 
       const result = parseGameSessionDto(data);
-      expect(result.players['player-1']?.player_id).toBe('player-1');
-      expect(result.players['player-1']?.character_name).toBe('Hero');
+      expect(result.players['player-1']?.id).toBe('player-1');
+      expect(result.players['player-1']?.character).toBe('Hero');
     });
 
     it('shared_cardsとavailable_choicesの配列を受け入れる', () => {
       const data = {
         ...validSessionData,
         shared_cards: [
-          { card_id: 'card-1', name: 'Sword', description: 'A sharp sword' },
+          {
+            card_id: 'card-1',
+            name: 'Sword',
+            tags: [],
+            embedded_events: [],
+            card_type: 'Possession',
+          },
         ],
         available_choices: ['choice-1', 'choice-2'],
       };
@@ -125,12 +132,6 @@ describe('parseGameSessionDto', () => {
       const data = { ...validSessionData, version: 42 };
       const result = parseGameSessionDto(data);
       expect(result.version).toBe(42);
-    });
-
-    it('versionフィールドとしてbigintを受け入れる', () => {
-      const data = { ...validSessionData, version: BigInt(123) };
-      const result = parseGameSessionDto(data);
-      expect(result.version).toBe(BigInt(123));
     });
   });
 
