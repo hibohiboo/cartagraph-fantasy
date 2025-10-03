@@ -25,5 +25,7 @@
     "@types/bun": "latest",
     "vitest": "^1.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "valibot": "^1.1.0"
+  }
 }

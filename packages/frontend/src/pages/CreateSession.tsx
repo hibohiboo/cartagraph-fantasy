@@ -1,7 +1,8 @@
-import { GameSessionDto } from '@cartagraph/shared';
+import { parseGameSessionDtoFromJson } from '@cartagraph/shared';
 import { CreateSessionForm, CreateSessionFormData } from '@cartagraph/ui';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ValiError } from 'valibot';
 
 import { getSessionStore } from '../services/session-store';
 import { getSimpleWorkerService } from '../services/simple-worker-service';
@@ -70,8 +71,8 @@ const CreateSession = () => {
 
       console.log('Session created:', result);
 
-      // 結果をパース（JSON形式）
-      const sessionData = JSON.parse(result) as GameSessionDto;
+      // 結果をパース（JSON形式）with runtime validation
+      const sessionData = parseGameSessionDtoFromJson(result);
       const sessionId = sessionData.session_id;
 
       // IndexedDBにセッションメタデータを保存
@@ -95,9 +96,15 @@ const CreateSession = () => {
       // セッション一覧ページに戻る
       navigate('/sessions');
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'セッションの作成に失敗しました',
-      );
+      // Runtime validation error handling
+      if (err instanceof ValiError) {
+        console.error('Session data validation failed:', err.issues);
+        setError('セッションデータの検証に失敗しました。データ形式が不正です。');
+      } else {
+        setError(
+          err instanceof Error ? err.message : 'セッションの作成に失敗しました',
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
