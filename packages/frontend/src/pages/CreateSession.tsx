@@ -1,8 +1,7 @@
-import { parseGameSessionDtoFromJson } from '@cartagraph/shared';
+import { parseGameSessionDtoFromJson, ValiError } from '@cartagraph/shared';
 import { CreateSessionForm, CreateSessionFormData } from '@cartagraph/ui';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ValiError } from 'valibot';
 
 import { getSessionStore } from '../services/session-store';
 import { getSimpleWorkerService } from '../services/simple-worker-service';
@@ -99,7 +98,9 @@ const CreateSession = () => {
       // Runtime validation error handling
       if (err instanceof ValiError) {
         console.error('Session data validation failed:', err.issues);
-        setError('セッションデータの検証に失敗しました。データ形式が不正です。');
+        setError(
+          'セッションデータの検証に失敗しました。データ形式が不正です。',
+        );
       } else {
         setError(
           err instanceof Error ? err.message : 'セッションの作成に失敗しました',
