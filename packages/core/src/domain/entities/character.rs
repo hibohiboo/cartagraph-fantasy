@@ -28,7 +28,7 @@ pub struct Character {
     pub last_updated: DateTime<Utc>,
 
     // Event History (Event Sourcing)
-    pub version: u64,
+    pub version: u32,
 }
 
 impl Character {

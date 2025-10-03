@@ -28,7 +28,7 @@ pub struct ScenarioTemplate {
     // Metadata
     pub created_at: DateTime<Utc>,
     pub last_updated: DateTime<Utc>,
-    pub version: u64,
+    pub version: u32,
 }
 
 #[derive(Debug, Clone, PartialEq)]

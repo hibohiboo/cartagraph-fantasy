@@ -3,4 +3,4 @@ import type { EventId } from "./EventId";
 import type { GameSessionEvent } from "./GameSessionEvent";
 import type { SessionId } from "./SessionId";
 
-export type DomainEvent = { event_id: EventId, session_id: SessionId, timestamp: string, event_type: GameSessionEvent, version: bigint, };
+export type DomainEvent = { event_id: EventId, session_id: SessionId, timestamp: string, event_type: GameSessionEvent, version: number, };

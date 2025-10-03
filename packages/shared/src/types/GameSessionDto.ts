@@ -3,4 +3,4 @@ import type { CardDto } from "./CardDto";
 import type { SessionPlayerDto } from "./SessionPlayerDto";
 import type { SessionStatusDto } from "./SessionStatusDto";
 
-export type GameSessionDto = { session_id: string, scenario_id: string, gm_user_id: string, created_at: string, players: { [key in string]?: SessionPlayerDto }, max_players: number, current_scene: string, session_status: SessionStatusDto, shared_cards: Array<CardDto>, available_choices: Array<string>, version: bigint, };
+export type GameSessionDto = { session_id: string, scenario_id: string, gm_user_id: string, created_at: string, players: { [key in string]?: SessionPlayerDto }, max_players: number, current_scene: string, session_status: SessionStatusDto, shared_cards: Array<CardDto>, available_choices: Array<string>, version: number, };

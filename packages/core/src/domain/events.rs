@@ -11,7 +11,7 @@ pub struct DomainEvent {
     #[ts(type = "string")]
     pub timestamp: DateTime<Utc>,
     pub event_type: GameSessionEvent,
-    pub version: u64,
+    pub version: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, TS)]
@@ -38,7 +38,7 @@ pub enum GameSessionEvent {
 }
 
 impl DomainEvent {
-    pub fn new(session_id: SessionId, event_type: GameSessionEvent, version: u64) -> Self {
+    pub fn new(session_id: SessionId, event_type: GameSessionEvent, version: u32) -> Self {
         Self {
             event_id: EventId::new(),
             session_id,

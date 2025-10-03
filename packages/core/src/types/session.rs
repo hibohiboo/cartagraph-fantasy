@@ -27,7 +27,7 @@ pub struct GameSession {
     pub session_status: SessionStatus,
 
     // Event History (Event Sourcing)
-    pub version: u64,
+    pub version: u32,
 
     // Event Sourcing: 未コミットイベント
     #[serde(skip)]

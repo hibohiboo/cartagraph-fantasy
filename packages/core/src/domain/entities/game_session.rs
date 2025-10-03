@@ -25,7 +25,7 @@ pub struct GameSession {
     pub available_choices: Vec<CardId>, // 現在利用可能な選択肢カード
 
     // Event History (Event Sourcing)
-    pub version: u64,
+    pub version: u32,
 }
 
 impl GameSession {

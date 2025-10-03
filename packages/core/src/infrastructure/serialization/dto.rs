@@ -20,7 +20,7 @@ pub struct GameSessionDto {
     pub session_status: SessionStatusDto,
     pub shared_cards: Vec<CardDto>,
     pub available_choices: Vec<String>,
-    pub version: u64,
+    pub version: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -214,7 +214,7 @@ pub struct CharacterDto {
     pub created_at: DateTime<Utc>,
     #[ts(type = "string")]
     pub last_updated: DateTime<Utc>,
-    pub version: u64,
+    pub version: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]
@@ -310,7 +310,7 @@ pub struct ScenarioTemplateDto {
     pub created_at: DateTime<Utc>,
     #[ts(type = "string")]
     pub last_updated: DateTime<Utc>,
-    pub version: u64,
+    pub version: u32,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, TS)]

@@ -4,4 +4,4 @@ import type { DifficultyDto } from "./DifficultyDto";
 import type { PlayerRangeDto } from "./PlayerRangeDto";
 import type { SceneDefinitionDto } from "./SceneDefinitionDto";
 
-export type ScenarioTemplateDto = { scenario_id: string, name: string, description: string, author_id: string, recommended_players: PlayerRangeDto, estimated_duration_secs: bigint, difficulty: DifficultyDto, scenes: { [key in string]?: SceneDefinitionDto }, initial_scene_id: string | null, shared_cards: Array<CardTemplateDto>, created_at: string, last_updated: string, version: bigint, };
+export type ScenarioTemplateDto = { scenario_id: string, name: string, description: string, author_id: string, recommended_players: PlayerRangeDto, estimated_duration_secs: bigint, difficulty: DifficultyDto, scenes: { [key in string]?: SceneDefinitionDto }, initial_scene_id: string | null, shared_cards: Array<CardTemplateDto>, created_at: string, last_updated: string, version: number, };
