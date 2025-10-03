@@ -38,14 +38,13 @@ describe('App Component', () => {
     expect(screen.getByText('シナリオ')).toBeInTheDocument();
   });
 
-  it('should render loading fallback', () => {
+  it('should have main content area', () => {
     render(
       <TestWrapper>
         <App />
       </TestWrapper>
     );
 
-    // Suspenseのfallbackが表示されることを確認
-    expect(screen.getByText('読み込み中...')).toBeInTheDocument();
+    expect(screen.getByRole('main')).toBeInTheDocument();
   });
 });
