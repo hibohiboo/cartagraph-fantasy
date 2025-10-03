@@ -1,5 +1,6 @@
 // GameSessionDto validation schema using valibot
 import * as v from 'valibot';
+import { GameSessionDto } from '../types';
 
 // SessionStatusDto schema (simplified for MVP)
 // Full variant support can be added later
@@ -21,17 +22,30 @@ const SessionStatusDtoSchema = v.union([
 
 // SessionPlayerDto schema (minimal - can be expanded)
 const SessionPlayerDtoSchema = v.object({
-  player_id: v.string(),
+  id: v.string(),
   user_id: v.string(),
-  character_name: v.string(),
-  status: v.string(),
+  character: v.union([v.string(), v.null()]),
+  status: v.union([
+    v.literal('waiting'),
+    v.literal('active'),
+    v.object({ inactive: v.object({ duration_minutes: v.number() }) }),
+    v.literal('departed'),
+  ]),
+  joined_at: v.string(),
 });
 
 // CardDto schema (minimal - can be expanded)
 const CardDtoSchema = v.object({
   card_id: v.string(),
   name: v.string(),
-  description: v.optional(v.string()),
+  tags: v.array(v.string()),
+  embedded_events: v.array(v.string()),
+  card_type: v.union([
+    v.literal('Action'),
+    v.literal('Choice'),
+    v.literal('Possession'),
+    v.literal('SceneTransition'),
+  ]),
 });
 
 // GameSessionDto schema
@@ -46,14 +60,14 @@ export const GameSessionDtoSchema = v.object({
   session_status: SessionStatusDtoSchema,
   shared_cards: v.array(CardDtoSchema),
   available_choices: v.array(v.string()),
-  version: v.union([v.bigint(), v.number()]), // Accept both for flexibility
+  version: v.number(),
 });
 
 /**
  * Parse and validate GameSessionDto from JSON string or unknown object
  * @throws {v.ValiError} if validation fails
  */
-export function parseGameSessionDto(data: unknown) {
+export function parseGameSessionDto(data: unknown): GameSessionDto {
   return v.parse(GameSessionDtoSchema, data);
 }
 
