@@ -1,27 +1,16 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { FlatCompat } from '@eslint/eslintrc';
 import { defineConfig } from 'eslint/config';
+import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefreshPlugin from 'eslint-plugin-react-refresh';
 import globals from 'globals';
 import customConfig from './defaults.js';
 
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
-
-const compat = new FlatCompat({
-  baseDirectory: dirname,
-});
-
 export default defineConfig({
   files: ['**/*.ts', '**/*.tsx'],
   ignores: ['dist', 'public'],
-  extends: [
-    ...customConfig,
-    ...compat.extends('plugin:react-hooks/recommended')
-  ],
+  extends: [...customConfig, 'react-hooks/recommended'],
   plugins: {
     'react-refresh': reactRefreshPlugin,
+    'react-hooks': reactHooks,
   },
   rules: {
     'react-refresh/only-export-components': [
