@@ -75,3 +75,27 @@ export const LongHistory: Story = {
     maxHeight: '300px',
   },
 };
+
+export const WithFilters: Story = {
+  args: {
+    events: mockEvents,
+    enableFilter: true,
+    enableSearch: true,
+  },
+};
+
+export const NoFilters: Story = {
+  args: {
+    events: mockEvents,
+    enableFilter: false,
+    enableSearch: false,
+  },
+};
+
+export const SearchOnly: Story = {
+  args: {
+    events: mockEvents,
+    enableFilter: false,
+    enableSearch: true,
+  },
+};

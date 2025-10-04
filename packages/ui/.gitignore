@@ -1,0 +1,11 @@
+# Storybook build
+storybook-static/
+
+# Build output
+dist/
+
+# Node modules
+node_modules/
+
+# Cache
+.turbo/

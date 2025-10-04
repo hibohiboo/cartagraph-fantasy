@@ -267,6 +267,114 @@ IndexedDB → loadCharacters() → CharacterList表示
 
 ### 実装済みコンポーネント
 
+#### 0. ゲームコアコンポーネント (タスク27) ✅ 完了
+
+**GameCard** - ゲーム用カードコンポーネント
+**ファイル**: `packages/ui/src/components/GameCard.tsx`
+
+**Props**:
+```typescript
+interface GameCardProps {
+  name: string;
+  cardType: CardType; // 'action' | 'choice' | 'possession' | 'scene_transition'
+  description?: string;
+  tags?: string[];
+  state?: 'normal' | 'selected' | 'disabled' | 'used';
+  onClick?: () => void;
+  size?: 'small' | 'medium' | 'large';
+}
+```
+
+**機能**:
+- カードタイプ別の色分け (アクション: 青、選択: 緑、所持品: 紫、シーン遷移: オレンジ)
+- 状態管理 (通常、選択中、無効、使用済み)
+- サイズバリアント (small/medium/large)
+- タグ表示
+- ホバーエフェクト、選択時のリング表示
+
+**Storybookストーリー**: 11種類 (ActionCard, ChoiceCard, PossessionCard, SceneTransitionCard, SelectedState, DisabledState, UsedState, SmallSize, LargeSize, CardGroup)
+
+---
+
+**DiceRoll** - アニメーション付きダイス振りコンポーネント
+**ファイル**: `packages/ui/src/components/DiceRoll.tsx`
+
+**Props**:
+```typescript
+interface DiceRollProps {
+  diceCount?: number; // デフォルト: 2
+  diceSides?: number; // デフォルト: 6
+  modifier?: number;
+  result?: number[];
+  total?: number;
+  isRolling?: boolean;
+  onRoll?: () => void;
+  size?: 'small' | 'medium' | 'large';
+  advantage?: 'normal' | 'advantage' | 'disadvantage';
+}
+```
+
+**機能**:
+- アニメーション付きダイス表示 (ロール中は100msごとに値変更)
+- 有利/不利システム対応 (色分け表示)
+- 修正値計算と表示
+- サイズバリアント
+- インタラクティブロールボタン
+
+**Storybookストーリー**: 11種類 (Default, WithModifier, WithAdvantage, WithDisadvantage, Rolling, SmallSize, LargeSize, Interactive, MultipleDice, D20Roll)
+
+---
+
+**PlayerStatus** - プレイヤーステータス表示コンポーネント
+**ファイル**: `packages/ui/src/components/PlayerStatus.tsx`
+
+**Props**:
+```typescript
+interface PlayerStatusProps {
+  name: string;
+  status: CharacterStatus; // 'ready' | 'in_action' | 'waiting_for_input' | 'incapacitated'
+  tags?: string[];
+  cardCount?: number;
+  avatarUrl?: string;
+  compact?: boolean;
+  onClick?: () => void;
+}
+```
+
+**機能**:
+- ステータス別の色分け (準備完了: 緑、行動中: 青、入力待ち: 黄、行動不能: 赤)
+- コンパクト/フル表示の切り替え
+- アバター表示 (画像またはイニシャル)
+- タグ表示
+- 所持カード数表示
+
+**Storybookストーリー**: 11種類 (Ready, InAction, WaitingForInput, Incapacitated, WithAvatar, CompactView, CompactWithAvatar, NoCards, ManyTags, PlayerList, DetailedPlayerCards)
+
+---
+
+**EventLogPanel拡張** - フィルタ・検索機能追加
+**ファイル**: `packages/ui/src/components/EventLogPanel.tsx`
+
+**追加Props**:
+```typescript
+interface EventLogPanelProps {
+  events: EventLogEntry[];
+  maxHeight?: string;
+  enableFilter?: boolean; // タイプフィルタ有効化
+  enableSearch?: boolean; // 検索機能有効化
+}
+```
+
+**追加機能**:
+- タイプフィルタ (システム/プレイヤー/GM/ダイス)
+- テキスト検索 (メッセージ・アクター名)
+- useMemoによるパフォーマンス最適化
+- フィルタ条件に応じた空メッセージ表示
+
+**Storybookストーリー**: 6種類 (Default, Empty, LongHistory, WithFilters, NoFilters, SearchOnly)
+
+---
+
 #### 1. SessionCard
 **ファイル**: `packages/ui/src/components/SessionCard.tsx`
 
@@ -832,6 +940,8 @@ Backend → WASM (サーバーサイドロジック)
 - SessionCard, SessionList, CreateSessionForm, PlayerManagementModal コンポーネント (タスク20)
 - CharacterCard, CreateCharacterForm コンポーネント (タスク21)
 - SceneDisplay, DiceRollPanel, EventLogPanel コンポーネント (タスク22)
+- **GameCard, DiceRoll, PlayerStatus コンポーネント (タスク27)** ✅ NEW
+- **EventLogPanel フィルタ・検索機能拡張 (タスク27)** ✅ NEW
 - WebWorker統合サービス
 - IndexedDB Event Store基盤
 - IndexedDB session-store (タスク20)
@@ -839,6 +949,7 @@ Backend → WASM (サーバーサイドロジック)
 - Tailwind CSS スタイリング
 - プレイヤー管理UI (タスク20)
 - ゲームプレイUI MVP (タスク22)
+- ゲームコアUIコンポーネントライブラリ (タスク27)
 
 ### 🚧 一部完了
 - Game ページ (WASM統合済み、シーン/ダイス/ログUI完成、実際のゲーム状態連携は将来実装)

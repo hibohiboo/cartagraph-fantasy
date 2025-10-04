@@ -41,3 +41,13 @@ export type { ScenarioListProps } from './components/ScenarioList';
 
 export { CreateScenarioForm } from './components/CreateScenarioForm';
 export type { CreateScenarioFormProps, CreateScenarioFormData } from './components/CreateScenarioForm';
+
+// Game Components
+export { GameCard } from './components/GameCard';
+export type { GameCardProps } from './components/GameCard';
+
+export { DiceRoll } from './components/DiceRoll';
+export type { DiceRollProps } from './components/DiceRoll';
+
+export { PlayerStatus } from './components/PlayerStatus';
+export type { PlayerStatusProps } from './components/PlayerStatus';
