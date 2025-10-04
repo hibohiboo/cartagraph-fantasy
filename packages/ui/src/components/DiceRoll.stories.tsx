@@ -122,13 +122,11 @@ export const LargeSize: Story = {
 // InteractiveDiceRoll component extracted to reduce nesting
 const InteractiveDiceRoll = () => {
   const [isRolling, setIsRolling] = useState(false);
-  const [result, setResult] = useState<number[] | undefined>([4, 3]);
-  const [total, setTotal] = useState<number | undefined>(7);
+  const [result, setResult] = useState<number[]>([4, 3]);
+  const [total, setTotal] = useState<number>(7);
 
   const handleRoll = () => {
     setIsRolling(true);
-    setResult(undefined);
-    setTotal(undefined);
 
     setTimeout(() => {
       const newResult = [
