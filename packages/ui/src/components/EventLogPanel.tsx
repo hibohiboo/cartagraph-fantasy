@@ -72,7 +72,7 @@ export const EventLogPanel: React.FC<EventLogPanelProps> = ({
     }
   };
 
-  const getEventTypeLabel = (type: EventLogEntry['type']) => {
+  const getEventTypeLabel = (type: EventLogEntry['type']): string => {
     switch (type) {
       case 'system':
         return 'システム';
@@ -82,6 +82,8 @@ export const EventLogPanel: React.FC<EventLogPanelProps> = ({
         return 'GM';
       case 'dice':
         return 'ダイス';
+      default:
+        return '';
     }
   };
 

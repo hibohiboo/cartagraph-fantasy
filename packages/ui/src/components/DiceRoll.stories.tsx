@@ -119,47 +119,48 @@ export const LargeSize: Story = {
   },
 };
 
+// InteractiveDiceRoll component extracted to reduce nesting
+const InteractiveDiceRoll = () => {
+  const [isRolling, setIsRolling] = useState(false);
+  const [result, setResult] = useState<number[] | undefined>([4, 3]);
+  const [total, setTotal] = useState<number | undefined>(7);
+
+  const handleRoll = () => {
+    setIsRolling(true);
+    setResult(undefined);
+    setTotal(undefined);
+
+    setTimeout(() => {
+      const newResult = [
+        // eslint-disable-next-line sonarjs/pseudo-random
+        Math.floor(Math.random() * 6) + 1,
+        // eslint-disable-next-line sonarjs/pseudo-random
+        Math.floor(Math.random() * 6) + 1,
+      ];
+      const newTotal = newResult.reduce((a, b) => a + b, 0);
+      setResult(newResult);
+      setTotal(newTotal);
+      setIsRolling(false);
+    }, 1500);
+  };
+
+  return (
+    <DiceRoll
+      diceCount={2}
+      diceSides={6}
+      modifier={0}
+      result={result}
+      total={total}
+      isRolling={isRolling}
+      onRoll={handleRoll}
+      size="medium"
+      advantage="normal"
+    />
+  );
+};
+
 export const Interactive: Story = {
-  render: () => {
-    const InteractiveDiceRoll = () => {
-      const [isRolling, setIsRolling] = useState(false);
-      const [result, setResult] = useState<number[] | undefined>([4, 3]);
-      const [total, setTotal] = useState<number | undefined>(7);
-
-      const handleRoll = () => {
-        setIsRolling(true);
-        setResult(undefined);
-        setTotal(undefined);
-
-        setTimeout(() => {
-          const newResult = [
-            Math.floor(Math.random() * 6) + 1,
-            Math.floor(Math.random() * 6) + 1,
-          ];
-          const newTotal = newResult.reduce((a, b) => a + b, 0);
-          setResult(newResult);
-          setTotal(newTotal);
-          setIsRolling(false);
-        }, 1500);
-      };
-
-      return (
-        <DiceRoll
-          diceCount={2}
-          diceSides={6}
-          modifier={0}
-          result={result}
-          total={total}
-          isRolling={isRolling}
-          onRoll={handleRoll}
-          size="medium"
-          advantage="normal"
-        />
-      );
-    };
-
-    return <InteractiveDiceRoll />;
-  },
+  render: () => <InteractiveDiceRoll />,
 };
 
 export const MultipleDice: Story = {

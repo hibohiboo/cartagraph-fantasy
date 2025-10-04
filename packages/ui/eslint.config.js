@@ -2,7 +2,14 @@ import customConfig from '@cartagraph/config-eslint/frontend.js';
 import { defineConfig } from 'eslint/config';
 
 export default defineConfig(
-  { ignores: ['vite.config.ts', '**/dist/**', '**/public/**'] },
+  {
+    ignores: [
+      'vite.config.ts',
+      '**/dist/**',
+      '**/public/**',
+      'storybook-static/*',
+    ],
+  },
   {
     extends: [
       ...customConfig,

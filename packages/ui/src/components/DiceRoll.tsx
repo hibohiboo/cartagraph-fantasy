@@ -42,16 +42,20 @@ export const DiceRoll: React.FC<DiceRollProps> = ({
         setAnimatedValues(
           Array.from(
             { length: diceCount },
+            // eslint-disable-next-line sonarjs/pseudo-random
             () => Math.floor(Math.random() * diceSides) + 1,
           ),
         );
       }, 100);
 
-      return () => clearInterval(interval);
+      return () => {
+        clearInterval(interval);
+      };
     }
     if (result) {
       setAnimatedValues(result);
     }
+    return undefined;
   }, [isRolling, result, diceCount, diceSides]);
 
   // サイズごとのスタイル

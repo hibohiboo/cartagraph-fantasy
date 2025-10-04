@@ -19,114 +19,125 @@ export interface PlayerStatusProps {
   onClick?: () => void;
 }
 
-export const PlayerStatus: React.FC<PlayerStatusProps> = ({
+// ステータスごとの色設定
+const STATUS_COLORS: Record<CharacterStatus, string> = {
+  ready: 'border-green-500 bg-green-50',
+  in_action: 'border-blue-500 bg-blue-50',
+  waiting_for_input: 'border-yellow-500 bg-yellow-50',
+  incapacitated: 'border-red-500 bg-red-50',
+};
+
+// ステータスラベル
+const STATUS_LABELS: Record<CharacterStatus, string> = {
+  ready: '準備完了',
+  in_action: '行動中',
+  waiting_for_input: '入力待ち',
+  incapacitated: '行動不能',
+};
+
+// ステータスアイコン
+const STATUS_ICONS: Record<CharacterStatus, string> = {
+  ready: '✓',
+  in_action: '⚡',
+  waiting_for_input: '⏳',
+  incapacitated: '✕',
+};
+
+// アバターコンポーネント
+const Avatar: React.FC<{ name: string; avatarUrl?: string; size: 'small' | 'large' }> = ({
   name,
-  status,
-  tags = [],
-  cardCount = 0,
   avatarUrl,
-  compact = false,
-  onClick,
+  size,
 }) => {
-  // ステータスごとの色設定
-  const statusColors: Record<CharacterStatus, string> = {
-    ready: 'border-green-500 bg-green-50',
-    in_action: 'border-blue-500 bg-blue-50',
-    waiting_for_input: 'border-yellow-500 bg-yellow-50',
-    incapacitated: 'border-red-500 bg-red-50',
-  };
+  const sizeClasses = size === 'small' ? 'w-8 h-8' : 'w-16 h-16';
+  const textSize = size === 'small' ? 'text-base' : 'text-2xl';
 
-  // ステータスラベル
-  const statusLabels: Record<CharacterStatus, string> = {
-    ready: '準備完了',
-    in_action: '行動中',
-    waiting_for_input: '入力待ち',
-    incapacitated: '行動不能',
-  };
-
-  // ステータスアイコン
-  const statusIcons: Record<CharacterStatus, string> = {
-    ready: '✓',
-    in_action: '⚡',
-    waiting_for_input: '⏳',
-    incapacitated: '✕',
-  };
-
-  const isClickable = !!onClick;
-
-  if (compact) {
+  if (avatarUrl) {
     return (
-      <div
-        className={`
-          flex items-center gap-2 px-3 py-2 rounded-lg border-l-4
-          ${statusColors[status]}
-          ${isClickable ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}
-        `}
-        onClick={onClick}
-      >
-        {/* アバター */}
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={name}
-            className="w-8 h-8 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold">
-            {name[0]}
-          </div>
-        )}
-
-        {/* 名前とステータス */}
-        <div className="flex-1 min-w-0">
-          <div className="font-semibold text-sm text-gray-900 truncate">
-            {name}
-          </div>
-          <div className="text-xs text-gray-600">{statusLabels[status]}</div>
-        </div>
-
-        {/* カード数 */}
-        {cardCount > 0 && (
-          <div className="text-xs font-semibold px-2 py-1 rounded bg-white/70">
-            🎴 {cardCount}
-          </div>
-        )}
-      </div>
+      <img
+        src={avatarUrl}
+        alt={name}
+        className={`${sizeClasses} rounded-full object-cover`}
+      />
     );
   }
 
   return (
     <div
+      className={`${sizeClasses} rounded-full bg-gray-300 flex items-center justify-center text-gray-600 ${textSize} font-bold`}
+    >
+      {name[0]}
+    </div>
+  );
+};
+
+// コンパクトビュー
+const CompactView: React.FC<PlayerStatusProps> = ({
+  name,
+  status,
+  cardCount = 0,
+  avatarUrl,
+  onClick,
+}) => {
+  const isClickable = !!onClick;
+
+  return (
+    <div
+      className={`
+        flex items-center gap-2 px-3 py-2 rounded-lg border-l-4
+        ${STATUS_COLORS[status]}
+        ${isClickable ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}
+      `}
+      onClick={onClick}
+    >
+      <Avatar name={name} avatarUrl={avatarUrl} size="small" />
+
+      {/* 名前とステータス */}
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-sm text-gray-900 truncate">{name}</div>
+        <div className="text-xs text-gray-600">{STATUS_LABELS[status]}</div>
+      </div>
+
+      {/* カード数 */}
+      {cardCount > 0 && (
+        <div className="text-xs font-semibold px-2 py-1 rounded bg-white/70">
+          🎴 {cardCount}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// フルビュー
+const FullView: React.FC<PlayerStatusProps> = ({
+  name,
+  status,
+  tags = [],
+  cardCount = 0,
+  avatarUrl,
+  onClick,
+}) => {
+  const isClickable = !!onClick;
+
+  return (
+    <div
       className={`
         rounded-lg border-2 p-4
-        ${statusColors[status]}
+        ${STATUS_COLORS[status]}
         ${isClickable ? 'cursor-pointer hover:shadow-lg transition-all' : ''}
       `}
       onClick={onClick}
     >
       {/* ヘッダー */}
       <div className="flex items-center gap-3 mb-3">
-        {/* アバター */}
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={name}
-            className="w-16 h-16 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 text-2xl font-bold">
-            {name[0]}
-          </div>
-        )}
+        <Avatar name={name} avatarUrl={avatarUrl} size="large" />
 
         {/* 名前とステータス */}
         <div className="flex-1">
           <h3 className="text-lg font-bold text-gray-900">{name}</h3>
           <div className="flex items-center gap-1 mt-1">
-            <span className="text-lg">{statusIcons[status]}</span>
-            <span className="text-sm font-semibold">
-              {statusLabels[status]}
-            </span>
+            <span className="text-lg">{STATUS_ICONS[status]}</span>
+            <span className="text-sm font-semibold">{STATUS_LABELS[status]}</span>
           </div>
         </div>
       </div>
@@ -153,3 +164,5 @@ export const PlayerStatus: React.FC<PlayerStatusProps> = ({
     </div>
   );
 };
+
+export const PlayerStatus: React.FC<PlayerStatusProps> = (props) => props.compact ? <CompactView {...props} /> : <FullView {...props} />;
