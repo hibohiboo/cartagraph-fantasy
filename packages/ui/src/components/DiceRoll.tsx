@@ -182,30 +182,73 @@ const RollButton: React.FC<{
   </button>
 );
 
+// DiceRollビューコンポーネント
+const DiceRollView: React.FC<{
+  showAdvantage: boolean;
+  advantageLabel: string;
+  advantageBadgeClass: string;
+  animatedValues: number[];
+  isRolling: boolean;
+  diceClass: string;
+  containerClass: string;
+  colorClass: string;
+  showResult: boolean;
+  result: number[];
+  modifier: number;
+  calculatedTotal: number;
+  textClass: string;
+  onRoll?: () => void;
+  diceCount: number;
+  diceSides: number;
+}> = (props) => (
+  <div className="flex flex-col items-center gap-4">
+    {props.showAdvantage && <AdvantageBadge label={props.advantageLabel} className={props.advantageBadgeClass} />}
+    <DiceDisplay
+      values={props.animatedValues}
+      isRolling={props.isRolling}
+      diceClass={props.diceClass}
+      containerClass={props.containerClass}
+      colorClass={props.colorClass}
+    />
+    {props.showResult && (
+      <TotalDisplay
+        result={props.result}
+        modifier={props.modifier}
+        total={props.calculatedTotal}
+        textClass={props.textClass}
+      />
+    )}
+    {props.onRoll && (
+      <RollButton onClick={props.onRoll} isRolling={props.isRolling} diceCount={props.diceCount} diceSides={props.diceSides} />
+    )}
+  </div>
+);
+
 export function DiceRoll(props: DiceRollProps) {
   const { diceCount, diceSides, result, isRolling, modifier = 0, total, size = 'medium', advantage = 'normal', onRoll } = props;
 
   const animatedValues = useDiceAnimation(isRolling, result, diceCount, diceSides);
   const styles = useDiceStyles(size, advantage);
-  const calculatedTotal = total ?? result.reduce((a, b) => a + b, 0) + modifier;
+  const calculatedTotal = calculateTotal(result, modifier, total);
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      {advantage !== 'normal' && <AdvantageBadge label={styles.advantageLabel} className={styles.advantageBadgeClass} />}
-
-      <DiceDisplay
-        values={animatedValues}
-        isRolling={isRolling}
-        diceClass={styles.sizeStyle.dice}
-        containerClass={styles.sizeStyle.container}
-        colorClass={styles.advantageColor}
-      />
-
-      {!isRolling && result.length > 0 && (
-        <TotalDisplay result={result} modifier={modifier} total={calculatedTotal} textClass={styles.sizeStyle.text} />
-      )}
-
-      {onRoll && <RollButton onClick={onRoll} isRolling={isRolling} diceCount={diceCount} diceSides={diceSides} />}
-    </div>
+    <DiceRollView
+      showAdvantage={advantage !== 'normal'}
+      advantageLabel={styles.advantageLabel}
+      advantageBadgeClass={styles.advantageBadgeClass}
+      animatedValues={animatedValues}
+      isRolling={isRolling}
+      diceClass={styles.sizeStyle.dice}
+      containerClass={styles.sizeStyle.container}
+      colorClass={styles.advantageColor}
+      showResult={!isRolling && result.length > 0}
+      result={result}
+      modifier={modifier}
+      calculatedTotal={calculatedTotal}
+      textClass={styles.sizeStyle.text}
+      onRoll={onRoll}
+      diceCount={diceCount}
+      diceSides={diceSides}
+    />
   );
 }
