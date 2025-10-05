@@ -44,6 +44,7 @@ export const FullscreenSpinner: SpinnerStory = {
 };
 
 // Error Message stories
+// eslint-disable-next-line no-underscore-dangle
 const _errorMeta = {
   title: 'Layout/ErrorMessage',
   component: ErrorMessage,
@@ -96,6 +97,7 @@ export const ErrorWithRetryOnly: StoryObj<typeof _errorMeta> = {
 };
 
 // Empty State stories
+// eslint-disable-next-line no-underscore-dangle
 const _emptyMeta = {
   title: 'Layout/EmptyState',
   component: EmptyState,

@@ -52,6 +52,7 @@ const useModalFocus = (
   }, [isOpen, modalRef, previousActiveElement, onClose, closeOnEscape]);
 };
 
+// eslint-disable-next-line complexity
 export const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
