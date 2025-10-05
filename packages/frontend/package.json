@@ -10,7 +10,8 @@
     "test": "vitest",
     "test:e2e": "playwright test",
     "lint": "tsc --noEmit && eslint . --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "report": "playwright test --reporter=html"
   },
   "dependencies": {
     "@cartagraph/core": "workspace:*",
