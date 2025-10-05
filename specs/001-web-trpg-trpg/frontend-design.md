@@ -1,6 +1,6 @@
 # Frontend Design: 非同期TRPG風ゲーム「遺跡漁りとドブさらい」
 
-**Date**: 2025-10-02
+**Date**: 2025-10-05
 **Phase**: Phase 3 - Frontend Implementation
 **Status**: In Progress
 
@@ -45,11 +45,13 @@ packages/frontend/
 | `/` | Home | ホーム画面、各機能へのナビゲーション | ✅ 完了 |
 | `/sessions` | Sessions | セッション一覧 (アクティブ/完了) | ✅ 完了 |
 | `/sessions/new` | CreateSession | 新規セッション作成 | ✅ 完了 |
-| `/game/:sessionId?` | Game | ゲームプレイ画面 | 🚧 基盤のみ |
-| `/scenario/:scenarioId?` | Scenario | シナリオ閲覧 | 🚧 基盤のみ |
-| `/characters` | Characters | キャラクター一覧 (予定) | ❌ 未実装 |
-| `/characters/new` | CreateCharacter | キャラクター作成 (予定) | ❌ 未実装 |
-| `/characters/:id` | CharacterDetail | キャラクター詳細 (予定) | ❌ 未実装 |
+| `/game/:sessionId?` | Game | ゲームプレイ画面 | ✅ 完了 (MVP) |
+| `/scenarios` | Scenarios | シナリオ一覧 | ✅ 完了 |
+| `/scenarios/new` | CreateScenario | 新規シナリオ作成 | ✅ 完了 |
+| `/scenarios/:scenarioId` | ScenarioDetail | シナリオ詳細表示 | ✅ 完了 |
+| `/scenarios/:scenarioId/edit` | ScenarioEditor | シナリオビジュアルエディター | ✅ 完了 |
+| `/characters` | Characters | キャラクター一覧 | ✅ 完了 |
+| `/characters/new` | CreateCharacter | キャラクター作成 | ✅ 完了 |
 
 ---
 
@@ -240,26 +242,59 @@ IndexedDB → loadCharacters() → CharacterList表示
 
 ---
 
-### 6. Scenario (`/scenarios`, `/scenarios/new`, `/scenarios/:scenarioId`)
+### 6. Scenario (`/scenarios`, `/scenarios/new`, `/scenarios/:scenarioId`, `/scenarios/:scenarioId/edit`)
 
-**目的**: シナリオ管理・閲覧
+**目的**: シナリオ管理・閲覧・編集
 
-**MVP機能** (タスク23):
-- シナリオ一覧表示 (タイトル、説明、作成日時)
-- シナリオ基本情報作成フォーム (タイトル、説明、初期シーン名)
-- シナリオ詳細表示ページ
-- IndexedDB scenario-store による永続化
+**実装済み機能** (タスク23 + タスク28):
+- ✅ シナリオ一覧表示 (タイトル、説明、作成日時)
+- ✅ シナリオ基本情報作成フォーム (タイトル、説明、初期シーン名)
+- ✅ シナリオ詳細表示ページ
+- ✅ IndexedDB scenario-store による永続化
+- ✅ **React Flow統合ビジュアルエディター** (タスク28完了)
+- ✅ **シーン追加・編集機能** (SceneNode, SceneEditForm)
+- ✅ **イベントノード表示** (EventNode)
+- ✅ **シーン遷移エッジ作成**
+- ✅ **リアルタイム検証機能** (ScenarioValidator)
+- ✅ **シナリオプレビュー機能** (ScenarioPreview)
 
 **将来実装機能**:
-- React Flow統合 (ビジュアルエディター)
-- シーン・イベント詳細編集
-- シナリオテスト・検証ツール
-- エクスポート/インポート機能
+- イベント詳細編集 (トリガー・条件・効果設定)
+- シナリオデータのIndexedDB永続化 (現在はメモリのみ)
+- エクスポート/インポート機能 (JSON形式)
 - バージョン管理
 - 推奨人数・難易度設定
 - シナリオ検索・フィルタ
+- 自動レイアウト機能
+- アンドゥ/リドゥ機能
 
-**実装状態**: 🚧 タスク23実装中
+**実装状態**: ✅ 完了 (タスク23 + タスク28)
+
+**技術スタック**:
+- `@xyflow/react` v12.8.6 - ビジュアルフローエディター
+- カスタムノード: SceneNode, EventNode
+- カスタムエッジ: シーン遷移
+- リアルタイム検証: validateScenario関数
+
+**ページ構成**:
+1. **Scenarios (`/scenarios`)** - シナリオ一覧
+   - ScenarioList, ScenarioCard コンポーネント
+   - 作成日時順ソート
+
+2. **CreateScenario (`/scenarios/new`)** - 新規作成
+   - CreateScenarioForm コンポーネント
+   - タイトル、説明、初期シーン名入力
+
+3. **ScenarioDetail (`/scenarios/:scenarioId`)** - 詳細表示
+   - シナリオメタデータ表示
+   - 編集ボタン → ScenarioEditor へ遷移
+   - セッション作成ボタン
+
+4. **ScenarioEditor (`/scenarios/:scenarioId/edit`)** - ビジュアルエディター
+   - React Flow キャンバス (ドラッグ&ドロップ、ズーム、パン)
+   - シーン追加ボタン
+   - 右サイドバー: SceneEditForm + ScenarioValidator
+   - プレビューボタン → ScenarioPreview モーダル
 
 ---
 
@@ -372,6 +407,162 @@ interface EventLogPanelProps {
 - フィルタ条件に応じた空メッセージ表示
 
 **Storybookストーリー**: 6種類 (Default, Empty, LongHistory, WithFilters, NoFilters, SearchOnly)
+
+---
+
+#### シナリオエディターコンポーネント (タスク28) ✅ 完了
+
+**ScenarioEditorCanvas** - React Flowビジュアルエディター統合
+**ファイル**: `packages/ui/src/components/ScenarioEditor/ScenarioEditorCanvas.tsx`
+
+**Props**:
+```typescript
+interface ScenarioEditorCanvasProps {
+  initialNodes?: Node[];
+  initialEdges?: Edge[];
+  onNodesChange?: (nodes: Node[]) => void;
+  onEdgesChange?: (edges: Edge[]) => void;
+  readOnly?: boolean;
+}
+```
+
+**機能**:
+- React Flow v12統合 (ドラッグ&ドロップ、ズーム、パン)
+- カスタムノード登録 (scene, event)
+- エッジ作成・編集
+- Background グリッド表示
+- Controls パネル (ズーム、フィット)
+- MiniMap 表示
+- 読み取り専用モード対応
+
+**Storybookストーリー**: 5種類 (Empty, WithScenes, WithScenesAndEdges, ComplexScenario, ReadOnly)
+
+---
+
+**SceneNode** - シーン表示カスタムノード
+**ファイル**: `packages/ui/src/components/ScenarioEditor/SceneNode.tsx`
+
+**Data型**:
+```typescript
+interface SceneNodeData {
+  label: string;
+  description?: string;
+  isInitial?: boolean;
+  eventCount?: number;
+}
+```
+
+**機能**:
+- シーン名・説明表示
+- 開始シーンマーカー (緑背景バッジ)
+- イベント数表示
+- 選択状態ハイライト (青リング)
+- ハンドル (上: target, 下: source)
+
+---
+
+**EventNode** - イベント表示カスタムノード
+**ファイル**: `packages/ui/src/components/ScenarioEditor/EventNode.tsx`
+
+**Data型**:
+```typescript
+interface EventNodeData {
+  label: string;
+  type: 'trigger' | 'condition' | 'effect';
+  description?: string;
+}
+```
+
+**機能**:
+- イベントタイプ別色分け (トリガー: 黄、条件: 紫、効果: オレンジ)
+- イベント名・説明表示
+- ハンドル (左: target, 右: source)
+
+---
+
+**SceneEditForm** - シーン編集フォーム
+**ファイル**: `packages/ui/src/components/ScenarioEditor/SceneEditForm.tsx`
+
+**Props**:
+```typescript
+interface SceneEditFormProps {
+  initialData?: {
+    name?: string;
+    description?: string;
+    isInitial?: boolean;
+  };
+  onSubmit: (data: SceneFormData) => void;
+  onCancel?: () => void;
+}
+```
+
+**機能**:
+- シーン名入力 (必須)
+- 説明入力 (テキストエリア)
+- 開始シーン設定 (チェックボックス)
+- 保存・キャンセルボタン
+- FormField, FormButtons サブコンポーネント化 (複雑度対策)
+
+**Storybookストーリー**: 5種類 (NewScene, EditExistingScene, InitialScene, WithoutCancelButton, LongDescription)
+
+---
+
+**ScenarioValidator** - シナリオ検証結果表示
+**ファイル**: `packages/ui/src/components/ScenarioEditor/ScenarioValidator.tsx`
+
+**Props**:
+```typescript
+interface ScenarioValidatorProps {
+  validationResults: ValidationMessage[];
+  onMessageClick?: (nodeId?: string, edgeId?: string) => void;
+}
+
+interface ValidationMessage {
+  level: 'error' | 'warning' | 'info';
+  message: string;
+  nodeId?: string;
+  edgeId?: string;
+}
+```
+
+**機能**:
+- エラー/警告/情報の3段階表示
+- レベル別アイコン・色分け
+- クリックでノード/エッジにジャンプ
+- エラー・警告カウント表示
+- エラーなし時の成功メッセージ
+
+**Storybookストーリー**: 9種類 (NoErrors, ErrorsOnly, WarningsOnly, InfoOnly, MixedResults, SingleError, ClickableValidations, ManyValidations)
+
+---
+
+**ScenarioPreview** - シナリオテストプレビュー
+**ファイル**: `packages/ui/src/components/ScenarioEditor/ScenarioPreview.tsx`
+
+**Props**:
+```typescript
+interface ScenarioPreviewProps {
+  scenes: PreviewScene[];
+  initialSceneId: string;
+  onClose?: () => void;
+}
+
+interface PreviewScene {
+  id: string;
+  name: string;
+  description: string;
+  choices: PreviewChoice[];
+}
+```
+
+**機能**:
+- シーン遷移テスト
+- 選択肢クリックでシーン移動
+- 条件付き選択肢表示
+- 履歴ナビゲーション (前のシーンに戻る)
+- 閉じるボタン
+
+**Storybookストーリー**: 8種類 (SimpleScenario, WithConditions, NoChoices, SingleChoice, LongDescription, ErrorSceneNotFound, WithoutCloseButton)
 
 ---
 
@@ -949,37 +1140,119 @@ Backend → WASM (サーバーサイドロジック)
 - Tailwind CSS スタイリング
 - プレイヤー管理UI (タスク20)
 - ゲームプレイUI MVP (タスク22)
+- シナリオ管理UI MVP (タスク23)
+- グローバル状態管理 (タスク25 - Zustand)
 - ゲームコアUIコンポーネントライブラリ (タスク27)
+- **シナリオエディターUI (タスク28) ✅**
+  - React Flow統合ビジュアルエディター
+  - シーン・イベントノードカスタマイズ
+  - リアルタイム検証機能
+  - プレビュー機能
 
 ### 🚧 一部完了
 - Game ページ (WASM統合済み、シーン/ダイス/ログUI完成、実際のゲーム状態連携は将来実装)
+- Scenario エディター (ビジュアル編集完成、IndexedDB永続化は将来実装)
 
 ### ❌ 未実装
-- Scenario ページ (シナリオエディター)
 - クロスタブ同期UI (BroadcastChannel実装済みだが、UI未統合)
-- 状態管理 (Zustand + React Query)
+- React Query統合 (現在はuseStateのみ)
 - E2Eテスト
 - ドラッグ&ドロップカード操作
 - アニメーション (シーン遷移、ダイス振り)
+- シナリオデータのIndexedDB永続化
 
 ---
 
 ## Next Steps
 
-### 短期 (タスク23)
-1. シナリオエディターUI実装 (React Flow統合)
-2. シーン・イベント作成フォーム
-3. シナリオテスト・検証ツール
+### 短期 (タスク29-30)
+1. ✅ ~~シナリオエディターUI実装~~ (タスク28完了)
+2. レイアウト&ナビゲーションコンポーネント作成 (タスク29)
+3. UIコンポーネントドキュメント完成 (タスク30)
 
-### 中期 (タスク24-26)
-1. クロスタブ同期完全実装 (UIとの統合)
-2. Zustand + React Query 状態管理移行
-3. E2Eテスト完全実装 (quickstart.mdシナリオ)
+### 中期 (将来実装)
+1. シナリオデータのIndexedDB永続化
+2. イベント詳細編集機能 (トリガー・条件・効果)
+3. React Query統合 (将来のバックエンド統合時)
+4. E2Eテスト完全実装 (quickstart.mdシナリオ)
+5. クロスタブ同期UI統合
 
 ### 長期 (将来改善)
 1. ドラッグ&ドロップカード操作
 2. アニメーション (シーン遷移、ダイス振り)
 3. リアルタイム更新 (他プレイヤーの行動)
+4. シナリオエクスポート/インポート
+5. シナリオバージョン管理
+
+---
+
+## 実装フィードバックと学び
+
+### タスク28: シナリオエディターUI実装 (2025-10-05)
+
+**成果**:
+- React Flow v12統合によるビジュアルエディター完成
+- 6個の新規コンポーネント作成 (ScenarioEditorCanvas, SceneNode, EventNode, SceneEditForm, ScenarioValidator, ScenarioPreview)
+- 27個のStorybookストーリー追加
+- packages/frontend に ScenarioEditor ページ追加
+- 全コンポーネントでlint・型チェック・ビルド成功
+
+**技術的課題と解決策**:
+
+1. **複雑度エラー (complexity > 7)**
+   - **問題**: ScenarioEditorコンポーネントが複雑度11
+   - **解決**: EditorView, PreviewView サブコンポーネント分離
+   - **学び**: 早めにビューロジックを分離すると保守性向上
+
+2. **React Flow型定義の問題**
+   - **問題**: `NodeProps<T>` の型が正しく機能しない
+   - **解決**: カスタムPropsインターフェース定義 (`SceneNodeProps`, `EventNodeProps`)
+   - **学び**: React Flowのカスタムノードは独自Props型を定義すべき
+
+3. **データ型アサーションの必要性**
+   - **問題**: `node.data` の型推論が `unknown` になる
+   - **解決**: `as { label?: string; description?: string }` で型アサーション
+   - **学び**: React FlowのNode.dataは汎用型のため、使用箇所で明示的な型が必要
+
+4. **import順序の警告**
+   - **問題**: `@xyflow/react` と `@cartagraph/ui` のimport順
+   - **解決**: `@cartagraph/ui` を先にimport
+   - **学び**: ESLint import/orderルールに従う
+
+5. **dependencies追加の必要性**
+   - **問題**: `@xyflow/react` が packages/frontend の dependencies に未登録
+   - **解決**: `bun add @xyflow/react` で追加
+   - **学び**: packages/ui で使うライブラリも、packages/frontend で直接使う場合は dependencies に追加が必要
+
+**アーキテクチャ判断**:
+
+1. **メモリベース vs IndexedDB永続化**
+   - **判断**: タスク28ではメモリベースのみ実装
+   - **理由**: ビジュアルエディター機能の検証が優先
+   - **将来**: scenario-store にシーン・エッジデータを追加
+
+2. **プレビューモード vs 別ページ**
+   - **判断**: 同一ページ内でモード切替
+   - **理由**: 編集→テスト→編集の往復が容易
+   - **トレードオフ**: ルーティング複雑化を避けられたが、状態管理が複雑に
+
+3. **検証タイミング**
+   - **判断**: ノード・エッジ変更時にリアルタイム検証
+   - **理由**: 即座にフィードバックを得られる
+   - **実装**: `validateScenario` 関数を onNodesChange/onEdgesChange 内で呼び出し
+
+**パフォーマンス考慮**:
+- React Flow は大規模グラフでもパフォーマンス良好 (数百ノードまで対応可能)
+- 検証関数は O(N) で軽量
+- useCallback で不要な再レンダリング防止
+
+**今後の改善点**:
+1. シナリオデータのIndexedDB永続化
+2. イベントノードの詳細編集UI
+3. 自動レイアウト機能 (dagre等)
+4. アンドゥ/リドゥ機能
+5. ノード・エッジのコピー&ペースト
+6. キーボードショートカット
 
 ---
 
