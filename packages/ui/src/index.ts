@@ -70,3 +70,16 @@ export type { ScenarioValidatorProps, ValidationMessage, ValidationLevel } from 
 
 export { ScenarioPreview } from './components/ScenarioEditor/ScenarioPreview';
 export type { ScenarioPreviewProps, PreviewScene, PreviewChoice } from './components/ScenarioEditor/ScenarioPreview';
+
+// Layout Components
+export { AppLayout } from './components/AppLayout';
+export type { AppLayoutProps } from './components/AppLayout';
+
+export { Navigation } from './components/Navigation';
+export type { NavigationProps, NavigationItem } from './components/Navigation';
+
+export { Modal, Dialog } from './components/Modal';
+export type { ModalProps, DialogProps } from './components/Modal';
+
+export { LoadingSpinner, ErrorMessage, EmptyState } from './components/LoadingSpinner';
+export type { LoadingSpinnerProps, ErrorMessageProps, EmptyStateProps } from './components/LoadingSpinner';
