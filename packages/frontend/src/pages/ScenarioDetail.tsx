@@ -126,18 +126,21 @@ const ScenarioDetail = () => {
           </div>
 
           <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-sm font-semibold text-gray-500 mb-4">
-              このシナリオを使用
-            </h2>
-            <p className="text-sm text-gray-600 mb-4">
-              このシナリオを使って新しいセッションを開始できます。
-            </p>
-            <Link
-              to="/sessions/new"
-              className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors"
-            >
-              このシナリオでセッションを作成
-            </Link>
+            <h2 className="text-sm font-semibold text-gray-500 mb-4">アクション</h2>
+            <div className="flex gap-3">
+              <Link
+                to={`/scenarios/${scenarioId}/edit`}
+                className="inline-block px-6 py-3 bg-purple-600 text-white font-semibold rounded-md hover:bg-purple-700 transition-colors"
+              >
+                シナリオを編集
+              </Link>
+              <Link
+                to="/sessions/new"
+                className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors"
+              >
+                このシナリオでセッションを作成
+              </Link>
+            </div>
           </div>
         </div>
       </div>

@@ -17,6 +17,7 @@
     "@cartagraph/shared": "workspace:*",
     "@cartagraph/ui": "workspace:*",
     "@tanstack/react-query": "^5.90.2",
+    "@xyflow/react": "^12.8.6",
     "idb": "^8.0.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

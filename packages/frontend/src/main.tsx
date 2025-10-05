@@ -13,6 +13,7 @@ import Game from './pages/Game';
 import Home from './pages/Home';
 import Scenario from './pages/Scenario';
 import ScenarioDetail from './pages/ScenarioDetail';
+import ScenarioEditor from './pages/ScenarioEditor';
 import Scenarios from './pages/Scenarios';
 import Sessions from './pages/Sessions';
 
@@ -55,6 +56,10 @@ const router = createBrowserRouter([
       {
         path: 'scenarios/:scenarioId',
         element: <ScenarioDetail />,
+      },
+      {
+        path: 'scenarios/:scenarioId/edit',
+        element: <ScenarioEditor />,
       },
       {
         path: 'sessions',
