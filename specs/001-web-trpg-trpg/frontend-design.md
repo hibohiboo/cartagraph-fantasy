@@ -49,7 +49,7 @@ packages/frontend/
 | `/scenarios` | Scenarios | シナリオ一覧 | ✅ 完了 |
 | `/scenarios/new` | CreateScenario | 新規シナリオ作成 | ✅ 完了 |
 | `/scenarios/:scenarioId` | ScenarioDetail | シナリオ詳細表示 | ✅ 完了 |
-| `/scenarios/:scenarioId/edit` | ScenarioEditor | シナリオビジュアルエディター | ✅ 完了 |
+| `/scenarios/:scenarioId/edit` | ScenarioEditor | シナリオビジュアルエディター | ⚠️ 実装完了・未テスト |
 | `/characters` | Characters | キャラクター一覧 | ✅ 完了 |
 | `/characters/new` | CreateCharacter | キャラクター作成 | ✅ 完了 |
 
@@ -410,7 +410,7 @@ interface EventLogPanelProps {
 
 ---
 
-#### シナリオエディターコンポーネント (タスク28) ✅ 完了
+#### シナリオエディターコンポーネント (タスク28) ⚠️ 実装完了・未テスト
 
 **ScenarioEditorCanvas** - React Flowビジュアルエディター統合
 **ファイル**: `packages/ui/src/components/ScenarioEditor/ScenarioEditorCanvas.tsx`
@@ -1143,7 +1143,7 @@ Backend → WASM (サーバーサイドロジック)
 - シナリオ管理UI MVP (タスク23)
 - グローバル状態管理 (タスク25 - Zustand)
 - ゲームコアUIコンポーネントライブラリ (タスク27)
-- **シナリオエディターUI (タスク28) ✅**
+- **シナリオエディターUI (タスク28) ⚠️ 実装完了・未テスト**
   - React Flow統合ビジュアルエディター
   - シーン・イベントノードカスタマイズ
   - リアルタイム検証機能
@@ -1166,7 +1166,7 @@ Backend → WASM (サーバーサイドロジック)
 ## Next Steps
 
 ### 短期 (タスク29-30)
-1. ✅ ~~シナリオエディターUI実装~~ (タスク28完了)
+1. ⚠️ ~~シナリオエディターUI実装~~ (タスク28実装完了・E2Eテスト未完了)
 2. レイアウト&ナビゲーションコンポーネント作成 (タスク29)
 3. UIコンポーネントドキュメント完成 (タスク30)
 
@@ -1190,12 +1190,19 @@ Backend → WASM (サーバーサイドロジック)
 
 ### タスク28: シナリオエディターUI実装 (2025-10-05)
 
+**ステータス**: ⚠️ 実装完了・E2Eテスト未完了
+
 **成果**:
-- React Flow v12統合によるビジュアルエディター完成
+- React Flow v12統合によるビジュアルエディター実装
 - 6個の新規コンポーネント作成 (ScenarioEditorCanvas, SceneNode, EventNode, SceneEditForm, ScenarioValidator, ScenarioPreview)
 - 27個のStorybookストーリー追加
 - packages/frontend に ScenarioEditor ページ追加
 - 全コンポーネントでlint・型チェック・ビルド成功
+
+**未完了項目**:
+- E2Eテストによる動作確認 (scenario-editor.spec.ts 作成済みだが未パス)
+- 手動での動作確認
+- シーン追加・編集・プレビュー機能の実動作検証
 
 **技術的課題と解決策**:
 
