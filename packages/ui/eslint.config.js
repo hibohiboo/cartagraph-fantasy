@@ -19,6 +19,8 @@ export default defineConfig(
           '**/test/**',
           '**/*.test.tsx',
           '**/*.test.ts',
+          '**/*.stories.tsx',
+          '**/*.stories.ts',
           'vitest.config.ts',
         ],
         rules: {

@@ -51,3 +51,22 @@ export type { DiceRollProps } from './components/DiceRoll';
 
 export { PlayerStatus } from './components/PlayerStatus';
 export type { PlayerStatusProps } from './components/PlayerStatus';
+
+// Scenario Editor Components
+export { ScenarioEditorCanvas } from './components/ScenarioEditor/ScenarioEditorCanvas';
+export type { ScenarioEditorCanvasProps } from './components/ScenarioEditor/ScenarioEditorCanvas';
+
+export { SceneNode } from './components/ScenarioEditor/SceneNode';
+export type { SceneNodeData } from './components/ScenarioEditor/SceneNode';
+
+export { EventNode } from './components/ScenarioEditor/EventNode';
+export type { EventNodeData } from './components/ScenarioEditor/EventNode';
+
+export { SceneEditForm } from './components/ScenarioEditor/SceneEditForm';
+export type { SceneEditFormProps, SceneFormData } from './components/ScenarioEditor/SceneEditForm';
+
+export { ScenarioValidator } from './components/ScenarioEditor/ScenarioValidator';
+export type { ScenarioValidatorProps, ValidationMessage, ValidationLevel } from './components/ScenarioEditor/ScenarioValidator';
+
+export { ScenarioPreview } from './components/ScenarioEditor/ScenarioPreview';
+export type { ScenarioPreviewProps, PreviewScene, PreviewChoice } from './components/ScenarioEditor/ScenarioPreview';
