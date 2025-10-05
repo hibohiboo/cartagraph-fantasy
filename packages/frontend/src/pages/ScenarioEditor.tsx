@@ -176,8 +176,8 @@ function EditorView(props: EditorViewProps) {
       <div className="flex-1 flex overflow-hidden">
         <div className="flex-1">
           <ScenarioEditorCanvas
-            initialNodes={props.nodes}
-            initialEdges={props.edges}
+            nodes={props.nodes}
+            edges={props.edges}
             onNodesChange={props.onNodesChange}
             onEdgesChange={props.onEdgesChange}
             readOnly={false}

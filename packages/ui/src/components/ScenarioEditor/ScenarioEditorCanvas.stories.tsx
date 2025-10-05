@@ -101,8 +101,8 @@ const sampleEdges: Edge[] = [
 
 export const Empty: Story = {
   args: {
-    initialNodes: [],
-    initialEdges: [],
+    nodes: [],
+    edges: [],
     readOnly: false,
   },
   decorators: [
@@ -116,8 +116,8 @@ export const Empty: Story = {
 
 export const WithScenes: Story = {
   args: {
-    initialNodes: sampleSceneNodes,
-    initialEdges: [],
+    nodes: sampleSceneNodes,
+    edges: [],
     readOnly: false,
   },
   decorators: [
@@ -131,8 +131,8 @@ export const WithScenes: Story = {
 
 export const WithScenesAndEdges: Story = {
   args: {
-    initialNodes: sampleSceneNodes,
-    initialEdges: sampleEdges.slice(0, 2),
+    nodes: sampleSceneNodes,
+    edges: sampleEdges.slice(0, 2),
     readOnly: false,
   },
   decorators: [
@@ -146,8 +146,8 @@ export const WithScenesAndEdges: Story = {
 
 export const ComplexScenario: Story = {
   args: {
-    initialNodes: [...sampleSceneNodes, ...sampleEventNodes],
-    initialEdges: sampleEdges,
+    nodes: [...sampleSceneNodes, ...sampleEventNodes],
+    edges: sampleEdges,
     readOnly: false,
   },
   decorators: [
@@ -161,8 +161,8 @@ export const ComplexScenario: Story = {
 
 export const ReadOnly: Story = {
   args: {
-    initialNodes: [...sampleSceneNodes, ...sampleEventNodes],
-    initialEdges: sampleEdges,
+    nodes: [...sampleSceneNodes, ...sampleEventNodes],
+    edges: sampleEdges,
     readOnly: true,
   },
   decorators: [

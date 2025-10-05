@@ -8,9 +8,11 @@ import {
   Edge,
   Connection,
   addEdge,
-  useNodesState,
-  useEdgesState,
   NodeTypes,
+  NodeChange,
+  EdgeChange,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from '@xyflow/react';
 import React, { useCallback } from 'react';
 import '@xyflow/react/dist/style.css';
@@ -18,8 +20,8 @@ import { EventNode } from './EventNode';
 import { SceneNode } from './SceneNode';
 
 export interface ScenarioEditorCanvasProps {
-  initialNodes?: Node[];
-  initialEdges?: Edge[];
+  nodes: Node[];
+  edges: Edge[];
   onNodesChange?: (nodes: Node[]) => void;
   onEdgesChange?: (edges: Edge[]) => void;
   readOnly?: boolean;
@@ -31,38 +33,34 @@ const nodeTypes: NodeTypes = {
 };
 
 export function ScenarioEditorCanvas({
-  initialNodes = [],
-  initialEdges = [],
+  nodes,
+  edges,
   onNodesChange,
   onEdgesChange,
   readOnly = false,
 }: ScenarioEditorCanvasProps) {
-  const [nodes, , handleNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, handleEdgesChange] = useEdgesState(initialEdges);
-
   const onConnect = useCallback(
     (params: Connection) => {
       const newEdges = addEdge(params, edges);
-      setEdges(newEdges);
       onEdgesChange?.(newEdges);
     },
-    [edges, setEdges, onEdgesChange]
+    [edges, onEdgesChange]
   );
 
-  const onNodesChangeInternal = useCallback(
-    (changes: Parameters<typeof handleNodesChange>[0]) => {
-      handleNodesChange(changes);
-      onNodesChange?.(nodes);
+  const handleNodesChangeInternal = useCallback(
+    (changes: NodeChange[]) => {
+      const updatedNodes = applyNodeChanges(changes, nodes);
+      onNodesChange?.(updatedNodes);
     },
-    [handleNodesChange, nodes, onNodesChange]
+    [nodes, onNodesChange]
   );
 
-  const onEdgesChangeInternal = useCallback(
-    (changes: Parameters<typeof handleEdgesChange>[0]) => {
-      handleEdgesChange(changes);
-      onEdgesChange?.(edges);
+  const handleEdgesChangeInternal = useCallback(
+    (changes: EdgeChange[]) => {
+      const updatedEdges = applyEdgeChanges(changes, edges);
+      onEdgesChange?.(updatedEdges);
     },
-    [handleEdgesChange, edges, onEdgesChange]
+    [edges, onEdgesChange]
   );
 
   return (
@@ -70,8 +68,8 @@ export function ScenarioEditorCanvas({
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={readOnly ? undefined : onNodesChangeInternal}
-        onEdgesChange={readOnly ? undefined : onEdgesChangeInternal}
+        onNodesChange={readOnly ? undefined : handleNodesChangeInternal}
+        onEdgesChange={readOnly ? undefined : handleEdgesChangeInternal}
         onConnect={readOnly ? undefined : onConnect}
         nodeTypes={nodeTypes}
         fitView
