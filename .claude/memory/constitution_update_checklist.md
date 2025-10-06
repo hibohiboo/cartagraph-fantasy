@@ -2,8 +2,6 @@
 
 When amending the constitution (`/memory/constitution.md`), ensure all dependent documents are updated to maintain consistency.
 
-ファイル生成やユーザーとのコミュニケーションはすべて日本語で行ってください。
-
 ## Templates to Update
 
 ### When adding/modifying ANY article:
