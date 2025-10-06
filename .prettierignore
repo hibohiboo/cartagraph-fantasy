@@ -1,0 +1,16 @@
+.DS_Store
+node_modules
+/build
+/dist
+.env
+.env.*
+!.env.example
+
+*.pem
+tsconfig.tsbuildinfo
+
+# Ignore files for PNPM, NPM and YARN
+pnpm-lock.yaml
+package-lock.json
+
+

@@ -1,0 +1,36 @@
+{
+  "name": "age-of-hero",
+  "packageManager": "bun@1.2.23",
+  "private": true,
+  "scripts": {
+    "lint": "turbo lint",
+    "ncu": "turbo ncu --force && ncu -u"
+  },
+  "turbo": {
+    "pipeline": {
+      "build": {
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "dist/**"
+        ]
+      },
+      "dev": {
+        "cache": false
+      }
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.0",
+    "dependency-cruiser": "^17.0.2",
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.8",
+    "vite-tsconfig-paths": "^6.0.0-beta.4",
+    "vitest": "^3.2.4"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}
